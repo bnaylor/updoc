@@ -7,6 +7,6 @@ struct updocApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: Note.self)
+        .modelContainer(for: [Note.self, TemplateRule.self])
     }
 }
