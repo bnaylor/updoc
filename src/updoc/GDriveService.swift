@@ -1,6 +1,6 @@
 import Foundation
 
-public struct GDriveService {
+public struct GDriveService: Sendable {
     public init() {}
     
     public func getFileRevision(fileId: String) async throws -> String {

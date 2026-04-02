@@ -1,6 +1,6 @@
 import Foundation
 
-public struct GDocsService {
+public struct GDocsService: Sendable {
     public init() {}
     
     public func fetchDocContent(docId: String) async throws -> String {
