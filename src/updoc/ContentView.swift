@@ -3,9 +3,11 @@ import SwiftData
 
 struct ContentView: View {
     @State private var selectedNote: Note?
-    private let syncCoordinator = SyncCoordinator()
+    @State private var isSyncing = false
+    @State private var syncError: String?
+    
+    private static let syncCoordinator = SyncCoordinator()
     @Environment(\.modelContext) private var modelContext
-    private let syncTimer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
     
     var body: some View {
         NavigationSplitView {
@@ -16,19 +18,38 @@ struct ContentView: View {
                     HStack {
                         Text(note.title)
                             .font(.headline)
+                        
+                        if isSyncing {
+                            ProgressView()
+                                .controlSize(.small)
+                                .padding(.leading, 8)
+                        }
+                        
                         Spacer()
+                        
                         if let _ = note.googleDocId {
                             Button(action: openInBrowser) {
                                 Label("Open in Google Docs", systemImage: "arrow.up.right.square")
                             }
+                            .help("Open linked Google Doc in browser")
                         }
+                        
                         Button(action: { triggerSync(for: note) }) {
                             Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
                         }
+                        .disabled(isSyncing)
                         .keyboardShortcut("s", modifiers: .command)
+                        .help("Sync changes with Google Docs (Cmd+S)")
                     }
                     .padding()
                     .background(Color(NSColor.windowBackgroundColor))
+                    
+                    if let error = syncError {
+                        Text("Sync Error: \(error)")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .padding(.horizontal)
+                    }
                     
                     Divider()
                     
@@ -36,11 +57,6 @@ struct ContentView: View {
                         get: { note.content },
                         set: { note.content = $0 }
                     ))
-                }
-                .onReceive(syncTimer) { _ in
-                    if let note = selectedNote {
-                        triggerSync(for: note)
-                    }
                 }
             } else {
                 Text("Select a note to begin")
@@ -56,8 +72,23 @@ struct ContentView: View {
     }
     
     private func triggerSync(for note: Note) {
+        guard !isSyncing else { return }
+        
+        isSyncing = true
+        syncError = nil
+        
         Task {
-            try? await syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
+            do {
+                try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
+                await MainActor.run {
+                    isSyncing = false
+                }
+            } catch {
+                await MainActor.run {
+                    syncError = error.localizedDescription
+                    isSyncing = false
+                }
+            }
         }
     }
 }
