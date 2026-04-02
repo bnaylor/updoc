@@ -9,6 +9,7 @@ public enum AppTheme: String, CaseIterable, Identifiable, Codable, Sendable {
 }
 
 @Observable
+@MainActor
 public class ThemeManager {
     public static let shared = ThemeManager()
     public var currentTheme: AppTheme = .modern
