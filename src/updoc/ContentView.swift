@@ -25,6 +25,7 @@ struct ContentView: View {
                         Button(action: { triggerSync(for: note) }) {
                             Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
                         }
+                        .keyboardShortcut("s", modifiers: .command)
                     }
                     .padding()
                     .background(Color(NSColor.windowBackgroundColor))
@@ -37,7 +38,9 @@ struct ContentView: View {
                     ))
                 }
                 .onReceive(syncTimer) { _ in
-                    triggerSync(for: note)
+                    if let note = selectedNote {
+                        triggerSync(for: note)
+                    }
                 }
             } else {
                 Text("Select a note to begin")
