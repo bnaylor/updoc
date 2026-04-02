@@ -1,14 +1,15 @@
 import SwiftUI
 import AppKit
+import UniformTypeIdentifiers
 
 class EditorTextView: NSTextView {
-    var onFileDropped: ((URL) -> Void)?
+    var onFileDropped: ((URL, NSTextView) -> Void)?
     
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let pboard = sender.draggingPasteboard
         if let urls = pboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
             for url in urls {
-                onFileDropped?(url)
+                onFileDropped?(url, self)
             }
             return true
         }
@@ -33,8 +34,8 @@ struct EditorView: NSViewRepresentable {
         scrollView.documentView = textView
         
         textView.delegate = context.coordinator
-        textView.onFileDropped = { url in
-            context.coordinator.handleFileDrop(url: url)
+        textView.onFileDropped = { url, targetTextView in
+            context.coordinator.handleFileDrop(url: url, in: targetTextView)
         }
         textView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.isAutomaticQuoteSubstitutionEnabled = false
@@ -72,10 +73,10 @@ struct EditorView: NSViewRepresentable {
             self.parent = parent
         }
 
-        func handleFileDrop(url: URL) {
-            // Check if it's an image
-            let imageExtensions = ["png", "jpg", "jpeg", "gif", "tiff", "webp"]
-            guard imageExtensions.contains(url.pathExtension.lowercased()) else { return }
+        func handleFileDrop(url: URL, in textView: NSTextView) {
+            // Check if it's an image using UTType
+            let type = UTType(filenameExtension: url.pathExtension) ?? .data
+            guard type.conforms(to: .image) else { return }
             
             Task {
                 do {
@@ -83,12 +84,12 @@ struct EditorView: NSViewRepresentable {
                     let assetId = try await ImageLibraryManager.shared.saveImage(data, filename: url.lastPathComponent)
                     
                     // Update assetIds
-                    var currentAssets = self.parent.assetIds
-                    currentAssets.append(assetId)
-                    self.parent.assetIds = currentAssets
-                    
-                    // Insert placeholder at cursor or end
-                    if let textView = NSApp.keyWindow?.firstResponder as? NSTextView {
+                    await MainActor.run {
+                        var currentAssets = self.parent.assetIds
+                        currentAssets.append(assetId)
+                        self.parent.assetIds = currentAssets
+                        
+                        // Insert placeholder at cursor or end
                         let placeholder = "\n![[\(assetId)]]\n"
                         let range = textView.selectedRange()
                         if textView.shouldChangeText(in: range, replacementString: placeholder) {
