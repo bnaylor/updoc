@@ -37,6 +37,7 @@ struct EditorView: NSViewRepresentable {
     class Coordinator: NSObject, NSTextViewDelegate {
         var parent: EditorView
         private let autocompleteManager = AutocompleteManager()
+        private var syncTask: Task<Void, Never>?
 
         init(_ parent: EditorView) {
             self.parent = parent
@@ -49,7 +50,14 @@ struct EditorView: NSViewRepresentable {
             // Basic trigger check
             checkForAutocompleteTrigger(in: textView)
             
-            applyStyles(to: textView)
+            // Debounced style application
+            syncTask?.cancel()
+            syncTask = Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                if !Task.isCancelled {
+                    applyStyles(to: textView)
+                }
+            }
         }
         
         private func checkForAutocompleteTrigger(in textView: NSTextView) {
@@ -61,9 +69,58 @@ struct EditorView: NSViewRepresentable {
             let lastChar = (text as NSString).substring(with: lastCharRange)
             
             if lastChar == "@" {
-                // Trigger autocomplete (UI would be shown here)
-                print("Autocomplete triggered at: \(selectedRange.location)")
+                // In a real app, we'd wait for more characters to search, 
+                // but for this demo we'll show a menu immediately or after a short delay.
+                Task {
+                    do {
+                        // For demonstration, search for a default or empty query initially
+                        let matches = try await autocompleteManager.findMatches(for: "today")
+                        if !matches.isEmpty {
+                            showAutocompleteMenu(for: matches, in: textView)
+                        }
+                    } catch {
+                        print("Autocomplete error: \(error)")
+                    }
+                }
             }
+        }
+
+        private func showAutocompleteMenu(for matches: [AutocompleteMatch], in textView: NSTextView) {
+            let menu = NSMenu(title: "Autocomplete")
+            for match in matches {
+                let title: String
+                switch match {
+                case .person(let person):
+                    title = "Person: \(person.name)"
+                case .date(let date):
+                    let formatter = DateFormatter()
+                    formatter.dateStyle = .medium
+                    title = "Date: \(formatter.string(from: date))"
+                }
+                
+                let item = NSMenuItem(title: title, action: #selector(menuItemSelected(_:)), keyEquivalent: "")
+                item.representedObject = match
+                item.target = self
+                menu.addItem(item)
+            }
+            
+            // Get cursor position in view coordinates
+            let layoutManager = textView.layoutManager!
+            let textContainer = textView.textContainer!
+            let selectedRange = textView.selectedRange()
+            let glyphRange = layoutManager.glyphRange(forCharacterRange: NSRange(location: selectedRange.location - 1, length: 1), actualCharacterRange: nil)
+            let rect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+            let containerOrigin = textView.textContainerOrigin
+            let menuOrigin = NSPoint(x: rect.minX + containerOrigin.x, y: rect.maxY + containerOrigin.y)
+            
+            menu.popUp(positioning: nil, at: menuOrigin, in: textView)
+        }
+
+        @objc private func menuItemSelected(_ sender: NSMenuItem) {
+            guard let match = sender.representedObject as? AutocompleteMatch,
+                  let textView = NSApp.keyWindow?.firstResponder as? NSTextView else { return }
+            
+            insertChip(for: match, in: textView)
         }
         
         func insertChip(for match: AutocompleteMatch, in textView: NSTextView) {

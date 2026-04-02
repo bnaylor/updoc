@@ -6,7 +6,7 @@ public enum AutocompleteMatch: Sendable {
     case date(Date)
 }
 
-public struct AutocompleteManager {
+public struct AutocompleteManager: Sendable {
     public init() {}
     
     public func findMatches(for query: String) async throws -> [AutocompleteMatch] {
