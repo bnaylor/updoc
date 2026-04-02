@@ -56,6 +56,9 @@ struct SidebarView: View {
         .onAppear {
             refreshMeetings()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .addNewNote)) { _ in
+            addNote()
+        }
     }
     
     private func refreshMeetings() {

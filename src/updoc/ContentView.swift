@@ -5,6 +5,10 @@ struct ContentView: View {
     @State private var selectedNote: Note?
     @State private var isSyncing = false
     @State private var syncError: String?
+    @State private var showingCommandPalette = false
+    
+    @Query private var notes: [Note]
+    @Environment(ThemeManager.self) private var themeManager
     
     private static let syncCoordinator = SyncCoordinator()
     @Environment(\.modelContext) private var modelContext
@@ -65,6 +69,66 @@ struct ContentView: View {
                 Text("Select a note to begin")
                     .foregroundColor(.secondary)
             }
+        }
+        .overlay {
+            if showingCommandPalette {
+                CommandPaletteView(
+                    isPresented: $showingCommandPalette,
+                    commands: appCommands,
+                    notes: notes,
+                    onNoteSelect: { note in
+                        selectedNote = note
+                    }
+                )
+                .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .syncAllNotes)) { _ in
+            syncAllNotes()
+        }
+        .background {
+            Button("") {
+                showingCommandPalette.toggle()
+            }
+            .keyboardShortcut("k", modifiers: .command)
+            .opacity(0)
+        }
+    }
+    
+    private var appCommands: [Command] {
+        var commands = [
+            Command(title: "New Note", subtitle: "App", shortcut: "⌘N") {
+                NotificationCenter.default.post(name: .addNewNote, object: nil)
+            },
+            Command(title: "Sync All Notes", subtitle: "App", shortcut: "⇧⌘S") {
+                syncAllNotes()
+            }
+        ]
+        
+        for theme in AppTheme.allCases {
+            commands.append(Command(title: "Switch to \(theme.rawValue) Theme", subtitle: "Theme") {
+                themeManager.currentTheme = theme
+            })
+        }
+        
+        return commands
+    }
+    
+    private func syncAllNotes() {
+        guard !isSyncing else { return }
+        
+        Task {
+            isSyncing = true
+            for note in notes {
+                if let _ = note.googleDocId {
+                    do {
+                        try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
+                    } catch {
+                        print("Failed to sync note: \(note.title)")
+                    }
+                }
+            }
+            isSyncing = false
         }
     }
     
