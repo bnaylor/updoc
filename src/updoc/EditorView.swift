@@ -45,7 +45,14 @@ struct EditorView: NSViewRepresentable {
 
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
-            self.parent.text = textView.string
+            
+            // Handle √ shortcut
+            if checkForCheckmarkShortcut(in: textView) {
+                // If we replaced text, textView.string changed, and we should refresh parent text
+                self.parent.text = textView.string
+            } else {
+                self.parent.text = textView.string
+            }
             
             // Basic trigger check
             checkForAutocompleteTrigger(in: textView)
@@ -58,6 +65,32 @@ struct EditorView: NSViewRepresentable {
                     applyStyles(to: textView)
                 }
             }
+        }
+        
+        private func checkForCheckmarkShortcut(in textView: NSTextView) -> Bool {
+            let selectedRange = textView.selectedRange()
+            guard selectedRange.location > 0 else { return false }
+            
+            let text = textView.string as NSString
+            let lineRange = text.lineRange(for: NSRange(location: selectedRange.location - 1, length: 1))
+            let line = text.substring(with: lineRange)
+            
+            // Check if line starts with √ (ignoring leading whitespace)
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+            if trimmedLine.hasPrefix("√") {
+                // Find the range of √ in the actual text
+                if let checkmarkRange = line.range(of: "√") {
+                    let nsCheckmarkRange = NSRange(checkmarkRange, in: line)
+                    let absoluteCheckmarkRange = NSRange(location: lineRange.location + nsCheckmarkRange.location, length: nsCheckmarkRange.length)
+                    
+                    if textView.shouldChangeText(in: absoluteCheckmarkRange, replacementString: "[ ]") {
+                        textView.textStorage?.replaceCharacters(in: absoluteCheckmarkRange, with: "[ ]")
+                        textView.didChangeText()
+                        return true
+                    }
+                }
+            }
+            return false
         }
         
         private func checkForAutocompleteTrigger(in textView: NSTextView) {
@@ -190,8 +223,20 @@ struct EditorView: NSViewRepresentable {
                     .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
                     .backgroundColor: NSColor.quaternaryLabelColor
                 ]
-            default:
-                return [:]
+            case .checklist(let done):
+                if done {
+                    return [
+                        .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                        .foregroundColor: NSColor.secondaryLabelColor
+                    ]
+                } else {
+                    return [.foregroundColor: NSColor.labelColor]
+                }
+            case .link(_):
+                return [
+                    .foregroundColor: NSColor.systemBlue,
+                    .underlineStyle: NSUnderlineStyle.single.rawValue
+                ]
             }
         }
     }

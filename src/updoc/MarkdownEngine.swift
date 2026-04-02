@@ -54,6 +54,16 @@ public struct MarkdownEngine {
             }
         }
         
+        // 4. Checklist (e.g., [ ], [x], or √)
+        let checklistRegex = try! NSRegularExpression(pattern: "^(\\s*)(\\[[ x]\\]|√)\\s+.*$", options: [.anchorsMatchLines])
+        checklistRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
+            if let matchRange = match?.range {
+                let line = (text as NSString).substring(with: matchRange)
+                let done = line.contains("[x]") || line.contains("√")
+                ranges.append(MarkdownRange(range: matchRange, style: .checklist(done: done)))
+            }
+        }
+        
         return ranges
     }
 }
