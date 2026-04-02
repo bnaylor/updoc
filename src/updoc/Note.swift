@@ -20,8 +20,8 @@ public class Note {
     }
 }
 
-// Add Hashable conformance for SwiftUI navigation
-extension Note: Hashable {
+// Add Hashable and Sendable conformance for SwiftUI navigation and concurrency
+extension Note: Hashable, @unchecked Sendable {
     public static func == (lhs: Note, rhs: Note) -> Bool {
         lhs.id == rhs.id
     }

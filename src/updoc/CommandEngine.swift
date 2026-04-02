@@ -19,7 +19,7 @@ public struct Command: Identifiable, Sendable {
 public struct CommandEngine {
     public init() {}
     
-    public func search(query: String, commands: [Command], notes: [Note] = []) -> [Command] {
+    public func search(query: String, commands: [Command], notes: [Note] = [], onNoteSelect: @escaping @Sendable (Note) -> Void) -> [Command] {
         if query.isEmpty { return [] }
         
         let lowerQuery = query.lowercased()
@@ -31,8 +31,7 @@ public struct CommandEngine {
         // Match notes (wrapped as commands)
         let noteResults = notes.filter { $0.title.lowercased().contains(lowerQuery) }.map { note in
             Command(title: "Open Note: \(note.title)", subtitle: "Note", action: {
-                // In a real implementation, this might post a notification or call a handler
-                // to navigate to the note.
+                onNoteSelect(note)
             })
         }
         results.append(contentsOf: noteResults)
