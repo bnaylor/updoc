@@ -55,12 +55,13 @@ public struct MarkdownEngine {
         }
         
         // 4. Checklist (e.g., [ ], [x], or √)
-        let checklistRegex = try! NSRegularExpression(pattern: "^(\\s*)(\\[[ x]\\]|√)\\s+.*$", options: [.anchorsMatchLines])
+        let checklistRegex = try! NSRegularExpression(pattern: "^(\\s*)(\\[[ x]\\]|√)\\s+(.*)$", options: [.anchorsMatchLines])
         checklistRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
-            if let matchRange = match?.range {
-                let line = (text as NSString).substring(with: matchRange)
-                let done = line.contains("[x]") || line.contains("√")
-                ranges.append(MarkdownRange(range: matchRange, style: .checklist(done: done)))
+            if let match = match, match.numberOfRanges >= 3 {
+                let markerRange = match.range(at: 2)
+                let marker = (text as NSString).substring(with: markerRange)
+                let done = marker == "[x]" || marker == "√"
+                ranges.append(MarkdownRange(range: match.range, style: .checklist(done: done)))
             }
         }
         

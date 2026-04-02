@@ -47,12 +47,8 @@ struct EditorView: NSViewRepresentable {
             guard let textView = notification.object as? NSTextView else { return }
             
             // Handle √ shortcut
-            if checkForCheckmarkShortcut(in: textView) {
-                // If we replaced text, textView.string changed, and we should refresh parent text
-                self.parent.text = textView.string
-            } else {
-                self.parent.text = textView.string
-            }
+            checkForCheckmarkShortcut(in: textView)
+            self.parent.text = textView.string
             
             // Basic trigger check
             checkForAutocompleteTrigger(in: textView)
@@ -67,9 +63,9 @@ struct EditorView: NSViewRepresentable {
             }
         }
         
-        private func checkForCheckmarkShortcut(in textView: NSTextView) -> Bool {
+        private func checkForCheckmarkShortcut(in textView: NSTextView) {
             let selectedRange = textView.selectedRange()
-            guard selectedRange.location > 0 else { return false }
+            guard selectedRange.location > 0 else { return }
             
             let text = textView.string as NSString
             let lineRange = text.lineRange(for: NSRange(location: selectedRange.location - 1, length: 1))
@@ -83,14 +79,14 @@ struct EditorView: NSViewRepresentable {
                     let nsCheckmarkRange = NSRange(checkmarkRange, in: line)
                     let absoluteCheckmarkRange = NSRange(location: lineRange.location + nsCheckmarkRange.location, length: nsCheckmarkRange.length)
                     
-                    if textView.shouldChangeText(in: absoluteCheckmarkRange, replacementString: "[ ]") {
-                        textView.textStorage?.replaceCharacters(in: absoluteCheckmarkRange, with: "[ ]")
-                        textView.didChangeText()
-                        return true
+                    // Use insertText to handle undo and cursor positioning correctly
+                    // Convert √ to an unchecked placeholder "[ ] "
+                    if textView.shouldChangeText(in: absoluteCheckmarkRange, replacementString: "[ ] ") {
+                        textView.insertText("[ ] ", replacementRange: absoluteCheckmarkRange)
+                        // After insertText, the cursor should be at the correct position.
                     }
                 }
             }
-            return false
         }
         
         private func checkForAutocompleteTrigger(in textView: NSTextView) {
