@@ -1,0 +1,1320 @@
+{
+  "builtTestProducts" : [
+    {
+      "binaryPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.xctest/Contents/MacOS/updocPackageTests",
+      "packagePath" : "/Users/bnaylor/src/updoc",
+      "productName" : "updocPackageTests"
+    }
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.updoc-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/sources",
+      "importPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ActionItem.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/AuthManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/AutocompleteManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/CommandEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/CommandPaletteView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/DateService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/EditorView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GCalendarService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ImageLibraryManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/MarkdownEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/Note.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SidebarView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SmartTemplateEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TemplateRule.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ThemeManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/updocApp.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "updoc",
+      "moduleOutputPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updoc.swiftmodule",
+      "objects" : [
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ActionItem.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AuthManager.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AutocompleteManager.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandEngine.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandPaletteView.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/DateService.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/EditorView.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GCalendarService.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MarkdownEngine.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Note.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SidebarView.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SmartTemplateEngine.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TemplateRule.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ThemeManager.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/updocApp.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "updoc_main",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "updoc"
+      ],
+      "outputFileMapPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ActionItem.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AuthManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AutocompleteManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandPaletteView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/DateService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/EditorView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GCalendarService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MarkdownEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Note.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SidebarView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SmartTemplateEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TemplateRule.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ThemeManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/updocApp.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updoc.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/bnaylor/src/updoc/src/updoc/ActionItem.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/AuthManager.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/AutocompleteManager.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/CommandEngine.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/CommandPaletteView.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/DateService.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/EditorView.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/GCalendarService.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/ImageLibraryManager.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/MarkdownEngine.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/Note.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/SidebarView.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/SmartTemplateEngine.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/TemplateRule.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/ThemeManager.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/updocApp.swift"
+      ],
+      "tempsPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.updocPackageTests-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/sources",
+      "importPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.derived/runner.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updocTests.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "updocPackageTests",
+      "moduleOutputPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updocPackageTests.swiftmodule",
+      "objects" : [
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/include/updocPackageTests-Swift.h",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "updoc"
+      ],
+      "outputFileMapPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updocPackageTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.derived/runner.swift"
+      ],
+      "tempsPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build",
+      "wholeModuleOptimization" : false
+    },
+    "C.updocTests-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/sources",
+      "importPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/AutocompleteTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/CalendarServiceTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ChecklistTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/CommandEngineTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ServiceTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/TemplateEngineTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "updocTests",
+      "moduleOutputPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updocTests.swiftmodule",
+      "objects" : [
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-Xfrontend",
+        "-enable-cross-import-overlays",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-swift-version",
+        "6",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "updoc"
+      ],
+      "outputFileMapPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updocTests.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/AutocompleteTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/CalendarServiceTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/ChecklistTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/CommandEngineTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/ServiceTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/TemplateEngineTests.swift"
+      ],
+      "tempsPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "updoc" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "updoc",
+      "-package-name",
+      "updoc",
+      "-c",
+      "/Users/bnaylor/src/updoc/src/updoc/ActionItem.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/AuthManager.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/AutocompleteManager.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/CommandEngine.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/CommandPaletteView.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/DateService.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/EditorView.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/GCalendarService.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/ImageLibraryManager.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/MarkdownEngine.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/Note.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/SidebarView.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/SmartTemplateEngine.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/TemplateRule.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/ThemeManager.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/updocApp.swift",
+      "-I",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "updoc_main",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "updoc",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "updocPackageTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "updocPackageTests",
+      "-package-name",
+      "updoc",
+      "-c",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.derived/runner.swift",
+      "-I",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/include/updocPackageTests-Swift.h",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "updoc",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
+    "updocTests" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "updocTests",
+      "-package-name",
+      "updoc",
+      "-c",
+      "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/AutocompleteTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/CalendarServiceTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/ChecklistTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/CommandEngineTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/ServiceTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/TemplateEngineTests.swift",
+      "-I",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-Xfrontend",
+      "-enable-cross-import-overlays",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-swift-version",
+      "6",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "updoc",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "updoc" : [
+
+    ],
+    "updocPackageTests" : [
+      "updocTests",
+      "updoc"
+    ],
+    "updocTests" : [
+      "updoc"
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.derived/runner.swift" : {
+      "inputs" : [
+
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.derived/runner.swift"
+        }
+      ]
+    }
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc-entitlement.plist" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<entitlement-plist>"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<com.apple.security.get-task-allow>"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc-entitlement.plist"
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ActionItem.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/AuthManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/AutocompleteManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/CommandEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/CommandPaletteView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/DateService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/EditorView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GCalendarService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ImageLibraryManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/MarkdownEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/Note.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SidebarView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SmartTemplateEngine.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TemplateRule.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/ThemeManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/updocApp.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/sources"
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ActionItem.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AuthManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AutocompleteManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandPaletteView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/DateService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/EditorView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GCalendarService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MarkdownEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Note.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SidebarView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SmartTemplateEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TemplateRule.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ThemeManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/updocApp.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.product/Objects.LinkFileList"
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.derived/runner.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/sources"
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ActionItem.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AuthManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AutocompleteManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandPaletteView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/DateService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/EditorView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GCalendarService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MarkdownEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Note.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SidebarView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SmartTemplateEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TemplateRule.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ThemeManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/updocApp.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.product/Objects.LinkFileList"
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/AutocompleteTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/CalendarServiceTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ChecklistTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/CommandEngineTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ServiceTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/TemplateEngineTests.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/sources"
+    }
+  }
+}

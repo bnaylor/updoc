@@ -1,0 +1,47 @@
+<h2>Checklists & Action Items</h2>
+<p class="subtitle">Standard checklists with the option to "promote" items to tracked Action Items.</p>
+
+<div class="mockup">
+  <div class="mockup-header">updoc - Action Items</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <div style="line-height: 1.6;">
+      <p>## Meeting Tasks</p>
+      
+      <!-- Standard Checklist (Checked) -->
+      <div style="display: flex; align-items: center; gap: 8px; color: #999; text-decoration: line-through;">
+        <input type="checkbox" checked disabled>
+        <span>Review the Q1 performance report</span>
+      </div>
+
+      <!-- Standard Checklist (Unchecked) -->
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox">
+        <span>Draft the new design spec</span>
+        <button class="mock-button" style="font-size: 0.7em; padding: 2px 6px; margin-left: 10px; opacity: 0.5;">⚡ Promote to Action Item</button>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+      <p>## Tracked Action Items</p>
+
+      <!-- Promoted Action Item -->
+      <div style="background: #fdfdfd; border: 1px solid #eee; border-radius: 4px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="checkbox">
+          <div>
+            <div style="font-size: 0.9em; font-weight: bold;">Finalize sync coordinator logic</div>
+            <div style="font-size: 0.75em; color: #666;">Assigned to: <span style="color: #4285f4;">@bnaylor</span> | Due: Apr 15</div>
+          </div>
+        </div>
+        <div style="font-size: 0.75em; font-weight: bold; color: #34a853; background: #e6ffed; padding: 2px 8px; border-radius: 10px;">IN PROGRESS</div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <p>Standard checklists handle simple tasks. For more complex items, you can "promote" them to Action Items with assignments and status (perfect for future Sharpei integration). Does this distinction make sense?</p>
+</div>

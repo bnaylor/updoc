@@ -1,0 +1,56 @@
+<h2>Architecture: Google Docs Sync Coordinator</h2>
+<p class="subtitle">High-level overview of the sync components and their relationships.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Sync Component Diagram</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+      
+      <!-- Logic Layer -->
+      <div style="border: 2px solid #34a853; border-radius: 8px; padding: 15px; width: 80%; background: #f6fff8; text-align: center;">
+        <div style="font-weight: bold; color: #34a853;">Sync Coordinator (Swift Actor)</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          OAuth2 Manager | Drive API Monitor | Docs API Synchronizer
+        </div>
+      </div>
+
+      <div style="font-size: 1.2em; color: #ccc;">↓ ↑</div>
+
+      <div style="display: flex; gap: 40px; width: 80%; justify-content: center;">
+        <div style="flex: 1; text-align: center;">
+          <div style="border: 2px solid #007aff; border-radius: 8px; padding: 10px; background: #f0f7ff;">
+            <div style="font-weight: bold; color: #007aff; font-size: 0.9em;">Local Store (SwiftData)</div>
+            <div style="font-size: 0.75em; color: #666;">Note Models | Sync Tokens</div>
+          </div>
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <div style="border: 2px solid #4285f4; border-radius: 8px; padding: 10px; background: #f4f8ff;">
+            <div style="font-weight: bold; color: #4285f4; font-size: 0.9em;">External API (Google REST)</div>
+            <div style="font-size: 0.75em; color: #666;">Docs | Drive | Auth</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 1.2em; color: #ccc;">↓ ↑</div>
+
+      <!-- Logic Layer -->
+      <div style="border: 2px solid #fbbc05; border-radius: 8px; padding: 15px; width: 80%; background: #fffdf0; text-align: center;">
+        <div style="font-weight: bold; color: #fbbc05;">Auth Manager (Keychain)</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          Access Tokens | Refresh Tokens | Scopes
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Core Sync Components</h3>
+  <ul>
+    <li><strong>Sync Coordinator:</strong> The central Swift Actor that manages the "Live-ish Sync" process, ensuring that local edits are pushed and remote changes are pulled asynchronously.</li>
+    <li><strong>OAuth2 Manager:</strong> Handles the initial authentication flow via system browser redirect and stores tokens securely in the macOS Keychain.</li>
+    <li><strong>Drive API Monitor:</strong> Periodically checks the "Head" version of the linked Google Drive files to detect external changes.</li>
+    <li><strong>Docs API Synchronizer:</strong> Performs the actual content sync, including converting local Markdown to Google Docs JSON structure and back.</li>
+  </ul>
+</div>

@@ -6,6 +6,7 @@ struct ContentView: View {
     @State private var isSyncing = false
     @State private var syncError: String?
     @State private var showingCommandPalette = false
+    @State private var showingRuleManager = false
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -70,6 +71,9 @@ struct ContentView: View {
                     .foregroundColor(.secondary)
             }
         }
+        .sheet(isPresented: $showingRuleManager) {
+            RuleManagerView()
+        }
         .overlay {
             if showingCommandPalette {
                 CommandPaletteView(
@@ -85,6 +89,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .syncAllNotes)) { _ in
             syncAllNotes()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openRules)) { _ in
+            showingRuleManager = true
         }
         .background {
             Button("") {
@@ -102,6 +109,9 @@ struct ContentView: View {
             },
             Command(title: "Sync All Notes", subtitle: "App", shortcut: "⇧⌘S") {
                 syncAllNotes()
+            },
+            Command(title: "Open Template Rules", subtitle: "App", shortcut: "⌘R") {
+                showingRuleManager = true
             }
         ]
         

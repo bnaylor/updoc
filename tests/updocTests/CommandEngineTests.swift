@@ -14,7 +14,7 @@ struct CommandEngineTests {
     @Test func searchMatchesNotesByTitle() {
         let engine = CommandEngine()
         let note = Note(title: "Project Plan", content: "...")
-        let results = engine.search(query: "project", commands: [], notes: [note])
+        let results = engine.search(query: "project", commands: [], notes: [note], onNoteSelect: { _ in })
         #expect(results.count == 1)
         #expect(results.first?.title == "Open Note: Project Plan")
     }

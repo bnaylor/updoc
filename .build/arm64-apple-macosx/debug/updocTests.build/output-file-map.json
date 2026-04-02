@@ -1,0 +1,75 @@
+{
+  "": {
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/master.swiftdeps"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/AutocompleteTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/CalendarServiceTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/ChecklistTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/CommandEngineTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/ServiceTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.dia"
+  },
+  "/Users/bnaylor/src/updoc/tests/updocTests/TemplateEngineTests.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.dia"
+  }
+}

@@ -1,0 +1,52 @@
+<h2>Smart Template Selection & Participant Logic</h2>
+<p class="subtitle">Intelligent pre-filling of meeting notes using calendar metadata.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Template Engine Lifecycle</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="display: flex; justify-content: space-around; align-items: center; position: relative;">
+      
+      <!-- Calendar Event -->
+      <div style="text-align: center; width: 150px;">
+        <div style="font-weight: bold; color: #444; margin-bottom: 8px;">Calendar Event</div>
+        <div style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; background: #fafafa; font-size: 0.75em;">
+          <strong>Title:</strong> Duckie 1:1<br>
+          <strong>Attendees:</strong> Duckie, Brian<br>
+          <strong>Notes:</strong> g.co/doc/123
+        </div>
+      </div>
+
+      <!-- Template Engine -->
+      <div style="text-align: center; flex: 1;">
+        <div style="font-size: 0.8em; color: #666; margin-bottom: 5px;">Template Engine</div>
+        <div style="height: 2px; background: #eee; position: relative; width: 80%; margin: 0 auto;">
+          <div style="position: absolute; top: -5px; right: 0; border-right: 2px solid #eee; border-top: 2px solid #eee; width: 10px; height: 10px; transform: rotate(45deg);"></div>
+        </div>
+        <div style="font-size: 0.7em; margin-top: 10px; color: #34a853; font-weight: bold;">Rules & Mapping</div>
+      </div>
+
+      <!-- Note Output -->
+      <div style="text-align: center; width: 150px;">
+        <div style="font-weight: bold; color: #007aff; margin-bottom: 8px;">Pre-filled Note</div>
+        <div style="border: 1px solid #007aff; border-radius: 4px; padding: 10px; background: #fff; font-size: 0.75em; text-align: left;">
+          # 1:1 w/ Duckie<br>
+          @duckie @bnaylor<br><br>
+          ## Discussion<br>
+          - ...
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Strategy: Intelligent Meeting Templates</h3>
+  <ul>
+    <li><strong>Keyword Detection:</strong> If the title contains "1:1", "Sync", or "Interview", the engine automatically selects the corresponding Markdown template.</li>
+    <li><strong>Participant Mapping:</strong> Attendees are converted into <code>@mention</code> chips at the top of the note. If a manager is detected, a specialized "1:1 with Manager" template is used.</li>
+    <li><strong>Doc Linkage:</strong> If a Google Doc URL is found in the event, updoc automatically links the note and pulls in existing content.</li>
+    <li><strong>"Apply My Template" Action:</strong> For empty foreign docs, a button in the header allows the user to push their selected template into the document.</li>
+    <li><strong>Persistence:</strong> Selected templates are stored locally in <code>SwiftData</code>, allowing for offline note preparation.</li>
+  </ul>
+</div>

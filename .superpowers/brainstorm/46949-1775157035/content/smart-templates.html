@@ -1,0 +1,52 @@
+<h2>Smart Meeting Templates</h2>
+<p class="subtitle">Automatic template selection based on meeting metadata.</p>
+
+<div class="mockup">
+  <div class="mockup-header">updoc - Template Selection Logic</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <div style="display: flex; gap: 20px;">
+      
+      <!-- Example 1: 1:1 -->
+      <div style="flex: 1; border: 1px solid #eee; border-radius: 4px; padding: 12px; background: #fff;">
+        <div style="font-weight: bold; font-size: 0.8em; color: #007aff; margin-bottom: 8px;">TYPE: 1:1 Meeting</div>
+        <div style="font-size: 0.75em; font-family: monospace; background: #fafafa; padding: 10px;">
+          # 1:1 w/ {{person}}<br>
+          Date: {{date}}<br><br>
+          ## How are things going?<br>
+          - ...<br><br>
+          ## Roadmap / Projects<br>
+          - ...
+        </div>
+      </div>
+
+      <!-- Example 2: Sync -->
+      <div style="flex: 1; border: 1px solid #eee; border-radius: 4px; padding: 12px; background: #fff;">
+        <div style="font-weight: bold; font-size: 0.8em; color: #34a853; margin-bottom: 8px;">TYPE: Project Sync</div>
+        <div style="font-size: 0.75em; font-family: monospace; background: #fafafa; padding: 10px;">
+          # {{title}}<br>
+          Date: {{date}}<br><br>
+          ## Accomplished<br>
+          - ...<br><br>
+          ## Blocker / Risks<br>
+          - ...
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top: 20px; font-size: 0.85em; color: #666;">
+      <p><strong>Smart Logic:</strong></p>
+      <ul>
+        <li>If title contains "1:1" or "Sync", apply corresponding template.</li>
+        <li>If participants include your manager, apply "1:1 with Manager" template.</li>
+        <li>If recurring meeting, copy the "Action Items" from the previous occurrence.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <p>The "Smart Template" will intelligently guess the best structure for your note, saving you manual effort. Does this setup feel right?</p>
+</div>

@@ -1,0 +1,55 @@
+<h2>Editor Experience: Live-Preview & Chips</h2>
+<p class="subtitle">Fast, native text interaction with intelligent formatting and embedded components.</p>
+
+<div class="mockup">
+  <div class="mockup-header">updoc - Project Sync</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <!-- Title -->
+    <h1 style="border-bottom: 1px solid #eee; padding-bottom: 10px;"># Project Sync</h1>
+    
+    <!-- Chips Row -->
+    <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+      <div style="background: #eef; border: 1px solid #ccd; border-radius: 12px; padding: 2px 10px; font-size: 0.8em; display: flex; align-items: center; gap: 5px;">
+        <span style="width: 16px; height: 16px; border-radius: 8px; background: #4285f4; color: white; display: flex; align-items: center; justify-content: center; font-size: 8px;">BN</span>
+        <span>@bnaylor</span>
+      </div>
+      <div style="background: #eef; border: 1px solid #ccd; border-radius: 12px; padding: 2px 10px; font-size: 0.8em; display: flex; align-items: center; gap: 5px;">
+        <span style="width: 16px; height: 16px; border-radius: 8px; background: #34a853; color: white; display: flex; align-items: center; justify-content: center; font-size: 8px;">DK</span>
+        <span>@duckie</span>
+      </div>
+      <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 2px 8px; font-size: 0.8em; cursor: pointer;">
+        Status: <span style="font-weight: bold; color: #34a853;">In Progress ▼</span>
+      </div>
+    </div>
+
+    <!-- Text Content -->
+    <div style="line-height: 1.6;">
+      <p>## Discussion Points</p>
+      <ul>
+        <li>Implementing <strong>**Live-Preview**</strong> using <code>TextKit 2</code>.</li>
+        <li>Ensuring <em>*Moma*</em> chips render faithfully.</li>
+        <li>Supporting <code>`@`</code> mentions for 1:1 meetings.</li>
+      </ul>
+
+      <p>## Action Items</p>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+        <input type="checkbox" checked> <span>Select editor SDK (Approach 1 chosen)</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox"> <span>Finalize architecture doc</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>Key Features</h3>
+  <ul>
+    <li><strong>TextKit 2 Editor:</strong> A native macOS text view optimized for performance. It will handle the transformation of Markdown syntax into visually styled text in real-time.</li>
+    <li><strong>Intelligent Chips:</strong> Typing <code>@</code> will trigger a Moma directory lookup, embedding a "Contact Chip" similar to Google Docs. We'll also support dropdown chips for status tracking.</li>
+    <li><strong>Image Support:</strong> Drag & drop or paste images directly into the editor. Images are stored locally and synced to the linked Google Doc.</li>
+    <li><strong>Native Interaction:</strong> Full support for macOS system features (spelling, grammar, dictation, services).</li>
+  </ul>
+</div>

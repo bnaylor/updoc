@@ -9,7 +9,6 @@ struct SidebarView: View {
     
     @State private var meetings: [CalendarEvent] = []
     private let templateEngine = SmartTemplateEngine()
-    @State private var showingRuleManager = false
     
     var body: some View {
         List(selection: $selectedNote) {
@@ -46,12 +45,6 @@ struct SidebarView: View {
         .listStyle(.sidebar)
         .toolbar {
             Button("Add Note", systemImage: "plus", action: addNote)
-            Button(action: { showingRuleManager = true }) {
-                Label("Rules", systemImage: "gearshape")
-            }
-        }
-        .sheet(isPresented: $showingRuleManager) {
-            RuleManagerView()
         }
         .onAppear {
             refreshMeetings()

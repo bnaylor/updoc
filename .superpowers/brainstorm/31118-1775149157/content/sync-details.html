@@ -1,0 +1,51 @@
+<h2>Google Docs Sync Mechanism</h2>
+<p class="subtitle">Faithful rendering and bidirectional updates between Markdown and GDocs.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Sync Lifecycle Diagram</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="display: flex; justify-content: space-around; align-items: center; position: relative;">
+      
+      <!-- Local Markdown -->
+      <div style="text-align: center; width: 150px;">
+        <div style="font-weight: bold; color: #444; margin-bottom: 8px;">updoc (Local)</div>
+        <div style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; background: #fafafa; font-family: monospace; font-size: 0.75em;">
+          # Project X<br>
+          - [x] Done<br>
+          - [ ] Todo
+        </div>
+      </div>
+
+      <!-- Conversion Bridge -->
+      <div style="text-align: center; flex: 1;">
+        <div style="font-size: 0.8em; color: #666; margin-bottom: 5px;">Bridge Layer</div>
+        <div style="height: 2px; background: #eee; position: relative; width: 80%; margin: 0 auto;">
+          <div style="position: absolute; top: -5px; right: 0; border-right: 2px solid #eee; border-top: 2px solid #eee; width: 10px; height: 10px; transform: rotate(45deg);"></div>
+          <div style="position: absolute; top: -5px; left: 0; border-left: 2px solid #eee; border-bottom: 2px solid #eee; width: 10px; height: 10px; transform: rotate(45deg);"></div>
+        </div>
+        <div style="font-size: 0.7em; margin-top: 10px; color: #34a853; font-weight: bold;">Markdown ⟷ JSON AST ⟷ GDocs API</div>
+      </div>
+
+      <!-- Google Docs -->
+      <div style="text-align: center; width: 150px;">
+        <div style="font-weight: bold; color: #4285f4; margin-bottom: 8px;">Google Docs</div>
+        <div style="border: 1px solid #4285f4; border-radius: 4px; padding: 10px; background: #fff; font-size: 0.75em;">
+          <h1 style="color: #4285f4; border: 0; margin: 0; padding: 0;">Project X</h1>
+          <div style="margin-top: 5px;">☑ Done</div>
+          <div>☐ Todo</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Strategy: "Live-ish" Sync Coordinator</h3>
+  <ul>
+    <li><strong>Intermediate Representation (AST):</strong> We'll parse Markdown into a JSON-based Abstract Syntax Tree (AST). This allows us to map Markdown elements (headings, lists) and custom "Chips" to the exact structures required by the Google Docs API.</li>
+    <li><strong>Debounced Updates:</strong> To avoid rate limiting and ensure "no lag," local changes will be debounced before being pushed to Google Docs in batch requests.</li>
+    <li><strong>Version Management:</strong> We'll use the Drive API's "Head" version to detect external changes. When an external change is detected, we'll perform a non-destructive merge into the local Markdown.</li>
+    <li><strong>Offline Resilience:</strong> Edits made offline are stored in <code>SwiftData</code>. Upon reconnecting, the Sync Coordinator will replay these changes to the linked Google Doc.</li>
+  </ul>
+</div>

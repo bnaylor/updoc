@@ -1,0 +1,49 @@
+<h2>Architecture: Google Calendar API Integration</h2>
+<p class="subtitle">Direct sync with Google Calendar using OAuth2.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Calendar Sync Diagram</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+      
+      <!-- App Layer -->
+      <div style="border: 2px solid #007aff; border-radius: 8px; padding: 15px; width: 80%; background: #f0f7ff; text-align: center;">
+        <div style="font-weight: bold; color: #007aff;">updoc Application</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          Sidebar View | Template Manager
+        </div>
+      </div>
+
+      <div style="font-size: 1.2em; color: #ccc;">↓ ↑</div>
+
+      <!-- Service Layer -->
+      <div style="border: 2px solid #34a853; border-radius: 8px; padding: 15px; width: 80%; background: #f6fff8; text-align: center;">
+        <div style="font-weight: bold; color: #34a853;">GCalendarService (Swift Actor)</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          List Events | Fetch Meeting Details | Auto-Link Detection
+        </div>
+      </div>
+
+      <div style="font-size: 1.2em; color: #ccc;">↓ ↑ (uses existing OAuth2 tokens)</div>
+
+      <!-- External API -->
+      <div style="border: 2px solid #4285f4; border-radius: 8px; padding: 15px; width: 80%; background: #f4f8ff; text-align: center;">
+        <div style="font-weight: bold; color: #4285f4;">Google Calendar REST API</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          Primary Calendar | Shared Calendars
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Strategy: Direct GCalendar Sync</h3>
+  <ul>
+    <li><strong>Data Source:</strong> Uses the Google Calendar REST API to fetch today's events for the authenticated user.</li>
+    <li><strong>Security:</strong> Leverages the existing OAuth2 flow and secure Keychain storage for the <code>calendar.readonly</code> scope.</li>
+    <li><strong>Intelligence:</strong> The <code>GCalendarService</code> parses event descriptions and locations to find "Meeting Notes" URLs (Docs) and pre-fills templates using participant data.</li>
+    <li><strong>Sidebar Integration:</strong> Today's meetings appear in the collapsible sidebar, just as planned, but are sourced directly from Google.</li>
+  </ul>
+</div>

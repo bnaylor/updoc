@@ -19,7 +19,7 @@ public struct Command: Identifiable, Sendable {
 public struct CommandEngine {
     public init() {}
     
-    public func search(query: String, commands: [Command], notes: [Note] = [], onNoteSelect: @escaping @Sendable (Note) -> Void) -> [Command] {
+    public func search(query: String, commands: [Command], notes: [Note] = [], onNoteSelect: (@Sendable (Note) -> Void)? = nil) -> [Command] {
         if query.isEmpty { return [] }
         
         let lowerQuery = query.lowercased()
@@ -29,12 +29,14 @@ public struct CommandEngine {
         results.append(contentsOf: commands.filter { $0.title.lowercased().contains(lowerQuery) })
         
         // Match notes (wrapped as commands)
-        let noteResults = notes.filter { $0.title.lowercased().contains(lowerQuery) }.map { note in
-            Command(title: "Open Note: \(note.title)", subtitle: "Note", action: {
-                onNoteSelect(note)
-            })
+        if let onNoteSelect = onNoteSelect {
+            let noteResults = notes.filter { $0.title.lowercased().contains(lowerQuery) }.map { note in
+                Command(title: "Open Note: \(note.title)", subtitle: "Note", action: {
+                    onNoteSelect(note)
+                })
+            }
+            results.append(contentsOf: noteResults)
         }
-        results.append(contentsOf: noteResults)
         
         return results
     }

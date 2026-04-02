@@ -1,0 +1,38 @@
+<h2>Image Management & Sync</h2>
+<p class="subtitle">Local library for fast editing, with automatic upload to Google Drive during sync.</p>
+
+<div class="mockup">
+  <div class="mockup-header">updoc - Editor with Image</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <div style="line-height: 1.6;">
+      <p>Here is the whiteboard sketch from the design sync:</p>
+      
+      <!-- Embedded Image -->
+      <div style="margin: 15px 0; border: 1px solid #eee; border-radius: 8px; overflow: hidden; position: relative;">
+        <div style="background: #f0f0f0; height: 150px; display: flex; align-items: center; justify-content: center; color: #999;">
+          [Sketch of Architecture Diagram]
+        </div>
+        <div style="position: absolute; bottom: 8px; right: 8px; font-size: 0.7em; background: rgba(0,0,0,0.5); color: white; padding: 2px 6px; border-radius: 4px;">
+          ● Locally Stored (Library ID: img-789)
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+      <div style="background: #f6fff8; border: 1px solid #34a853; padding: 12px; border-radius: 4px; font-size: 0.85em; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.2em;">⬆️</span>
+        <div>
+          <span style="font-weight: bold; color: #34a853;">Syncing to Google Docs...</span>
+          <div style="font-size: 0.8em; color: #666;">Uploading image to Drive Assets folder and embedding link in Doc.</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <p>Approach 3 (Library) is best for local speed. During sync, updoc will upload the library image to a hidden "Assets" folder in Google Drive and then use the Drive ID to embed the image into the Google Doc. Does this bridge make sense?</p>
+</div>

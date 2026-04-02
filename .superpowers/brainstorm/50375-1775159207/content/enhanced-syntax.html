@@ -1,0 +1,50 @@
+<h2>Enhanced Autocomplete & Checklist Syntax</h2>
+<p class="subtitle">Smart '@' chips for persons and dates, plus an intuitive '√' checklist shortcut.</p>
+
+<div class="mockup">
+  <div class="mockup-header">updoc - Editor Experience</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <div style="line-height: 1.6;">
+      <!-- Multi-Purpose @ Autocomplete -->
+      <div style="position: relative; margin-bottom: 30px;">
+        <p>I met with Duckie on <strong>@tod|</strong></p>
+        
+        <div style="position: absolute; top: 25px; left: 150px; width: 220px; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10;">
+          <div style="padding: 8px; border-bottom: 1px solid #eee; background: #f0f7ff; cursor: pointer;">
+            <div style="font-size: 0.85em; font-weight: bold; color: #007aff;">📅 Today (Apr 2, 2026)</div>
+          </div>
+          <div style="padding: 8px; border-bottom: 1px solid #eee; cursor: pointer;">
+            <div style="font-size: 0.85em; font-weight: bold;">👤 Tod Smith (tsmith@)</div>
+          </div>
+          <div style="padding: 8px; cursor: pointer;">
+            <div style="font-size: 0.85em; font-weight: bold;">📅 Tomorrow (Apr 3, 2026)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Checklist Syntax -->
+      <p>## Tasks</p>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <input type="checkbox">
+        <span>Standard task using [ ]</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; background: #fdfdfd; padding: 4px; border-radius: 4px; border: 1px dashed #ddd;">
+        <span style="color: #34a853; font-weight: bold;">√</span>
+        <span style="font-style: italic; color: #666;">(Autoconverts to...)</span>
+        <input type="checkbox">
+        <span>New task using √ shortcut</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>Smart Features</h3>
+  <ul>
+    <li><strong>Universal '@' Autocomplete:</strong> Intelligently matches against Moma directory names AND date keywords (today, tomorrow, next Monday).</li>
+    <li><strong>Fluent Checklist Syntax:</strong> Typing <code>√</code> (Option+V on Mac) at the start of a line instantly transforms into an interactive checklist item.</li>
+  </ul>
+</div>

@@ -1,0 +1,30 @@
+<h2>Background Sync Strategy</h2>
+<p class="subtitle">Decide how updoc handles background sync for your notes.</p>
+
+<div class="options">
+  <div class="option" data-choice="1" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Foreground Only</h3>
+      <p>Only sync the note you're currently editing. Minimal battery/data usage.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="2" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Intelligent Pre-fetch</h3>
+      <p>Sync the current note + any notes for upcoming meetings (linked via calendar).</p>
+    </div>
+  </div>
+  <div class="option" data-choice="3" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>Full Background Sync</h3>
+      <p>Periodically sync ALL notes. Ensures everything is always up-to-date and searchable.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p>Consider the trade-off between battery/resource usage and having everything always "ready to go". Which approach fits your vision?</p>
+</div>

@@ -1,0 +1,49 @@
+<h2>OAuth2 & Security Strategy</h2>
+<p class="subtitle">Securely managing authentication and local data on macOS.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Security Architecture Diagram</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+      
+      <!-- Auth Layer -->
+      <div style="border: 2px solid #4285f4; border-radius: 8px; padding: 15px; width: 80%; background: #f4f8ff; text-align: center;">
+        <div style="font-weight: bold; color: #4285f4;">OAuth2 Authentication Manager</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          App Auth Library | System Browser Redirect | Scopes (Docs, Drive, Profile)
+        </div>
+      </div>
+
+      <div style="font-size: 1.2em; color: #ccc;">↓ ↑</div>
+
+      <!-- Storage Layer -->
+      <div style="border: 2px solid #fbbc05; border-radius: 8px; padding: 15px; width: 80%; background: #fffdf0; text-align: center;">
+        <div style="font-weight: bold; color: #fbbc05;">Credential Storage (macOS Keychain)</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          Access Tokens | Refresh Tokens | Client IDs | Client Secrets
+        </div>
+      </div>
+
+      <div style="font-size: 1.2em; color: #ccc;">↓ ↑</div>
+
+      <!-- Local Data Layer -->
+      <div style="border: 2px solid #34a853; border-radius: 8px; padding: 15px; width: 80%; background: #f6fff8; text-align: center;">
+        <div style="font-weight: bold; color: #34a853;">Local Note Storage (SwiftData)</div>
+        <div style="font-size: 0.85em; color: #444; margin-top: 5px;">
+          Local Markdown | Sync Metadata | Template Data
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Strategy: OAuth2 & Security Architecture</h3>
+  <ul>
+    <li><strong>System Browser Redirect:</strong> We'll use the industry-standard OAuth2 redirect flow via the system browser (Chrome/Safari) to ensure a secure login experience.</li>
+    <li><strong>Keychain Storage:</strong> All sensitive credentials (access tokens, refresh tokens, client secrets) are stored in the macOS Keychain, protected by system-level security.</li>
+    <li><strong>Principle of Least Privilege:</strong> We'll request only the necessary scopes for Google Docs and Drive access, ensuring we don't overreach.</li>
+    <li><strong>Secure SwiftData:</strong> Local note content is stored in SwiftData. We'll leverage macOS system encryption for the data folder to protect user data.</li>
+  </ul>
+</div>

@@ -1,0 +1,50 @@
+<h2>Sync Protocol & Bidirectional Merging</h2>
+<p class="subtitle">The logic behind detecting changes and resolving conflicts.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Sync Lifecycle Diagram</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="display: flex; justify-content: space-around; align-items: center; position: relative;">
+      
+      <!-- Local Markdown -->
+      <div style="text-align: center; width: 150px;">
+        <div style="font-weight: bold; color: #444; margin-bottom: 8px;">updoc (Local)</div>
+        <div style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; background: #fafafa; font-family: monospace; font-size: 0.75em;">
+          # Project X<br>
+          - [x] Done
+        </div>
+      </div>
+
+      <!-- Sync Bridge -->
+      <div style="text-align: center; flex: 1;">
+        <div style="font-size: 0.8em; color: #666; margin-bottom: 5px;">Sync Bridge</div>
+        <div style="height: 2px; background: #eee; position: relative; width: 80%; margin: 0 auto;">
+          <div style="position: absolute; top: -5px; right: 0; border-right: 2px solid #eee; border-top: 2px solid #eee; width: 10px; height: 10px; transform: rotate(45deg);"></div>
+          <div style="position: absolute; top: -5px; left: 0; border-left: 2px solid #eee; border-bottom: 2px solid #eee; width: 10px; height: 10px; transform: rotate(45deg);"></div>
+        </div>
+        <div style="font-size: 0.7em; margin-top: 10px; color: #34a853; font-weight: bold;">Detection ⟷ Comparison ⟷ Resolution</div>
+      </div>
+
+      <!-- Google Docs -->
+      <div style="text-align: center; width: 150px;">
+        <div style="font-weight: bold; color: #4285f4; margin-bottom: 8px;">Google Docs</div>
+        <div style="border: 1px solid #4285f4; border-radius: 4px; padding: 10px; background: #fff; font-size: 0.75em;">
+          <h1 style="color: #4285f4; border: 0; margin: 0; padding: 0;">Project X</h1>
+          <div style="margin-top: 5px;">☑ Done</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Strategy: Bidirectional Merge Protocol</h3>
+  <ul>
+    <li><strong>Sync Cycle:</strong> Every 2 seconds of inactivity, updoc triggers a "push" for local changes. Periodically (e.g., every 30 seconds), it triggers a "pull" to check the Drive "Head" version for external changes.</li>
+    <li><strong>Change Detection:</strong> We'll maintain a `lastSyncedRevision` for each linked Google Doc. If the remote revision is greater, we fetch the remote content.</li>
+    <li><strong>Auto-Merge Logic:</strong> We'll use a standard 3-way merge algorithm (Base vs Local vs Remote). Non-overlapping line changes are merged automatically.</li>
+    <li><strong>Conflict Resolver UI:</strong> For overlapping changes, the side-by-side resolver (from the earlier mockup) is presented, allowing you to choose which version to keep.</li>
+    <li><strong>Version History:</strong> By pushing changes in small batches, we leverage Google Docs' native version history for safety and traceability.</li>
+  </ul>
+</div>

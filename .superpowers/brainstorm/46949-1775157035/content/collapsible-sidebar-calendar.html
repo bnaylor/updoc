@@ -1,0 +1,59 @@
+<h2>Sidebar: Notes + Today's Meetings</h2>
+<p class="subtitle">Quickly start meeting notes, with a collapsible sidebar for focused editing.</p>
+
+<div class="mockup">
+  <div class="mockup-header">updoc - Workspace</div>
+  <div class="mockup-body" style="display: flex; height: 400px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <!-- Sidebar -->
+    <div style="width: 240px; border-right: 1px solid #eee; background: #f5f5f7; display: flex; flex-direction: column;">
+      
+      <!-- Toolbar with Collapse Toggle -->
+      <div style="padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: bold; font-size: 0.85em;">updoc</span>
+        <button class="mock-button" style="padding: 2px 6px;">[|] Collapse Sidebar</button>
+      </div>
+
+      <!-- Section: Calendar (Today's Meetings) -->
+      <div style="padding: 15px 12px 5px 12px;">
+        <div class="label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; color: #007aff;">
+          <span>📅 TODAY'S MEETINGS</span>
+          <span style="font-weight: normal; font-size: 0.8em; color: #888;">Apr 2</span>
+        </div>
+        <div style="font-size: 0.9em; padding-left: 8px;">
+          <div style="background: #eef; border: 1px solid #ccd; border-radius: 4px; padding: 6px; margin-bottom: 8px;">
+            <div style="font-weight: bold; color: #0056b3;">[2:00 PM] updoc Architecture Sync</div>
+            <div style="font-size: 0.8em; color: #666;">@bnaylor, @gemini</div>
+            <button class="mock-button" style="width: 100%; font-size: 0.85em; margin-top: 4px; background: #007aff; color: white; border: none;">Start Note</button>
+          </div>
+          <div style="padding: 6px; border: 1px solid #eee; border-radius: 4px; margin-bottom: 8px; opacity: 0.7;">
+            <div style="font-weight: bold;">[4:00 PM] 1:1 w/ Duckie</div>
+            <button class="mock-button" style="width: 100%; font-size: 0.85em; margin-top: 4px;">Prepare Note</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Notes -->
+      <div style="padding: 15px 12px 5px 12px;">
+        <div class="label" style="margin-bottom: 8px;">📂 RECENT NOTES</div>
+        <div style="font-size: 0.9em; padding-left: 8px;">
+          <div style="padding: 4px 0;">- Sync Strategy Design</div>
+          <div style="padding: 4px 0;">- Editor TextKit Logic</div>
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- Content Area (Draft) -->
+    <div style="flex: 1; padding: 30px; background: white; position: relative;">
+      <div style="position: absolute; top: 10px; left: 10px;">
+        <button class="mock-button" style="padding: 2px 6px;">[|] Show Sidebar</button>
+      </div>
+      <h2 style="color: #ccc; margin-top: 20px; text-align: center;">Select a meeting or note to begin</h2>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p>The sidebar is collapsible (native macOS style), and today's schedule is right there for "frictionless" note-starting. Does this fit your vision?</p>
+</div>

@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/master.swiftdeps"
+  },
+  "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.dia"
+  }
+}

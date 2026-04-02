@@ -1,0 +1,60 @@
+<h2>Template Rule Manager</h2>
+<p class="subtitle">Customize, create, and manage your intelligent template selection rules.</p>
+
+<div class="mockup">
+  <div class="mockup-header">updoc - Template Settings</div>
+  <div class="mockup-body" style="padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 0.9em; margin-bottom: 10px;">Current Rules</h3>
+      
+      <!-- Rule 1 -->
+      <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="font-weight: bold; font-size: 0.85em;">Title contains "1:1"</span>
+          <div style="font-size: 0.75em; color: #666;">Apply Template: <strong>Standard 1:1</strong></div>
+        </div>
+        <div style="display: flex; gap: 5px;">
+          <button class="mock-button" style="font-size: 0.75em;">Edit</button>
+          <button class="mock-button" style="font-size: 0.75em; color: #dc2626;">Delete</button>
+        </div>
+      </div>
+
+      <!-- Rule 2 -->
+      <div style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="font-weight: bold; font-size: 0.85em;">Participants include "Manager"</span>
+          <div style="font-size: 0.75em; color: #666;">Apply Template: <strong>Manager Review</strong></div>
+        </div>
+        <div style="display: flex; gap: 5px;">
+          <button class="mock-button" style="font-size: 0.75em;">Edit</button>
+          <button class="mock-button" style="font-size: 0.75em; color: #dc2626;">Delete</button>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="mock-button" style="width: 100%; background: #007aff; color: white; border: none;">+ Add New Rule...</button>
+
+    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee;">
+      <h3 style="font-size: 0.9em; margin-bottom: 10px;">Define New Rule</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span style="font-size: 0.8em;">IF</span>
+          <select style="font-size: 0.8em;"><option>Meeting Title</option><option>Participant Name</option></select>
+          <select style="font-size: 0.8em;"><option>Contains</option><option>Matches Regex</option></select>
+          <input type="text" placeholder="Value..." style="flex: 1; font-size: 0.8em; padding: 4px;">
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <span style="font-size: 0.8em;">THEN</span>
+          <select style="flex: 1; font-size: 0.8em;"><option>Standard 1:1</option><option>Architecture Sync</option></select>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <p>The Template Rule Manager will allow you to build complex logic using simple "IF/THEN" statements, ensuring updoc adapts to your specific needs. Does this level of control work for you?</p>
+</div>

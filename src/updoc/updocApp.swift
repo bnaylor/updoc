@@ -33,6 +33,13 @@ struct updocApp: App {
                 }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
             }
+            
+            CommandGroup(after: .toolbar) {
+                Button("Open Template Rules") {
+                    NotificationCenter.default.post(name: .openRules, object: nil)
+                }
+                .keyboardShortcut("r", modifiers: .command)
+            }
         }
     }
 }
@@ -40,4 +47,5 @@ struct updocApp: App {
 extension Notification.Name {
     static let addNewNote = Notification.Name("addNewNote")
     static let syncAllNotes = Notification.Name("syncAllNotes")
+    static let openRules = Notification.Name("openRules")
 }
