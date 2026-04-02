@@ -20,6 +20,7 @@ class EditorTextView: NSTextView {
 struct EditorView: NSViewRepresentable {
     @Binding var text: String
     @Binding var assetIds: [String]
+    @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
 
     func makeNSView(context: Context) -> NSScrollView {
@@ -37,7 +38,7 @@ struct EditorView: NSViewRepresentable {
         textView.onFileDropped = { url, targetTextView in
             context.coordinator.handleFileDrop(url: url, in: targetTextView)
         }
-        textView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
+        textView.font = themeManager.font
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isContinuousSpellCheckingEnabled = true
         textView.allowsUndo = true
@@ -45,14 +46,22 @@ struct EditorView: NSViewRepresentable {
         // Register for dropped image files
         textView.registerForDraggedTypes([.fileURL])
         
-        // Use a standard body font as the base
-        textView.typingAttributes = [.font: NSFont.systemFont(ofSize: 14)]
+        // Use the theme's font as the base
+        textView.typingAttributes = [.font: themeManager.font]
         
         return scrollView
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         let textView = nsView.documentView as! NSTextView
+        
+        // Ensure theme font is applied
+        if textView.font != themeManager.font {
+            textView.font = themeManager.font
+            textView.typingAttributes = [.font: themeManager.font]
+            context.coordinator.applyStyles(to: textView)
+        }
+        
         if textView.string != text {
             textView.string = text
             context.coordinator.applyStyles(to: textView)
@@ -250,8 +259,8 @@ struct EditorView: NSViewRepresentable {
             let text = textView.string
             let ranges = parent.engine.parse(text)
             
-            // Reset styles
-            textStorage.setAttributes([.font: NSFont.systemFont(ofSize: 14)], range: NSRange(text.startIndex..., in: text))
+            // Reset styles using theme font
+            textStorage.setAttributes([.font: parent.themeManager.font], range: NSRange(text.startIndex..., in: text))
             
             // Apply Markdown styles
             for markdownRange in ranges {
@@ -261,22 +270,26 @@ struct EditorView: NSViewRepresentable {
         }
         
         private func attributes(for style: MarkdownStyle) -> [NSAttributedString.Key: Any] {
+            let baseFont = parent.themeManager.font
+            let baseSize = parent.themeManager.bodyFontSize
+            
             switch style {
             case .heading(let level):
-                let size: CGFloat = level == 1 ? 24 : (level == 2 ? 20 : 18)
+                let size: CGFloat = level == 1 ? baseSize + 10 : (level == 2 ? baseSize + 6 : baseSize + 4)
+                let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
                 return [
-                    .font: NSFont.boldSystemFont(ofSize: size),
+                    .font: boldFont.withSize(size) ?? NSFont.boldSystemFont(ofSize: size),
                     .foregroundColor: NSColor.labelColor
                 ]
             case .bold:
-                return [.font: NSFont.boldSystemFont(ofSize: 14)]
+                let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
+                return [.font: boldFont]
             case .italic:
-                let font = NSFont.systemFont(ofSize: 14)
-                let italicFont = NSFontManager.shared.convert(font, toHaveTrait: .italicFontMask)
+                let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
                 return [.font: italicFont]
             case .code:
                 return [
-                    .font: NSFont.monospacedSystemFont(ofSize: 13, weight: .regular),
+                    .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
                     .backgroundColor: NSColor.quaternaryLabelColor
                 ]
             case .checklist(let done):
