@@ -1,13 +1,23 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @State private var editorText = "# Welcome to updoc\n\nStart typing your meeting notes here."
+    @State private var selectedNote: Note?
     
     var body: some View {
         NavigationSplitView {
-            SidebarView()
+            SidebarView(selectedNote: $selectedNote)
         } detail: {
-            EditorView(text: $editorText)
+            if let note = selectedNote {
+                EditorView(text: Binding(
+                    get: { note.content },
+                    set: { note.content = $0 }
+                ))
+                .navigationTitle(note.title)
+            } else {
+                Text("Select a note to begin")
+                    .foregroundColor(.secondary)
+            }
         }
     }
 }
