@@ -5,9 +5,12 @@ import Foundation
 struct AuthManagerTests {
     @Test func canSaveAndRetrieveTokens() async throws {
         let manager = AuthManager.shared
-        let testToken = "test-access-token-\(UUID().uuidString)"
-        await manager.saveTokens(accessToken: testToken, refreshToken: "test-refresh")
-        let token = try await manager.getAccessToken()
-        #expect(token == testToken)
+        try await manager.saveTokens(accessToken: "test-access", refreshToken: "test-refresh")
+        
+        let accessToken = try await manager.getAccessToken()
+        #expect(accessToken == "test-access")
+        
+        let refreshToken = try await manager.getRefreshToken()
+        #expect(refreshToken == "test-refresh")
     }
 }
