@@ -13,3 +13,13 @@ class Note {
         self.createdAt = createdAt
     }
 }
+
+// Add Hashable conformance for SwiftUI navigation
+extension Note: Hashable {
+    static func == (lhs: Note, rhs: Note) -> Bool {
+        lhs.id == rhs.id
+    }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
