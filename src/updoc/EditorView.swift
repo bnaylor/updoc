@@ -1,19 +1,48 @@
 import SwiftUI
 import AppKit
 
+class EditorTextView: NSTextView {
+    var onFileDropped: ((URL) -> Void)?
+    
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        let pboard = sender.draggingPasteboard
+        if let urls = pboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
+            for url in urls {
+                onFileDropped?(url)
+            }
+            return true
+        }
+        return super.performDragOperation(sender)
+    }
+}
+
 struct EditorView: NSViewRepresentable {
     @Binding var text: String
+    @Binding var assetIds: [String]
     private let engine = MarkdownEngine()
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSTextView.scrollableTextView()
-        let textView = scrollView.documentView as! NSTextView
+        let textView = EditorTextView(frame: .zero)
+        textView.isVerticallyResizable = true
+        textView.isHorizontallyResizable = false
+        textView.autoresizingMask = [.width]
+        textView.textContainer?.containerSize = NSSize(width: scrollView.contentSize.width, height: CGFloat.greatestFiniteMagnitude)
+        textView.textContainer?.widthTracksTextView = true
+        
+        scrollView.documentView = textView
         
         textView.delegate = context.coordinator
+        textView.onFileDropped = { url in
+            context.coordinator.handleFileDrop(url: url)
+        }
         textView.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isContinuousSpellCheckingEnabled = true
         textView.allowsUndo = true
+        
+        // Register for dropped image files
+        textView.registerForDraggedTypes([.fileURL])
         
         // Use a standard body font as the base
         textView.typingAttributes = [.font: NSFont.systemFont(ofSize: 14)]
@@ -41,6 +70,36 @@ struct EditorView: NSViewRepresentable {
 
         init(_ parent: EditorView) {
             self.parent = parent
+        }
+
+        func handleFileDrop(url: URL) {
+            // Check if it's an image
+            let imageExtensions = ["png", "jpg", "jpeg", "gif", "tiff", "webp"]
+            guard imageExtensions.contains(url.pathExtension.lowercased()) else { return }
+            
+            Task {
+                do {
+                    let data = try Data(contentsOf: url)
+                    let assetId = try await ImageLibraryManager.shared.saveImage(data, filename: url.lastPathComponent)
+                    
+                    // Update assetIds
+                    var currentAssets = self.parent.assetIds
+                    currentAssets.append(assetId)
+                    self.parent.assetIds = currentAssets
+                    
+                    // Insert placeholder at cursor or end
+                    if let textView = NSApp.keyWindow?.firstResponder as? NSTextView {
+                        let placeholder = "\n![[\(assetId)]]\n"
+                        let range = textView.selectedRange()
+                        if textView.shouldChangeText(in: range, replacementString: placeholder) {
+                            textView.insertText(placeholder, replacementRange: range)
+                            textView.didChangeText()
+                        }
+                    }
+                } catch {
+                    print("Error saving dropped image: \(error)")
+                }
+            }
         }
 
         func textDidChange(_ notification: Notification) {

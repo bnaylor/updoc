@@ -8,13 +8,15 @@ public class Note {
     public var createdAt: Date
     public var googleDocId: String?
     public var lastSyncedRevision: String?
+    public var assetIds: [String] = []
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, assetIds: [String] = []) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
         self.googleDocId = googleDocId
         self.lastSyncedRevision = lastSyncedRevision
+        self.assetIds = assetIds
     }
 }
 

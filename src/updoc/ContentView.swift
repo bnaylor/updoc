@@ -56,6 +56,9 @@ struct ContentView: View {
                     EditorView(text: Binding(
                         get: { note.content },
                         set: { note.content = $0 }
+                    ), assetIds: Binding(
+                        get: { note.assetIds },
+                        set: { note.assetIds = $0 }
                     ))
                 }
             } else {
