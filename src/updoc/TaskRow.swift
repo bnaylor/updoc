@@ -9,7 +9,10 @@ struct TaskRow: View {
         HStack(alignment: .top, spacing: 10) {
             Toggle(isOn: Binding(
                 get: { task.status == .done },
-                set: { task.status = $0 ? .done : .todo }
+                set: { 
+                    task.status = $0 ? .done : .todo
+                    task.note?.updateContent(for: task)
+                }
             )) {
                 EmptyView()
             }
