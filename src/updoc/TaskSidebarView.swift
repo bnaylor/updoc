@@ -5,66 +5,71 @@ struct TaskSidebarView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \ActionItem.dueDate, order: .forward) private var tasks: [ActionItem]
     @Binding var selectedNote: Note?
+    @State private var hideCompleted = false
+    
+    private var groupedTasks: [TaskSection: [ActionItem]] {
+        let now = Date()
+        let startOfToday = Calendar.current.startOfDay(for: now)
+        let startOfTomorrow = Calendar.current.date(byAdding: .day, value: 1, to: startOfToday)!
+        
+        var groups: [TaskSection: [ActionItem]] = [:]
+        
+        let filteredTasks = tasks.filter { task in
+            if hideCompleted {
+                return task.status != .done
+            }
+            return true
+        }
+        
+        for task in filteredTasks {
+            let section: TaskSection
+            if task.status == .done {
+                section = .done
+            } else if let dueDate = task.dueDate {
+                if dueDate < startOfToday {
+                    section = .overdue
+                } else if dueDate < startOfTomorrow {
+                    section = .today
+                } else {
+                    section = .upcoming
+                }
+            } else {
+                section = .noDueDate
+            }
+            
+            groups[section, default: []].append(task)
+        }
+        
+        return groups
+    }
     
     var body: some View {
         NavigationStack {
             List {
-                ForEach(tasks) { task in
-                    TaskRow(task: task, selectedNote: $selectedNote)
+                ForEach(TaskSection.allCases) { section in
+                    if let sectionTasks = groupedTasks[section], !sectionTasks.isEmpty {
+                        Section(header: Text(section.rawValue)) {
+                            ForEach(sectionTasks) { task in
+                                TaskRow(task: task, selectedNote: $selectedNote)
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle("Action Items")
             .listStyle(.sidebar)
-        }
-    }
-}
-
-struct TaskRow: View {
-    @Bindable var task: ActionItem
-    @Binding var selectedNote: Note?
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Toggle(isOn: Binding(
-                get: { task.status == .done },
-                set: { task.status = $0 ? .done : .todo }
-            )) {
-                EmptyView()
-            }
-            .toggleStyle(.checkbox)
-            .labelsHidden()
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(task.title)
-                    .strikethrough(task.status == .done)
-                    .foregroundColor(task.status == .done ? .secondary : .primary)
-                
-                HStack {
-                    if let dueDate = task.dueDate {
-                        Label(dueDate.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
-                            .font(.caption)
-                            .foregroundColor(isOverdue(dueDate) && task.status != .done ? .red : .secondary)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        hideCompleted.toggle()
+                    } label: {
+                        Label(hideCompleted ? "Show Completed" : "Hide Completed", 
+                              systemImage: hideCompleted ? "eye" : "eye.slash")
                     }
-                    
-                    if let note = task.note {
-                        Spacer()
-                        Button {
-                            selectedNote = note
-                        } label: {
-                            Text("from \(note.title)")
-                                .font(.caption)
-                                .foregroundColor(.accentColor)
-                        }
-                        .buttonStyle(.plain)
-                    }
+                    .help("Toggle completed tasks")
                 }
             }
         }
-        .padding(.vertical, 4)
-    }
-    
-    private func isOverdue(_ date: Date) -> Bool {
-        date < Calendar.current.startOfDay(for: .now)
     }
 }
 
