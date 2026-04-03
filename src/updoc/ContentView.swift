@@ -6,8 +6,11 @@ struct ContentView: View {
     @State private var isSyncing = false
     @State private var syncError: String?
     @State private var showingCommandPalette = false
+    @State private var showingGlobalSearch = false
     @State private var showingRuleManager = false
     @State private var isAuthenticated = false
+    @State private var selectionRange: NSRange?
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -16,9 +19,9 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView(selectedNote: $selectedNote)
-        } detail: {
+        } content: {
             if let note = selectedNote {
                 VStack(spacing: 0) {
                     HStack {
@@ -72,13 +75,33 @@ struct ContentView: View {
                     ), assetIds: Binding(
                         get: { note.assetIds },
                         set: { note.assetIds = $0 }
-                    ), onPromoteAction: { selectedText in
+                    ), selectionRange: $selectionRange,
+                    onPromoteAction: { selectedText in
                         promoteToActionItem(selectedText, for: note)
                     })
                 }
             } else {
                 Text("Select a note to begin")
                     .foregroundColor(.secondary)
+            }
+        } detail: {
+            Text("Task Sidebar Placeholder")
+                .foregroundColor(.secondary)
+        }
+        .toolbar {
+            ToolbarItem {
+                Button(action: {
+                    withAnimation {
+                        if columnVisibility == .all {
+                            columnVisibility = .doubleColumn
+                        } else {
+                            columnVisibility = .all
+                        }
+                    }
+                }) {
+                    Label("Toggle Tasks", systemImage: "sidebar.right")
+                }
+                .help("Toggle Task Sidebar")
             }
         }
         .sheet(isPresented: $showingRuleManager) {
@@ -98,6 +121,22 @@ struct ContentView: View {
                 )
                 .transition(.scale.combined(with: .opacity))
             }
+            
+            if showingGlobalSearch {
+                GlobalSearchOverlayView(
+                    isVisible: $showingGlobalSearch,
+                    notes: notes,
+                    onResultSelect: { note, snippet in
+                        MainActor.assumeIsolated {
+                            selectedNote = note
+                            if let snippet = snippet {
+                                selectionRange = snippet.absoluteRange
+                            }
+                        }
+                    }
+                )
+                .transition(.opacity)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: .syncAllNotes)) { _ in
             syncAllNotes()
@@ -109,10 +148,17 @@ struct ContentView: View {
             isAuthenticated = AuthManager.shared.isAuthenticated()
         }
         .background {
-            Button("") {
-                showingCommandPalette.toggle()
+            Group {
+                Button("") {
+                    showingCommandPalette.toggle()
+                }
+                .keyboardShortcut("k", modifiers: .command)
+                
+                Button("") {
+                    showingGlobalSearch.toggle()
+                }
+                .keyboardShortcut("f", modifiers: [.command, .shift])
             }
-            .keyboardShortcut("k", modifiers: .command)
             .opacity(0)
         }
     }
