@@ -17,11 +17,39 @@ public actor MomaService {
     public static let shared = MomaService()
     public init() {}
     
+    public enum MomaError: Error {
+        case invalidURL
+        case requestFailed(Error)
+        case invalidResponse
+        case decodingError(Error)
+    }
+    
     public func searchPeople(query: String) async throws -> [Person] {
-        // Mock search: if query matches "duck", return Duckie
-        if query.lowercased().contains("duck") {
-            return [Person(id: "1", name: "Duckie", email: "duckie@google.com")]
+        guard let url = URL(string: "\(Config.momaAPIURL)/search?q=\(query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query)") else {
+            throw MomaError.invalidURL
         }
-        return []
+        
+        var request = URLRequest(url: url)
+        request.setValue(Config.momaAPIKey, forHTTPHeaderField: "X-API-Key")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw MomaError.invalidResponse
+            }
+            
+            let decoder = JSONDecoder()
+            do {
+                return try decoder.decode([Person].self, from: data)
+            } catch {
+                throw MomaError.decodingError(error)
+            }
+        } catch let error as MomaError {
+            throw error
+        } catch {
+            throw MomaError.requestFailed(error)
+        }
     }
 }
