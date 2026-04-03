@@ -1,35 +1,46 @@
 import Foundation
 import SwiftData
 
-public actor SyncCoordinator {
+@MainActor
+public class SyncCoordinator {
     private let gDocs = GDocsService()
     private let gDrive = GDriveService()
     
     public init() {}
     
-    @MainActor
     public func sync(noteId: PersistentIdentifier, in context: ModelContext) async throws {
-        guard let note = context.model(for: noteId) as? Note, let docId = note.googleDocId else { return }
-        
-        let remoteRev = try await gDrive.getFileRevision(fileId: docId)
-        if remoteRev != note.lastSyncedRevision {
-            // Pull and merge
-            let remoteContent = try await gDocs.fetchDocContent(docId: docId)
-            let mergedContent = merge(local: note.content, remote: remoteContent)
-            note.content = mergedContent
-            note.lastSyncedRevision = remoteRev
-        } else {
-            // Push local changes (simplified: only push if we have a revision)
-            try await gDocs.updateDocContent(docId: docId, content: note.content)
-            // Ideally the update call would return the new revision, for now we mock it
-            // note.lastSyncedRevision = remoteRev // Actually, we'd need to fetch the new one
+        // First check authentication
+        guard AuthManager.shared.isAuthenticated() else {
+            throw NSError(domain: "SyncCoordinator", code: 401, userInfo: [NSLocalizedDescriptionKey: "User is not authenticated with Google"])
         }
         
-        try context.save()
+        guard let note = context.model(for: noteId) as? Note, let docId = note.googleDocId else { return }
+        
+        let localContent = note.content
+        let lastRevision = note.lastSyncedRevision
+        
+        do {
+            let remoteRev = try await gDrive.getFileRevision(fileId: docId)
+            
+            if remoteRev != lastRevision {
+                // Pull and merge
+                let remoteContent = try await gDocs.fetchDocContent(docId: docId)
+                let mergedContent = merge(local: localContent, remote: remoteContent)
+                
+                note.content = mergedContent
+                note.lastSyncedRevision = remoteRev
+                try context.save()
+            } else {
+                // Push local changes
+                try await gDocs.updateDocContent(docId: docId, content: localContent)
+            }
+        } catch {
+            print("Sync error for note \(docId): \(error)")
+            throw error
+        }
     }
     
-    public nonisolated func merge(local: String, remote: String) -> String {
-        // Simple resolution: if they differ, we'll just append for now as a "safe-merge"
+    public func merge(local: String, remote: String) -> String {
         if local == remote { return local }
         return local + "\n\n--- Remote Changes ---\n\n" + remote
     }

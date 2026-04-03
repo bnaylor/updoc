@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var syncError: String?
     @State private var showingCommandPalette = false
     @State private var showingRuleManager = false
+    @State private var isAuthenticated = false
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -32,6 +33,13 @@ struct ContentView: View {
                         
                         Spacer()
                         
+                        if !isAuthenticated {
+                            Button(action: login) {
+                                Label("Login with Google", systemImage: "person.crop.circle.badge.plus")
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        
                         if let _ = note.googleDocId {
                             Button(action: openInBrowser) {
                                 Label("Open in Google Docs", systemImage: "arrow.up.right.square")
@@ -42,7 +50,7 @@ struct ContentView: View {
                         Button(action: { triggerSync(for: note) }) {
                             Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
                         }
-                        .disabled(isSyncing)
+                        .disabled(isSyncing || !isAuthenticated)
                         .keyboardShortcut("s", modifiers: .command)
                         .help("Sync changes with Google Docs (Cmd+S)")
                     }
@@ -97,12 +105,27 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openRules)) { _ in
             showingRuleManager = true
         }
+        .onAppear {
+            isAuthenticated = AuthManager.shared.isAuthenticated()
+        }
         .background {
             Button("") {
                 showingCommandPalette.toggle()
             }
             .keyboardShortcut("k", modifiers: .command)
             .opacity(0)
+        }
+    }
+    
+    private func login() {
+        guard let window = NSApp.keyWindow else { return }
+        Task {
+            do {
+                try await AuthManager.shared.authorize(in: window)
+                isAuthenticated = AuthManager.shared.isAuthenticated()
+            } catch {
+                syncError = "Login failed: \(error.localizedDescription)"
+            }
         }
     }
     
