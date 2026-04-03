@@ -10,13 +10,17 @@ public class Note {
     public var lastSyncedRevision: String?
     public var assetIds: [String] = []
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, assetIds: [String] = []) {
+    @Relationship(deleteRule: .cascade)
+    public var actionItems: [ActionItem] = []
+    
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, assetIds: [String] = [], actionItems: [ActionItem] = []) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
         self.googleDocId = googleDocId
         self.lastSyncedRevision = lastSyncedRevision
         self.assetIds = assetIds
+        self.actionItems = actionItems
     }
 }
 

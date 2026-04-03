@@ -64,7 +64,9 @@ struct ContentView: View {
                     ), assetIds: Binding(
                         get: { note.assetIds },
                         set: { note.assetIds = $0 }
-                    ))
+                    ), onPromoteAction: { selectedText in
+                        promoteToActionItem(selectedText, for: note)
+                    })
                 }
             } else {
                 Text("Select a note to begin")
@@ -81,7 +83,9 @@ struct ContentView: View {
                     commands: appCommands,
                     notes: notes,
                     onNoteSelect: { note in
-                        selectedNote = note
+                        MainActor.assumeIsolated {
+                            selectedNote = note
+                        }
                     }
                 )
                 .transition(.scale.combined(with: .opacity))
@@ -102,22 +106,53 @@ struct ContentView: View {
         }
     }
     
+    private func promoteToActionItem(_ text: String, for note: Note) {
+        // Clean up text: remove checklist markers and whitespace
+        var title = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let markers = ["[ ]", "[x]", "√"]
+        for marker in markers {
+            if title.hasPrefix(marker) {
+                title = String(title.dropFirst(marker.count)).trimmingCharacters(in: .whitespaces)
+                break
+            }
+        }
+        
+        guard !title.isEmpty else { return }
+        
+        let actionItem = ActionItem(title: title)
+        actionItem.note = note
+        note.actionItems.append(actionItem)
+        modelContext.insert(actionItem)
+        
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save promoted action item: \(error)")
+        }
+    }
+    
     private var appCommands: [Command] {
         var commands = [
             Command(title: "New Note", subtitle: "App", shortcut: "⌘N") {
                 NotificationCenter.default.post(name: .addNewNote, object: nil)
             },
             Command(title: "Sync All Notes", subtitle: "App", shortcut: "⇧⌘S") {
-                syncAllNotes()
+                Task { @MainActor in
+                    syncAllNotes()
+                }
             },
             Command(title: "Open Template Rules", subtitle: "App", shortcut: "⌘R") {
-                showingRuleManager = true
+                Task { @MainActor in
+                    showingRuleManager = true
+                }
             }
         ]
         
         for theme in AppTheme.allCases {
             commands.append(Command(title: "Switch to \(theme.rawValue) Theme", subtitle: "Theme") {
-                themeManager.currentTheme = theme
+                Task { @MainActor in
+                    themeManager.currentTheme = theme
+                }
             })
         }
         

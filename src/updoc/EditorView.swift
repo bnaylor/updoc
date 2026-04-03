@@ -4,6 +4,33 @@ import UniformTypeIdentifiers
 
 class EditorTextView: NSTextView {
     var onFileDropped: ((URL, NSTextView) -> Void)?
+    var onPromoteAction: ((String) -> Void)?
+    
+    override func menu(for event: NSEvent) -> NSMenu? {
+        let menu = super.menu(for: event) ?? NSMenu()
+        
+        let range = self.selectedRange()
+        if range.length > 0 {
+            let selectedText = (self.string as NSString).substring(with: range)
+            let trimmed = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Check if it's a checklist item
+            if trimmed.hasPrefix("[ ]") || trimmed.hasPrefix("[x]") || trimmed.hasPrefix("√") {
+                menu.addItem(NSMenuItem.separator())
+                let promoteItem = NSMenuItem(title: "⚡ Promote to Action Item", action: #selector(promoteToTask(_:)), keyEquivalent: "")
+                promoteItem.target = self
+                menu.addItem(promoteItem)
+            }
+        }
+        
+        return menu
+    }
+    
+    @objc func promoteToTask(_ sender: Any) {
+        let range = self.selectedRange()
+        let selectedText = (self.string as NSString).substring(with: range)
+        onPromoteAction?(selectedText)
+    }
     
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let pboard = sender.draggingPasteboard
@@ -20,6 +47,7 @@ class EditorTextView: NSTextView {
 struct EditorView: NSViewRepresentable {
     @Binding var text: String
     @Binding var assetIds: [String]
+    var onPromoteAction: ((String) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
 
@@ -37,6 +65,9 @@ struct EditorView: NSViewRepresentable {
         textView.delegate = context.coordinator
         textView.onFileDropped = { url, targetTextView in
             context.coordinator.handleFileDrop(url: url, in: targetTextView)
+        }
+        textView.onPromoteAction = { selectedText in
+            self.onPromoteAction?(selectedText)
         }
         textView.font = themeManager.font
         textView.isAutomaticQuoteSubstitutionEnabled = false
@@ -278,7 +309,7 @@ struct EditorView: NSViewRepresentable {
                 let size: CGFloat = level == 1 ? baseSize + 10 : (level == 2 ? baseSize + 6 : baseSize + 4)
                 let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
                 return [
-                    .font: boldFont.withSize(size) ?? NSFont.boldSystemFont(ofSize: size),
+                    .font: boldFont.withSize(size),
                     .foregroundColor: NSColor.labelColor
                 ]
             case .bold:
