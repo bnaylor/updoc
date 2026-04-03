@@ -85,8 +85,7 @@ struct ContentView: View {
                     .foregroundColor(.secondary)
             }
         } detail: {
-            Text("Task Sidebar Placeholder")
-                .foregroundColor(.secondary)
+            TaskSidebarView(selectedNote: $selectedNote)
         }
         .toolbar {
             ToolbarItem {
