@@ -10,12 +10,14 @@ let package = Package(
         .executable(name: "updoc", targets: ["updoc"]),
     ],
     dependencies: [
-        // Dependencies will go here
+        .package(url: "https://github.com/google/GTMAppAuth", from: "4.1.1")
     ],
     targets: [
         .executableTarget(
             name: "updoc",
-            dependencies: [],
+            dependencies: [
+                .product(name: "GTMAppAuth", package: "GTMAppAuth")
+            ],
             path: "src/updoc"
         ),
         .testTarget(
