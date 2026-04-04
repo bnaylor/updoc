@@ -133,6 +133,18 @@ public struct GDocsService: Sendable {
                 for element in paragraph.elements {
                     if let textRun = element.textRun, let content = textRun.content {
                         markdown += content
+                    } else if let inlineObjectElement = element.inlineObjectElement {
+                        let objectId = inlineObjectElement.inlineObjectId
+                        if let object = doc.inlineObjects?[objectId] {
+                            let props = object.inlineObjectProperties.embeddedObject
+                            let description = props.description ?? ""
+                            if description.hasPrefix("updoc_asset:") {
+                                let assetId = description.replacingOccurrences(of: "updoc_asset:", with: "")
+                                markdown += "![[\(assetId)]]"
+                            } else if let sourceUri = props.imageProperties?.contentUri {
+                                markdown += "![\(props.title ?? "image")](\(sourceUri))"
+                            }
+                        }
                     }
                 }
             }

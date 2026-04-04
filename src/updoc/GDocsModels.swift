@@ -4,6 +4,26 @@ public struct GDocsDocument: Codable {
     public let documentId: String
     public let title: String
     public let body: GDocsBody
+    public let inlineObjects: [String: GDocsInlineObject]?
+}
+
+public struct GDocsInlineObject: Codable {
+    public let objectId: String
+    public let inlineObjectProperties: GDocsInlineObjectProperties
+}
+
+public struct GDocsInlineObjectProperties: Codable {
+    public let embeddedObject: GDocsEmbeddedObject
+}
+
+public struct GDocsEmbeddedObject: Codable {
+    public let title: String?
+    public let description: String?
+    public let imageProperties: GDocsImageProperties?
+}
+
+public struct GDocsImageProperties: Codable {
+    public let contentUri: String?
 }
 
 public struct GDocsBody: Codable {
@@ -24,6 +44,11 @@ public struct GDocsParagraphElement: Codable {
     public let startIndex: Int?
     public let endIndex: Int?
     public let textRun: GDocsTextRun?
+    public let inlineObjectElement: GDocsInlineObjectElement?
+}
+
+public struct GDocsInlineObjectElement: Codable {
+    public let inlineObjectId: String
 }
 
 public struct GDocsTextRun: Codable {
