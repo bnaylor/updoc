@@ -26,7 +26,7 @@ class RemoteImageCache {
                     return image
                 }
             } catch {
-                print("Error loading remote image: \(error)")
+                print("Error loading remote image from \(url): \(error)")
             }
             return nil
         }
@@ -39,6 +39,7 @@ class RemoteImageCache {
 
     func clear(for url: URL) {
         cache.removeObject(forKey: url as NSURL)
+        loadingTasks[url]?.cancel()
         loadingTasks[url] = nil
     }
 }
