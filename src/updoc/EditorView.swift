@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 class EditorTextView: NSTextView {
     var onFileDropped: ((URL, NSTextView) -> Void)?
     var onPromoteAction: ((String) -> Void)?
+    var onEditRequested: ((RemoteImageAttachment) -> Void)?
     
     override func menu(for event: NSEvent) -> NSMenu? {
         let menu = super.menu(for: event) ?? NSMenu()
@@ -23,7 +24,42 @@ class EditorTextView: NSTextView {
             }
         }
         
+        // Find if there's an image at the click location
+        let point = self.convert(event.locationInWindow, from: nil)
+        let index = self.layoutManager?.characterIndex(for: point, in: self.textContainer!, fractionOfDistanceBetweenInsertionPoints: nil)
+        
+        if let index = index, index < self.textStorage?.length ?? 0 {
+            if let attachment = self.textStorage?.attribute(.attachment, at: index, effectiveRange: nil) as? RemoteImageAttachment {
+                menu.addItem(NSMenuItem.separator())
+                let editItem = NSMenuItem(title: "✎ Edit Image...", action: #selector(editImageAction(_:)), keyEquivalent: "")
+                editItem.target = self
+                editItem.representedObject = attachment
+                menu.addItem(editItem)
+            }
+        }
+        
         return menu
+    }
+    
+    @objc func editImageAction(_ sender: NSMenuItem) {
+        if let attachment = sender.representedObject as? RemoteImageAttachment {
+            onEditRequested?(attachment)
+        }
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        if event.clickCount == 2 {
+            let point = self.convert(event.locationInWindow, from: nil)
+            let index = self.layoutManager?.characterIndex(for: point, in: self.textContainer!, fractionOfDistanceBetweenInsertionPoints: nil)
+            
+            if let index = index, index < self.textStorage?.length ?? 0 {
+                if let attachment = self.textStorage?.attribute(.attachment, at: index, effectiveRange: nil) as? RemoteImageAttachment {
+                    onEditRequested?(attachment)
+                    return
+                }
+            }
+        }
+        super.mouseDown(with: event)
     }
     
     @objc func promoteToTask(_ sender: Any) {
@@ -49,6 +85,7 @@ struct EditorView: NSViewRepresentable {
     @Binding var assetIds: [String]
     @Binding var selectionRange: NSRange?
     var onPromoteAction: ((String) -> Void)?
+    var onEditRequested: ((RemoteImageAttachment) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
 
@@ -69,6 +106,9 @@ struct EditorView: NSViewRepresentable {
         }
         textView.onPromoteAction = { selectedText in
             self.onPromoteAction?(selectedText)
+        }
+        textView.onEditRequested = { attachment in
+            self.onEditRequested?(attachment)
         }
         textView.font = themeManager.font
         textView.isAutomaticQuoteSubstitutionEnabled = false
