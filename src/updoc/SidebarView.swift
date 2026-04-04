@@ -35,19 +35,30 @@ struct SidebarView: View {
                         .padding(.vertical, 4)
                     }
                 } else {
-                    Text("Login to see meetings")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Log in to see meetings")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Button(action: login) {
+                            Text("Log in with Google")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                    .padding(.vertical, 4)
                 }
             } header: {
                 HStack {
                     Text("TODAY'S MEETINGS")
                     Spacer()
-                    Button(action: refreshMeetings) {
-                        Image(systemName: "arrow.clockwise")
+                    if isAuthenticated {
+                        Button(action: refreshMeetings) {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(!isAuthenticated)
                 }
             }
             
@@ -73,7 +84,11 @@ struct SidebarView: View {
         }
         .listStyle(.sidebar)
         .toolbar {
-            Button("Add Note", systemImage: "plus", action: addNote)
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: addNote) {
+                    Label("Add Note", systemImage: "plus")
+                }
+            }
         }
         .onAppear {
             isAuthenticated = AuthManager.shared.isAuthenticated()
@@ -89,6 +104,23 @@ struct SidebarView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .addNewNote)) { _ in
             addNote()
+        }
+    }
+    
+    private func login() {
+        guard let window = NSApp.keyWindow else { return }
+        Task {
+            do {
+                try await AuthManager.shared.authorize(in: window)
+                await MainActor.run {
+                    self.isAuthenticated = AuthManager.shared.isAuthenticated()
+                    if self.isAuthenticated {
+                        refreshMeetings()
+                    }
+                }
+            } catch {
+                print("Login failed: \(error)")
+            }
         }
     }
     

@@ -45,13 +45,6 @@ struct ContentView: View {
                         
                         Spacer()
                         
-                        if !isAuthenticated {
-                            Button(action: login) {
-                                Label("Login with Google", systemImage: "person.crop.circle.badge.plus")
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-                        
                         if let _ = note.googleDocId {
                             Button(action: openInBrowser) {
                                 Label("Open in Google Docs", systemImage: "arrow.up.right.square")
@@ -102,8 +95,9 @@ struct ContentView: View {
         } detail: {
             TaskSidebarView(selectedNote: $selectedNote)
         }
+        .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 600)
         .toolbar {
-            ToolbarItem {
+            ToolbarItem(placement: .status) {
                 Button(action: {
                     withAnimation {
                         if columnVisibility == .all {
@@ -115,7 +109,7 @@ struct ContentView: View {
                 }) {
                     Label("Toggle Tasks", systemImage: "sidebar.right")
                 }
-                .help("Toggle Task Sidebar")
+                .help("Toggle Task Sidebar (Right)")
             }
         }
         .sheet(isPresented: $showingRuleManager) {
@@ -165,6 +159,12 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openRules)) { _ in
             showingRuleManager = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .openGlobalSearch)) { _ in
+            showingGlobalSearch = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openCommandPalette)) { _ in
+            showingCommandPalette = true
+        }
         .onAppear {
             isAuthenticated = AuthManager.shared.isAuthenticated()
         }
@@ -183,19 +183,21 @@ struct ContentView: View {
             .opacity(0)
         }
     }
-    
+
     private func login() {
         guard let window = NSApp.keyWindow else { return }
         Task {
             do {
                 try await AuthManager.shared.authorize(in: window)
-                isAuthenticated = AuthManager.shared.isAuthenticated()
+                await MainActor.run {
+                    self.isAuthenticated = AuthManager.shared.isAuthenticated()
+                }
             } catch {
                 syncError = "Login failed: \(error.localizedDescription)"
             }
         }
     }
-    
+
     private func promoteToActionItem(_ text: String, for note: Note) {
         // Clean up text: remove checklist markers and whitespace
         var title = text.trimmingCharacters(in: .whitespacesAndNewlines)

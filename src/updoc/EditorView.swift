@@ -137,9 +137,16 @@ struct EditorView: NSViewRepresentable {
             }
         }
         textView.font = themeManager.font
+        textView.isEditable = true
+        textView.isSelectable = true
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isContinuousSpellCheckingEnabled = true
         textView.allowsUndo = true
+        
+        // Ensure it can become first responder
+        DispatchQueue.main.async {
+            textView.window?.makeFirstResponder(textView)
+        }
         
         // Register for dropped image files
         textView.registerForDraggedTypes([.fileURL])

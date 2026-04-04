@@ -20,6 +20,10 @@ public class AuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
     public func authorize(in window: NSWindow) async throws {
         let configuration = AuthSession.configurationForGoogle()
         
+        guard let redirectURL = URL(string: Config.redirectURI) else {
+            throw NSError(domain: "AuthManager", code: -5, userInfo: [NSLocalizedDescriptionKey: "Invalid redirect URI: \(Config.redirectURI)"])
+        }
+        
         let request = OIDAuthorizationRequest(
             configuration: configuration,
             clientId: Config.clientID,
@@ -30,7 +34,7 @@ public class AuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
                 "https://www.googleapis.com/auth/drive.file",
                 "https://www.googleapis.com/auth/calendar.events.readonly"
             ],
-            redirectURL: URL(string: Config.redirectURI)!,
+            redirectURL: redirectURL,
             responseType: OIDResponseTypeCode,
             additionalParameters: nil
         )

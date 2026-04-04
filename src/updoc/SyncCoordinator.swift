@@ -21,18 +21,18 @@ public class SyncCoordinator {
     public init() {}
     
     public func sync(noteId: PersistentIdentifier, in context: ModelContext) async throws {
-        // First check authentication
-        guard AuthManager.shared.isAuthenticated() else {
-            throw SyncError.notAuthenticated
-        }
+        // First check authentication robustly
+        _ = try await AuthManager.shared.getAccessToken()
         
         guard let note = context.model(for: noteId) as? Note, let docId = note.googleDocId else { return }
         
-        // Sync images to Drive first
-        try await syncImages(note: note, in: context)
-        
+        // Capture local state BEFORE any network calls (like syncImages)
+        // to ensure we are syncing exactly what we expect even if it changes during the process.
         let localContent = note.content
         let lastRevision = note.lastSyncedRevision
+        
+        // Sync images to Drive first
+        try await syncImages(note: note, in: context)
         
         do {
             let remoteRev = try await gDrive.getFileRevision(fileId: docId)
@@ -104,10 +104,5 @@ public class SyncCoordinator {
                   let range = Range(match.range(at: 1), in: content) else { return nil }
             return String(content[range])
         }
-    }
-    
-    public func merge(local: String, remote: String) -> String {
-        if local == remote { return local }
-        return local + "\n\n--- Remote Changes ---\n\n" + remote
     }
 }

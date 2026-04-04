@@ -13,7 +13,7 @@ public actor AutocompleteManager {
     // Injected closure for easier testing
     private let searchPeople: @Sendable (String) async throws -> [Person]
     
-    public init(searchPeople: @escaping @Sendable (String) async throws -> [Person] = { try await MomaService.shared.searchPeople(query: $0) }) {
+    public init(searchPeople: @escaping @Sendable (String) async throws -> [Person] = { _ in [] }) {
         self.searchPeople = searchPeople
     }
     

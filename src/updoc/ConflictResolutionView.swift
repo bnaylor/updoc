@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ConflictResolutionView: View {
+    @Environment(ThemeManager.self) private var themeManager
+    
     let local: String
     let remote: String
     let onResolve: (String) -> Void
@@ -8,75 +10,87 @@ struct ConflictResolutionView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            Text("Conflict Detected")
-                .font(.title)
-                .padding()
-            
-            Text("This note has been modified both locally and on Google Docs since the last sync. Please choose which version to keep.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .padding(.bottom)
-            
-            HStack(spacing: 20) {
-                VStack(alignment: .leading) {
-                    Text("Local Version (Your Changes)").font(.headline)
-                    ScrollView {
-                        Text(local)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(8)
-                    }
-                    .background(Color(NSColor.controlBackgroundColor))
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-                    
-                    Button(action: { onResolve(local) }) {
-                        Text("Use Local Version")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                }
+            VStack(spacing: 8) {
+                Text("Conflict Detected")
+                    .font(.title)
+                    .accessibilityAddTraits(.isHeader)
                 
-                VStack(alignment: .leading) {
-                    Text("Google Docs Version").font(.headline)
-                    ScrollView {
-                        Text(remote)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(8)
-                    }
-                    .background(Color(NSColor.controlBackgroundColor))
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                Text("This note has been modified both locally and on Google Docs since the last sync. Please choose which version to keep.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding()
+            .accessibilityElement(children: .combine)
+            
+            Grid(horizontalSpacing: 20, verticalSpacing: 20) {
+                GridRow {
+                    conflictColumn(
+                        title: "Local Version (Your Changes)",
+                        content: local,
+                        buttonTitle: "Use Local Version",
+                        buttonStyle: .borderedProminent,
+                        action: { onResolve(local) }
                     )
                     
-                    Button(action: { onResolve(remote) }) {
-                        Text("Use Remote Version")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
+                    conflictColumn(
+                        title: "Google Docs Version",
+                        content: remote,
+                        buttonTitle: "Use Remote Version",
+                        buttonStyle: .bordered,
+                        action: { onResolve(remote) }
+                    )
                 }
             }
             .padding()
             
             HStack {
                 Spacer()
-                Button("Cancel") {
-                    onCancel()
-                }
-                .keyboardShortcut(.escape, modifiers: [])
+                Button("Cancel", action: onCancel)
+                    .keyboardShortcut(.escape, modifiers: [])
+                    .help("Discard changes and close the resolution view")
             }
             .padding()
         }
         .padding()
         .frame(minWidth: 800, minHeight: 600)
+    }
+    
+    @ViewBuilder
+    private func conflictColumn(
+        title: String,
+        content: String,
+        buttonTitle: String,
+        buttonStyle: some PrimitiveButtonStyle,
+        action: @escaping () -> Void
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            
+            ScrollView {
+                Text(content)
+                    .font(Font(themeManager.font))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(8)
+            }
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+            .accessibilityLabel("\(title) content")
+            
+            Button(action: action) {
+                Text(buttonTitle)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(buttonStyle)
+            .controlSize(.large)
+            .accessibilityLabel(buttonTitle)
+        }
     }
 }
 
@@ -87,4 +101,5 @@ struct ConflictResolutionView: View {
         onResolve: { _ in },
         onCancel: { }
     )
+    .environment(ThemeManager.shared)
 }

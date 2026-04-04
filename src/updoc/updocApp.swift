@@ -39,6 +39,16 @@ struct updocApp: App {
                     NotificationCenter.default.post(name: .openRules, object: nil)
                 }
                 .keyboardShortcut("r", modifiers: .command)
+                
+                Button("Global Search") {
+                    NotificationCenter.default.post(name: .openGlobalSearch, object: nil)
+                }
+                .keyboardShortcut("f", modifiers: [.command, .shift])
+                
+                Button("Command Palette") {
+                    NotificationCenter.default.post(name: .openCommandPalette, object: nil)
+                }
+                .keyboardShortcut("k", modifiers: .command)
             }
         }
     }
@@ -48,4 +58,6 @@ extension Notification.Name {
     static let addNewNote = Notification.Name("addNewNote")
     static let syncAllNotes = Notification.Name("syncAllNotes")
     static let openRules = Notification.Name("openRules")
+    static let openGlobalSearch = Notification.Name("openGlobalSearch")
+    static let openCommandPalette = Notification.Name("openCommandPalette")
 }
