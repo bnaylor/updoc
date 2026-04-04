@@ -38,6 +38,35 @@ public struct GDocsBatchUpdateRequest: Codable {
 public struct GDocsRequest: Codable {
     public let insertText: GDocsInsertTextRequest?
     public let deleteContentRange: GDocsDeleteContentRangeRequest?
+    public let insertInlineImage: GDocsInsertInlineImageRequest?
+    public let updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest?
+}
+
+public struct GDocsInsertInlineImageRequest: Codable {
+    public let uri: String
+    public let location: GDocsLocation
+}
+
+public struct GDocsUpdateEmbeddedObjectPropertiesRequest: Codable {
+    public let objectId: String
+    public let properties: GDocsEmbeddedObjectProperties
+    public let fields: String
+}
+
+public struct GDocsEmbeddedObjectProperties: Codable {
+    public let description: String?
+}
+
+public struct GDocsBatchUpdateResponse: Codable {
+    public let replies: [GDocsReply]
+}
+
+public struct GDocsReply: Codable {
+    public let insertInlineImage: GDocsInsertInlineImageReply?
+}
+
+public struct GDocsInsertInlineImageReply: Codable {
+    public let objectId: String
 }
 
 public struct GDocsInsertTextRequest: Codable {

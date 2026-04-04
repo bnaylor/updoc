@@ -39,8 +39,8 @@ public struct GDocsService: Sendable {
         // Find the end index of the body (excluding the final newline)
         let endIndex = doc.body.content.last?.endIndex ?? 2
         
-        let deleteRequest = GDocsRequest(insertText: nil, deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: max(1, endIndex - 1))))
-        let insertRequest = GDocsRequest(insertText: GDocsInsertTextRequest(text: content, location: GDocsLocation(index: 1)), deleteContentRange: nil)
+        let deleteRequest = GDocsRequest(insertText: nil, deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: max(1, endIndex - 1))), insertInlineImage: nil, updateEmbeddedObjectProperties: nil)
+        let insertRequest = GDocsRequest(insertText: GDocsInsertTextRequest(text: content, location: GDocsLocation(index: 1)), deleteContentRange: nil, insertInlineImage: nil, updateEmbeddedObjectProperties: nil)
         
         let batchRequest = GDocsBatchUpdateRequest(requests: [deleteRequest, insertRequest])
         let batchData = try JSONEncoder().encode(batchRequest)
@@ -55,6 +55,74 @@ public struct GDocsService: Sendable {
         
         if let httpResponse = updateResponse as? HTTPURLResponse, httpResponse.statusCode != 200 {
             throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to update doc"])
+        }
+    }
+    
+    public func insertImage(docId: String, index: Int, uri: String, assetId: String) async throws {
+        let token = try await AuthManager.shared.getAccessToken()
+        
+        let insertRequest = GDocsRequest(
+            insertText: nil,
+            deleteContentRange: nil,
+            insertInlineImage: GDocsInsertInlineImageRequest(
+                uri: uri,
+                location: GDocsLocation(index: index)
+            ),
+            updateEmbeddedObjectProperties: nil
+        )
+        
+        let batchRequest = GDocsBatchUpdateRequest(requests: [insertRequest])
+        let batchData = try JSONEncoder().encode(batchRequest)
+        
+        var request = URLRequest(url: URL(string: "https://docs.googleapis.com/v1/documents/\(docId):batchUpdate")!)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = batchData
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to insert image: \(errorBody)"])
+        }
+        
+        let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: data)
+        guard let objectId = batchResponse.replies.first?.insertInlineImage?.objectId else {
+            throw NSError(domain: "GDocsService", code: 0, userInfo: [NSLocalizedDescriptionKey: "No objectId returned after image insertion"])
+        }
+        
+        try await tagImage(docId: docId, objectId: objectId, assetId: assetId)
+    }
+    
+    private func tagImage(docId: String, objectId: String, assetId: String) async throws {
+        let token = try await AuthManager.shared.getAccessToken()
+        
+        let tagRequest = GDocsRequest(
+            insertText: nil,
+            deleteContentRange: nil,
+            insertInlineImage: nil,
+            updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest(
+                objectId: objectId,
+                properties: GDocsEmbeddedObjectProperties(description: "updoc_asset:\(assetId)"),
+                fields: "description"
+            )
+        )
+        
+        let batchRequest = GDocsBatchUpdateRequest(requests: [tagRequest])
+        let batchData = try JSONEncoder().encode(batchRequest)
+        
+        var request = URLRequest(url: URL(string: "https://docs.googleapis.com/v1/documents/\(docId):batchUpdate")!)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = batchData
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to tag image: \(errorBody)"])
         }
     }
     

@@ -3,21 +3,31 @@ import Foundation
 @testable import updoc
 
 struct ServiceTests {
-    @Test func gDriveServiceReturnsMockRevision() async throws {
+    @Test func gDriveServiceFailsWhenNotAuthenticated() async throws {
         let service = GDriveService()
-        let revision = try await service.getFileRevision(fileId: "test-id")
-        #expect(revision == "rev-1")
+        await #expect(throws: Error.self) {
+            try await service.getFileRevision(fileId: "test-id")
+        }
     }
     
-    @Test func gDocsServiceReturnsMockContent() async throws {
+    @Test func gDocsServiceFailsWhenNotAuthenticated() async throws {
         let service = GDocsService()
-        let content = try await service.fetchDocContent(docId: "test-id")
-        #expect(content == "# Remote Content")
+        await #expect(throws: Error.self) {
+            try await service.fetchDocContent(docId: "test-id")
+        }
     }
 
-    @Test func gDocsServiceUpdatesContent() async throws {
+    @Test func gDocsServiceUpdateFailsWhenNotAuthenticated() async throws {
         let service = GDocsService()
-        try await service.updateDocContent(docId: "test-id", content: "# New Content")
-        // Success means no error thrown
+        await #expect(throws: Error.self) {
+            try await service.updateDocContent(docId: "test-id", content: "# New Content")
+        }
+    }
+
+    @Test func gDocsServiceInsertImageFailsWhenNotAuthenticated() async throws {
+        let service = GDocsService()
+        await #expect(throws: Error.self) {
+            try await service.insertImage(docId: "test-id", index: 1, uri: "https://example.com/image.png", assetId: "asset-123")
+        }
     }
 }
