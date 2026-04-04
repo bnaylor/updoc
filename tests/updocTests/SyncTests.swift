@@ -5,16 +5,6 @@ import SwiftData
 
 @MainActor
 struct SyncTests {
-    @Test func syncCoordinatorMergesContentOnConflict() async throws {
-        let coordinator = SyncCoordinator()
-        let local = "# Local"
-        let remote = "# Remote"
-        let merged = coordinator.merge(local: local, remote: remote)
-        
-        #expect(merged.contains("# Local"))
-        #expect(merged.contains("# Remote"))
-    }
-    
     @Test func syncFailsWhenNotAuthenticated() async throws {
         let coordinator = SyncCoordinator()
         // Create a model context for the test

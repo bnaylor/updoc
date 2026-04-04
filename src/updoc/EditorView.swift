@@ -154,6 +154,10 @@ struct EditorView: NSViewRepresentable {
         // Use the theme's font as the base
         textView.typingAttributes = [.font: themeManager.font]
         
+        NotificationCenter.default.addObserver(forName: .focusEditor, object: nil, queue: .main) { _ in
+            textView.window?.makeFirstResponder(textView)
+        }
+        
         return scrollView
     }
 

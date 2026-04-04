@@ -1,10 +1,20 @@
 import Foundation
 
 public enum Config {
-    public static let clientID = ProcessInfo.processInfo.environment["GOOGLE_CLIENT_ID"] ?? ""
-    public static let clientSecret = ProcessInfo.processInfo.environment["GOOGLE_CLIENT_SECRET"] ?? ""
-    public static let redirectURI = ProcessInfo.processInfo.environment["GOOGLE_REDIRECT_URI"] ?? ""
+    public static var clientID: String {
+        UserDefaults.standard.string(forKey: "googleClientID") ?? ProcessInfo.processInfo.environment["GOOGLE_CLIENT_ID"] ?? ""
+    }
+    public static var clientSecret: String {
+        UserDefaults.standard.string(forKey: "googleClientSecret") ?? ProcessInfo.processInfo.environment["GOOGLE_CLIENT_SECRET"] ?? ""
+    }
+    public static var redirectURI: String {
+        UserDefaults.standard.string(forKey: "googleRedirectURI") ?? ProcessInfo.processInfo.environment["GOOGLE_REDIRECT_URI"] ?? ""
+    }
     
-    public static let momaAPIURL = ProcessInfo.processInfo.environment["MOMA_API_URL"] ?? ""
-    public static let momaAPIKey = ProcessInfo.processInfo.environment["MOMA_API_KEY"] ?? ""
+    public static var momaAPIURL: String {
+        ProcessInfo.processInfo.environment["MOMA_API_URL"] ?? ""
+    }
+    public static var momaAPIKey: String {
+        ProcessInfo.processInfo.environment["MOMA_API_KEY"] ?? ""
+    }
 }

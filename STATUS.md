@@ -1,7 +1,7 @@
-# updoc Project Status - 2026-04-03
+# updoc Project Status - 2026-04-04
 
-## 🎯 Current Mission Status: PHASE 7 COMPLETE
-We have successfully implemented Draft Mode, providing visual distinction for local notes and structured publishing to Google Drive.
+## 🎯 Current Mission Status: PHASE 8 COMPLETE
+We have successfully implemented Advanced Image Editing and a dedicated Offline Conflict UI, while also addressing several bug and polish items from initial user feedback.
 
 ---
 
@@ -11,6 +11,7 @@ We have successfully implemented Draft Mode, providing visual distinction for lo
 - **Native macOS Shell:** SwiftUI-based with a 3-column navigation split view.
 - **Local Persistence:** Full `SwiftData` integration for notes and metadata.
 - **High-Performance Editor:** `TextKit 2` (NSTextView) wrapper for zero-lag text entry.
+- **Improved Focus:** Editor now captures keyboard input correctly on launch.
 
 ### 2. Task Sidebar
 - **Global Task List:** A dedicated right-hand column showing all `ActionItems` across all notes.
@@ -34,42 +35,41 @@ We have successfully implemented Draft Mode, providing visual distinction for lo
 - **Inline Hashtags:** Automatic extraction and indexing of `#tags` from Markdown content.
 - **Editor Sync:** Selecting a search result automatically opens the note and scrolls to the matched text.
 
-### 6. Moma/Directory Integration
-- **Smart @mentions:** Responsive person lookup triggered by the "@" key, inserting styled user chips.
-- **MomaService:** Real internal directory lookups via REST API.
-
-### 7. Bidirectional Image Sync
+### 6. Bidirectional Image Sync & Editing (New!)
 - **Drive Asset Library:** Automatically uploads local images to a dedicated `updoc_assets` folder on Google Drive.
+- **Advanced Editing:** Double-click any image to open the native macOS Markup toolkit (crop, rotate, annotate).
 - **Metadata Tagging:** Uses Google Docs image description metadata (`updoc_asset:{assetId}`) to maintain sync parity.
-- **Rich-Media Pull:** Detects images in Google Docs and restores local asset placeholders or renders remote images.
-- **Asynchronous Rendering:** `EditorView` now renders both local and remote images using a thread-safe caching layer.
+- **Asynchronous Rendering:** `EditorView` renders both local and remote images using a thread-safe caching layer.
 
-### 8. Draft Mode & Structured Publishing (New!)
+### 7. Draft Mode & Structured Publishing
 - **Local-Only Drafts:** Notes with no `googleDocId` are marked with a `DRAFT` tag in the sidebar.
 - **Meeting Attribution:** Tracks the source calendar event via `meetingID` to allow smart folder organization.
 - **Auto-Organization:** Automatically publishes drafts into `/updoc/Meetings` or `/updoc/General` on Google Drive.
 - **One-Click Promotion:** A prominent "Publish" button replaces sync controls for local-only content.
 
+### 8. Conflict Resolution (New!)
+- **Offline Conflict UI:** A clear, side-by-side interface for resolving sync conflicts when changes happen in both local and remote versions.
+- **Resolution Choices:** Explicit options to "Use Mine," "Use Remote," or cancel the sync operation.
+
 ---
 
 ## 🏗 Technical Architecture
 - **Language:** Swift 6.0 (Concurrency-safe).
-- **Frameworks:** SwiftUI, SwiftData, TextKit 2, AuthenticationServices, GTMAppAuth.
-- **Layout:** `NavigationSplitView` with 3 columns (Sidebar, Content, Detail).
-- **Sync Logic:** Regex-based Markdown updating for status parity between views.
-- **Image Handling:** Multipart Drive uploads with dynamic MIME-type detection (UTType).
-- **Folder Resolution:** Recursive `getOrCreateFolder` implementation for structured Drive publishing.
+- **Frameworks:** SwiftUI, SwiftData, TextKit 2, AuthenticationServices, GTMAppAuth, QuickLookUI.
+- **Layout:** `NavigationSplitView` with 3 columns (Sidebar, Content, Detail) and consistent pane sizing.
+- **Sync Logic:** Explicit conflict detection comparing both revision IDs and actual content.
 
 ---
 
 ## 🚀 Immediate Next Steps
-1. **Advanced Image Editing:** Basic cropping/annotation within updoc (using native macOS Markup features).
-2. **Offline Conflict UI:** Improved resolution interface for complex sync conflicts.
+1. **App Bundling & Icons:** Create a proper `.app` bundle with high-quality icons.
+2. **Deep Linking:** Support opening updoc via `updoc://` URLs.
+3. **Advanced Templating:** More flexible rules for automated note content creation.
 
 ---
 
 ## 📝 Developer Notes
 - Task Sidebar visibility is managed via `columnVisibility` in `ContentView`.
-- Bidirectional task sync is handled by `Note.updateContent(for:)` using regex.
+- Image editing uses `QLPreviewPanel` with `isEditingAllowed = true`.
 - Build command: `swift build`
 - Test command: `swift test`

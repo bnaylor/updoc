@@ -17,9 +17,10 @@ struct ContentView: View {
     @State private var showingCommandPalette = false
     @State private var showingGlobalSearch = false
     @State private var showingRuleManager = false
+    @State private var showingSettings = false
     @State private var isAuthenticated = false
     @State private var selectionRange: NSRange?
-    @State private var columnVisibility = NavigationSplitViewVisibility.all
+    @State private var columnVisibility = NavigationSplitViewVisibility.automatic
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -87,6 +88,12 @@ struct ContentView: View {
                     onPromoteAction: { selectedText in
                         promoteToActionItem(selectedText, for: note)
                     })
+                    .onAppear {
+                        NotificationCenter.default.post(name: .focusEditor, object: nil)
+                    }
+                    .onChange(of: note.id) {
+                        NotificationCenter.default.post(name: .focusEditor, object: nil)
+                    }
                 }
             } else {
                 Text("Select a note to begin")
@@ -95,25 +102,12 @@ struct ContentView: View {
         } detail: {
             TaskSidebarView(selectedNote: $selectedNote)
         }
-        .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 600)
-        .toolbar {
-            ToolbarItem(placement: .status) {
-                Button(action: {
-                    withAnimation {
-                        if columnVisibility == .all {
-                            columnVisibility = .doubleColumn
-                        } else {
-                            columnVisibility = .all
-                        }
-                    }
-                }) {
-                    Label("Toggle Tasks", systemImage: "sidebar.right")
-                }
-                .help("Toggle Task Sidebar (Right)")
-            }
-        }
+        .navigationSplitViewStyle(.balanced)
         .sheet(isPresented: $showingRuleManager) {
             RuleManagerView()
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
         }
         .sheet(item: $activeConflict) { info in
             ConflictResolutionView(local: info.local, remote: info.remote) { resolvedContent in
@@ -167,6 +161,7 @@ struct ContentView: View {
         }
         .onAppear {
             isAuthenticated = AuthManager.shared.isAuthenticated()
+            checkConfig()
         }
         .background {
             Group {
@@ -181,6 +176,12 @@ struct ContentView: View {
                 .keyboardShortcut("f", modifiers: [.command, .shift])
             }
             .opacity(0)
+        }
+    }
+
+    private func checkConfig() {
+        if Config.clientID.isEmpty || Config.clientSecret.isEmpty || Config.redirectURI.isEmpty {
+            showingSettings = true
         }
     }
 
