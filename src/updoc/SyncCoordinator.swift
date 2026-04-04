@@ -3,8 +3,8 @@ import SwiftData
 
 @MainActor
 public class SyncCoordinator {
-    private let gDocs = GDocsService()
-    private let gDrive = GDriveService()
+    public let gDocs = GDocsService()
+    public let gDrive = GDriveService()
     
     public init() {}
     

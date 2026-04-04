@@ -1,7 +1,7 @@
 # updoc Project Status - 2026-04-03
 
-## 🎯 Current Mission Status: PHASE 6 COMPLETE
-We have successfully implemented Bidirectional Image Sync between the local editor and Google Docs via Google Drive.
+## 🎯 Current Mission Status: PHASE 7 COMPLETE
+We have successfully implemented Draft Mode, providing visual distinction for local notes and structured publishing to Google Drive.
 
 ---
 
@@ -38,11 +38,17 @@ We have successfully implemented Bidirectional Image Sync between the local edit
 - **Smart @mentions:** Responsive person lookup triggered by the "@" key, inserting styled user chips.
 - **MomaService:** Real internal directory lookups via REST API.
 
-### 7. Bidirectional Image Sync (New!)
+### 7. Bidirectional Image Sync
 - **Drive Asset Library:** Automatically uploads local images to a dedicated `updoc_assets` folder on Google Drive.
 - **Metadata Tagging:** Uses Google Docs image description metadata (`updoc_asset:{assetId}`) to maintain sync parity.
 - **Rich-Media Pull:** Detects images in Google Docs and restores local asset placeholders or renders remote images.
 - **Asynchronous Rendering:** `EditorView` now renders both local and remote images using a thread-safe caching layer.
+
+### 8. Draft Mode & Structured Publishing (New!)
+- **Local-Only Drafts:** Notes with no `googleDocId` are marked with a `DRAFT` tag in the sidebar.
+- **Meeting Attribution:** Tracks the source calendar event via `meetingID` to allow smart folder organization.
+- **Auto-Organization:** Automatically publishes drafts into `/updoc/Meetings` or `/updoc/General` on Google Drive.
+- **One-Click Promotion:** A prominent "Publish" button replaces sync controls for local-only content.
 
 ---
 
@@ -52,13 +58,13 @@ We have successfully implemented Bidirectional Image Sync between the local edit
 - **Layout:** `NavigationSplitView` with 3 columns (Sidebar, Content, Detail).
 - **Sync Logic:** Regex-based Markdown updating for status parity between views.
 - **Image Handling:** Multipart Drive uploads with dynamic MIME-type detection (UTType).
+- **Folder Resolution:** Recursive `getOrCreateFolder` implementation for structured Drive publishing.
 
 ---
 
 ## 🚀 Immediate Next Steps
-1. **Draft Mode:** Support for local-only drafts that haven't been pushed to Google Docs yet.
-2. **Multi-Account Support:** Allow users to switch between multiple Google accounts.
-3. **Advanced Image Editing:** Basic cropping/annotation within updoc.
+1. **Advanced Image Editing:** Basic cropping/annotation within updoc (using native macOS Markup features).
+2. **Offline Conflict UI:** Improved resolution interface for complex sync conflicts.
 
 ---
 

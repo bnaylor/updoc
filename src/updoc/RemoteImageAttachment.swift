@@ -1,10 +1,15 @@
 import AppKit
+import QuickLookUI
 
-class RemoteImageAttachment: NSTextAttachment {
+class RemoteImageAttachment: NSTextAttachment, QLPreviewItem {
     let url: URL
     let title: String?
     let originalMarkdown: String
     
+    // QLPreviewItem conformance
+    var previewItemURL: URL? { url }
+    var previewItemTitle: String? { title }
+
     init(url: URL, title: String?, originalMarkdown: String) {
         self.url = url
         self.title = title

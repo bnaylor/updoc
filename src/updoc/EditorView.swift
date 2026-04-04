@@ -1,8 +1,9 @@
 import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
-import QuickLookUI
+@preconcurrency import QuickLookUI
 
+@MainActor
 class EditorTextView: NSTextView {
     var onFileDropped: ((URL, NSTextView) -> Void)?
     var onPromoteAction: ((String) -> Void)?
@@ -70,18 +71,22 @@ class EditorTextView: NSTextView {
     }
     
     // QuickLook support
-    override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
+    nonisolated override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
         return true
     }
     
-    override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
-        panel.delegate = (self.delegate as? QLPreviewPanelDelegate)
-        panel.dataSource = (self.delegate as? QLPreviewPanelDataSource)
+    nonisolated override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        MainActor.assumeIsolated {
+            panel.delegate = (self.delegate as? QLPreviewPanelDelegate)
+            panel.dataSource = (self.delegate as? QLPreviewPanelDataSource)
+        }
     }
     
-    override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
-        panel.delegate = nil
-        panel.dataSource = nil
+    nonisolated override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        MainActor.assumeIsolated {
+            panel.delegate = nil
+            panel.dataSource = nil
+        }
     }
     
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
@@ -115,6 +120,7 @@ struct EditorView: NSViewRepresentable {
         textView.textContainer?.widthTracksTextView = true
         
         scrollView.documentView = textView
+        context.coordinator.textView = textView
         
         textView.delegate = context.coordinator
         textView.onFileDropped = { url, targetTextView in
@@ -123,11 +129,11 @@ struct EditorView: NSViewRepresentable {
         textView.onPromoteAction = { selectedText in
             self.onPromoteAction?(selectedText)
         }
-        textView.onEditRequested = { attachment in
+        textView.onEditRequested = { [weak coordinator = context.coordinator] attachment in
             if let onEditRequested = self.onEditRequested {
                 onEditRequested(attachment)
             } else {
-                context.coordinator.openEditor(for: attachment)
+                coordinator?.openEditor(for: attachment)
             }
         }
         textView.font = themeManager.font
@@ -176,11 +182,12 @@ struct EditorView: NSViewRepresentable {
     }
 
     @MainActor
-    class Coordinator: NSObject, NSTextViewDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate {
+    class Coordinator: NSObject, NSTextViewDelegate, @preconcurrency QLPreviewPanelDataSource, @preconcurrency QLPreviewPanelDelegate {
         var parent: EditorView
         private let autocompleteManager = AutocompleteManager()
         private var syncTask: Task<Void, Never>?
         var editingAttachment: RemoteImageAttachment?
+        weak var textView: NSTextView?
 
         init(_ parent: EditorView) {
             self.parent = parent
@@ -188,6 +195,9 @@ struct EditorView: NSViewRepresentable {
 
         func openEditor(for attachment: RemoteImageAttachment) {
             self.editingAttachment = attachment
+            if let textView = self.textView {
+                textView.window?.makeFirstResponder(textView)
+            }
             if let panel = QLPreviewPanel.shared() {
                 panel.dataSource = self
                 panel.delegate = self
@@ -200,8 +210,12 @@ struct EditorView: NSViewRepresentable {
             editingAttachment != nil ? 1 : 0
         }
         
+        func previewPanel(_ panel: QLPreviewPanel!) -> QLPreviewItem! {
+            editingAttachment
+        }
+        
         func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> QLPreviewItem! {
-            editingAttachment?.url as NSURL?
+            editingAttachment
         }
         
         // MARK: - QLPreviewPanelDelegate
@@ -210,7 +224,25 @@ struct EditorView: NSViewRepresentable {
         }
         
         func previewPanel(_ panel: QLPreviewPanel!, sourceFrameOnScreenFor item: QLPreviewItem!) -> NSRect {
-            .zero
+            guard let attachment = item as? RemoteImageAttachment,
+                  let textView = self.textView,
+                  let textStorage = textView.textStorage else { return .zero }
+            
+            var frame: NSRect = .zero
+            textStorage.enumerateAttribute(.attachment, in: NSRange(location: 0, length: textStorage.length)) { value, range, stop in
+                if let found = value as? RemoteImageAttachment, found === attachment {
+                    let layoutManager = textView.layoutManager!
+                    let textContainer = textView.textContainer!
+                    let glyphRange = layoutManager.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+                    let rect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+                    let containerOrigin = textView.textContainerOrigin
+                    let viewRect = rect.offsetBy(dx: containerOrigin.x, dy: containerOrigin.y)
+                    let windowRect = textView.convert(viewRect, to: nil)
+                    frame = textView.window?.convertToScreen(windowRect) ?? .zero
+                    stop.pointee = true
+                }
+            }
+            return frame
         }
         
         // Enable Markup
@@ -219,13 +251,21 @@ struct EditorView: NSViewRepresentable {
         }
         
         func previewPanel(_ panel: QLPreviewPanel!, didUpdateContentsOf item: QLPreviewItem!) {
-            guard let url = editingAttachment?.url else { return }
-            Task {
-                await RemoteImageCache.shared.clear(for: url)
-                await MainActor.run {
-                    // Trigger redraw
-                    if let textView = NSApp.keyWindow?.firstResponder as? NSTextView {
-                        applyStyles(to: textView)
+            guard let attachment = item as? RemoteImageAttachment else { return }
+            let url = attachment.url
+            
+            Task { @MainActor in
+                RemoteImageCache.shared.clear(for: url)
+                if let image = await RemoteImageCache.shared.image(for: url) {
+                    attachment.image = image
+                    // Find the attachment range in our text storage to redraw it
+                    if let textView = self.textView, let textStorage = textView.textStorage {
+                        textStorage.enumerateAttribute(.attachment, in: NSRange(location: 0, length: textStorage.length)) { value, range, stop in
+                            if let found = value as? RemoteImageAttachment, found === attachment {
+                                textView.layoutManager?.invalidateDisplay(forCharacterRange: range)
+                                stop.pointee = true
+                            }
+                        }
                     }
                 }
             }

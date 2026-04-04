@@ -48,14 +48,20 @@ struct ContentView: View {
                                 Label("Open in Google Docs", systemImage: "arrow.up.right.square")
                             }
                             .help("Open linked Google Doc in browser")
+                            
+                            Button(action: { triggerSync(for: note) }) {
+                                Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
+                            }
+                            .disabled(isSyncing || !isAuthenticated)
+                            .keyboardShortcut("s", modifiers: .command)
+                            .help("Sync changes with Google Docs (Cmd+S)")
+                        } else {
+                            Button(action: { publishDraft(note) }) {
+                                Label("Publish to Google Docs", systemImage: "arrow.up.doc.fill")
+                            }
+                            .disabled(isSyncing || !isAuthenticated)
+                            .buttonStyle(.borderedProminent)
                         }
-                        
-                        Button(action: { triggerSync(for: note) }) {
-                            Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
-                        }
-                        .disabled(isSyncing || !isAuthenticated)
-                        .keyboardShortcut("s", modifiers: .command)
-                        .help("Sync changes with Google Docs (Cmd+S)")
                     }
                     .padding()
                     .background(Color(NSColor.windowBackgroundColor))
@@ -260,6 +266,41 @@ struct ContentView: View {
         Task {
             do {
                 try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
+                await MainActor.run {
+                    isSyncing = false
+                }
+            } catch {
+                await MainActor.run {
+                    syncError = error.localizedDescription
+                    isSyncing = false
+                }
+            }
+        }
+    }
+
+    private func publishDraft(_ note: Note) {
+        guard !isSyncing else { return }
+        
+        isSyncing = true
+        syncError = nil
+        
+        Task {
+            do {
+                // 1. Get/Create Folder Structure
+                let rootFolder = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: "updoc")
+                let subfolderName = note.meetingID != nil ? "Meetings" : "General"
+                let subfolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: subfolderName, parentId: rootFolder)
+                
+                // 2. Create Doc
+                let docId = try await Self.syncCoordinator.gDrive.createDoc(name: note.title, parentId: subfolderId)
+                
+                // 3. Link and Initial Sync
+                await MainActor.run {
+                    note.googleDocId = docId
+                }
+                
+                try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
+                
                 await MainActor.run {
                     isSyncing = false
                 }

@@ -9,17 +9,19 @@ public class Note {
     public var googleDocId: String?
     public var lastSyncedRevision: String?
     public var assetIds: [String] = []
+    public var meetingID: String?
     
     @Relationship(deleteRule: .cascade)
     public var actionItems: [ActionItem] = []
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, assetIds: [String] = [], actionItems: [ActionItem] = []) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, assetIds: [String] = [], meetingID: String? = nil, actionItems: [ActionItem] = []) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
         self.googleDocId = googleDocId
         self.lastSyncedRevision = lastSyncedRevision
         self.assetIds = assetIds
+        self.meetingID = meetingID
         self.actionItems = actionItems
     }
     

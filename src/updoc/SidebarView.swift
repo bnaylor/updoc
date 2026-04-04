@@ -54,7 +54,19 @@ struct SidebarView: View {
             Section("NOTES") {
                 ForEach(notes) { note in
                     NavigationLink(value: note) {
-                        Text(note.title)
+                        HStack {
+                            Text(note.title)
+                            if note.googleDocId == nil {
+                                Spacer()
+                                Text("DRAFT")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 2)
+                                    .background(Color.orange.opacity(0.8))
+                                    .foregroundColor(.white)
+                                    .cornerRadius(4)
+                            }
+                        }
                     }
                 }
             }
@@ -109,7 +121,8 @@ struct SidebarView: View {
         let newNote = Note(
             title: meeting.summary,
             content: content,
-            googleDocId: docId
+            googleDocId: docId,
+            meetingID: meeting.id
         )
         
         modelContext.insert(newNote)

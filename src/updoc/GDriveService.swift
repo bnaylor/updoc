@@ -34,9 +34,13 @@ public struct GDriveService: Sendable {
         return driveResponse.headRevisionId ?? "unknown"
     }
 
-    public func getOrCreateFolder(named name: String) async throws -> String {
+    public func getOrCreateFolder(named name: String, parentId: String? = nil) async throws -> String {
         let token = try await AuthManager.shared.getAccessToken()
-        let query = "name = '\(name)' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+        var query = "name = '\(name)' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+        if let parentId = parentId {
+            query += " and '\(parentId)' in parents"
+        }
+        
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             throw NSError(domain: "GDriveService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode query"])
         }
@@ -64,10 +68,13 @@ public struct GDriveService: Sendable {
         createRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         createRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let metadata: [String: Any] = [
+        var metadata: [String: Any] = [
             "name": name,
             "mimeType": "application/vnd.google-apps.folder"
         ]
+        if let parentId = parentId {
+            metadata["parents"] = [parentId]
+        }
         createRequest.httpBody = try JSONSerialization.data(withJSONObject: metadata)
         
         let (createData, createResponse) = try await URLSession.shared.data(for: createRequest)
@@ -78,6 +85,32 @@ public struct GDriveService: Sendable {
         
         let createdFile = try JSONDecoder().decode(GDriveFile.self, from: createData)
         return createdFile.id
+    }
+
+    public func createDoc(name: String, parentId: String) async throws -> String {
+        let token = try await AuthManager.shared.getAccessToken()
+        let url = URL(string: "https://www.googleapis.com/drive/v3/files")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = [
+            "name": name,
+            "mimeType": "application/vnd.google-apps.document",
+            "parents": [parentId]
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GDriveService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to create doc: \(errorBody)"])
+        }
+        
+        let file = try JSONDecoder().decode(GDriveFile.self, from: data)
+        return file.id
     }
 
     public func uploadFile(data: Data, filename: String, parentId: String) async throws -> String {
