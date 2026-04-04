@@ -26,7 +26,7 @@ struct SyncTests {
         let note = Note(title: "Test", content: "Local", googleDocId: "test-id")
         context.insert(note)
         
-        await #expect(throws: Error.self) {
+        await #expect(throws: SyncError.notAuthenticated) {
             try await coordinator.sync(noteId: note.persistentModelID, in: context)
         }
     }

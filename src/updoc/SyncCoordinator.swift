@@ -1,6 +1,18 @@
 import Foundation
 import SwiftData
 
+public enum SyncError: Error, LocalizedError, Equatable {
+    case conflict(local: String, remote: String, remoteRevision: String)
+    case notAuthenticated
+    
+    public var errorDescription: String? {
+        switch self {
+        case .conflict: return "Conflict detected"
+        case .notAuthenticated: return "Authentication required"
+        }
+    }
+}
+
 @MainActor
 public class SyncCoordinator {
     public let gDocs = GDocsService()
@@ -11,7 +23,7 @@ public class SyncCoordinator {
     public func sync(noteId: PersistentIdentifier, in context: ModelContext) async throws {
         // First check authentication
         guard AuthManager.shared.isAuthenticated() else {
-            throw NSError(domain: "SyncCoordinator", code: 401, userInfo: [NSLocalizedDescriptionKey: "User is not authenticated with Google"])
+            throw SyncError.notAuthenticated
         }
         
         guard let note = context.model(for: noteId) as? Note, let docId = note.googleDocId else { return }
@@ -28,11 +40,15 @@ public class SyncCoordinator {
             if remoteRev != lastRevision {
                 // Pull and merge
                 let remoteContent = try await gDocs.fetchDocContent(docId: docId)
-                let mergedContent = merge(local: localContent, remote: remoteContent)
                 
-                note.content = mergedContent
-                note.lastSyncedRevision = remoteRev
-                try context.save()
+                // ONLY throw if content is actually different
+                if localContent != remoteContent {
+                    throw SyncError.conflict(local: localContent, remote: remoteContent, remoteRevision: remoteRev)
+                } else {
+                    // Content is identical, just update revision
+                    note.lastSyncedRevision = remoteRev
+                    try context.save()
+                }
             } else {
                 // Push local changes
                 let assetIds = extractAssetIds(from: localContent)
@@ -45,6 +61,9 @@ public class SyncCoordinator {
                 try await gDocs.updateDocContent(docId: docId, content: localContent, assetMappings: mappings)
             }
         } catch {
+            if error is SyncError {
+                throw error
+            }
             print("Sync error for note \(docId): \(error)")
             throw error
         }
