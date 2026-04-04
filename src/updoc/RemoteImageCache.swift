@@ -36,4 +36,9 @@ class RemoteImageCache {
         loadingTasks[url] = nil
         return result
     }
+
+    func clear(for url: URL) {
+        cache.removeObject(forKey: url as NSURL)
+        loadingTasks[url] = nil
+    }
 }
