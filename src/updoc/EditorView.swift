@@ -155,7 +155,24 @@ struct EditorView: NSViewRepresentable {
         textView.typingAttributes = [.font: themeManager.font]
         
         NotificationCenter.default.addObserver(forName: .focusEditor, object: nil, queue: .main) { _ in
-            textView.window?.makeFirstResponder(textView)
+            Task { @MainActor in
+                @MainActor func attemptFocus(retries: Int) {
+                    NSApplication.shared.activate(ignoringOtherApps: true)
+                    if let window = textView.window {
+                        window.makeKeyAndOrderFront(nil)
+                        if window.firstResponder != textView {
+                            window.makeFirstResponder(textView)
+                        }
+                    } else if retries > 0 {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            Task { @MainActor in
+                                attemptFocus(retries: retries - 1)
+                            }
+                        }
+                    }
+                }
+                attemptFocus(retries: 10)
+            }
         }
         
         return scrollView

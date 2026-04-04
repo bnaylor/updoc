@@ -1,13 +1,16 @@
 # updoc Project Status - 2026-04-04
 
-## 🎯 Current Mission Status: PHASE 8 COMPLETE
-We have successfully implemented Advanced Image Editing and a dedicated Offline Conflict UI, while also addressing several bug and polish items from initial user feedback.
+## 🎯 Current Mission Status: PHASE 9 COMPLETE
+We have successfully implemented App Bundling and Persistent Settings, providing a standard macOS application experience and a dedicated UI for configuring Google API credentials.
 
 ---
 
 ## ✅ Completed Features
 
 ### 1. Core Native App
+- **Native macOS Bundle:** Standard `.app` structure with automated bundling via `scripts/bundle.sh`.
+- **Persistent Settings:** Standard macOS Settings UI (Cmd+,) for persistent Google API configuration.
+- **Improved Integration:** Proper application lifecycle management for focus, menu bar, and shortcuts.
 - **Native macOS Shell:** SwiftUI-based with a 3-column navigation split view.
 - **Local Persistence:** Full `SwiftData` integration for notes and metadata.
 - **High-Performance Editor:** `TextKit 2` (NSTextView) wrapper for zero-lag text entry.
@@ -35,7 +38,7 @@ We have successfully implemented Advanced Image Editing and a dedicated Offline 
 - **Inline Hashtags:** Automatic extraction and indexing of `#tags` from Markdown content.
 - **Editor Sync:** Selecting a search result automatically opens the note and scrolls to the matched text.
 
-### 6. Bidirectional Image Sync & Editing (New!)
+### 6. Bidirectional Image Sync & Editing
 - **Drive Asset Library:** Automatically uploads local images to a dedicated `updoc_assets` folder on Google Drive.
 - **Advanced Editing:** Double-click any image to open the native macOS Markup toolkit (crop, rotate, annotate).
 - **Metadata Tagging:** Uses Google Docs image description metadata (`updoc_asset:{assetId}`) to maintain sync parity.
@@ -47,7 +50,7 @@ We have successfully implemented Advanced Image Editing and a dedicated Offline 
 - **Auto-Organization:** Automatically publishes drafts into `/updoc/Meetings` or `/updoc/General` on Google Drive.
 - **One-Click Promotion:** A prominent "Publish" button replaces sync controls for local-only content.
 
-### 8. Conflict Resolution (New!)
+### 8. Conflict Resolution
 - **Offline Conflict UI:** A clear, side-by-side interface for resolving sync conflicts when changes happen in both local and remote versions.
 - **Resolution Choices:** Explicit options to "Use Mine," "Use Remote," or cancel the sync operation.
 
@@ -57,19 +60,19 @@ We have successfully implemented Advanced Image Editing and a dedicated Offline 
 - **Language:** Swift 6.0 (Concurrency-safe).
 - **Frameworks:** SwiftUI, SwiftData, TextKit 2, AuthenticationServices, GTMAppAuth, QuickLookUI.
 - **Layout:** `NavigationSplitView` with 3 columns (Sidebar, Content, Detail) and consistent pane sizing.
-- **Sync Logic:** Explicit conflict detection comparing both revision IDs and actual content.
+- **Build System:** Custom `bundle.sh` script for creating universal macOS binaries.
 
 ---
 
 ## 🚀 Immediate Next Steps
-1. **App Bundling & Icons:** Create a proper `.app` bundle with high-quality icons.
-2. **Deep Linking:** Support opening updoc via `updoc://` URLs.
-3. **Advanced Templating:** More flexible rules for automated note content creation.
+1. **Deep Linking:** Support opening updoc via `updoc://` URLs.
+2. **Advanced Templating:** More flexible rules for automated note content creation.
+3. **App Icons:** Generate high-quality assets for the bundled application.
 
 ---
 
 ## 📝 Developer Notes
 - Task Sidebar visibility is managed via `columnVisibility` in `ContentView`.
 - Image editing uses `QLPreviewPanel` with `isEditingAllowed = true`.
-- Build command: `swift build`
+- Build command: `./scripts/bundle.sh`
 - Test command: `swift test`

@@ -3,6 +3,7 @@ import SwiftData
 
 @main
 struct updocApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var themeManager = ThemeManager.shared
     
     var body: some Scene {
@@ -12,6 +13,13 @@ struct updocApp: App {
         }
         .modelContainer(for: [Note.self, TemplateRule.self, ActionItem.self, ImageMap.self])
         .commands {
+            CommandGroup(replacing: .appTermination) {
+                Button("Quit updoc") {
+                    NSApplication.shared.terminate(nil)
+                }
+                .keyboardShortcut("q", modifiers: .command)
+            }
+            
             CommandGroup(replacing: .newItem) {
                 Button("New Note") {
                     NotificationCenter.default.post(name: .addNewNote, object: nil)
@@ -64,8 +72,14 @@ struct updocApp: App {
         }
         
         Settings {
-            SettingsView()
+            SettingsView(onDone: nil)
         }
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
     }
 }
 

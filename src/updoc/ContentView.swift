@@ -94,6 +94,9 @@ struct ContentView: View {
                     .onChange(of: note.id) {
                         NotificationCenter.default.post(name: .focusEditor, object: nil)
                     }
+                    .onTapGesture {
+                        NotificationCenter.default.post(name: .focusEditor, object: nil)
+                    }
                 }
             } else {
                 Text("Select a note to begin")
@@ -107,7 +110,9 @@ struct ContentView: View {
             RuleManagerView()
         }
         .sheet(isPresented: $showingSettings) {
-            SettingsView()
+            SettingsView {
+                showingSettings = false
+            }
         }
         .sheet(item: $activeConflict) { info in
             ConflictResolutionView(local: info.local, remote: info.remote) { resolvedContent in
@@ -161,7 +166,19 @@ struct ContentView: View {
         }
         .onAppear {
             isAuthenticated = AuthManager.shared.isAuthenticated()
+        }
+        .task {
+            // Short delay to ensure view hierarchy is ready
+            try? await Task.sleep(nanoseconds: 500_000_000)
             checkConfig()
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { showingSettings = true }) {
+                    Label("Settings", systemImage: "gear")
+                }
+                .help("Open App Settings")
+            }
         }
         .background {
             Group {
@@ -180,7 +197,14 @@ struct ContentView: View {
     }
 
     private func checkConfig() {
-        if Config.clientID.isEmpty || Config.clientSecret.isEmpty || Config.redirectURI.isEmpty {
+        let id = Config.clientID
+        let secret = Config.clientSecret
+        let uri = Config.redirectURI
+        
+        print("checkConfig: id=\(id.count), secret=\(secret.count), uri=\(uri.count)")
+        
+        if id.isEmpty || secret.isEmpty || uri.isEmpty {
+            print("checkConfig: Configuration incomplete, showing settings")
             showingSettings = true
         }
     }
@@ -307,7 +331,7 @@ struct ContentView: View {
     }
 
     private func resolveConflict(_ info: ConflictInfo, with content: String) {
-        guard let note = try? modelContext.model(for: info.noteId) as? Note else { return }
+        guard let note = modelContext.model(for: info.noteId) as? Note else { return }
         
         note.content = content
         note.lastSyncedRevision = info.remoteRevision
