@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
+import QuickLookUI
 
 class EditorTextView: NSTextView {
     var onFileDropped: ((URL, NSTextView) -> Void)?
@@ -68,6 +69,21 @@ class EditorTextView: NSTextView {
         onPromoteAction?(selectedText)
     }
     
+    // QuickLook support
+    override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
+        return true
+    }
+    
+    override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        panel.delegate = (self.delegate as? QLPreviewPanelDelegate)
+        panel.dataSource = (self.delegate as? QLPreviewPanelDataSource)
+    }
+    
+    override func endPreviewPanelControl(_ panel: QLPreviewPanel!) {
+        panel.delegate = nil
+        panel.dataSource = nil
+    }
+    
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let pboard = sender.draggingPasteboard
         if let urls = pboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
@@ -108,7 +124,11 @@ struct EditorView: NSViewRepresentable {
             self.onPromoteAction?(selectedText)
         }
         textView.onEditRequested = { attachment in
-            self.onEditRequested?(attachment)
+            if let onEditRequested = self.onEditRequested {
+                onEditRequested(attachment)
+            } else {
+                context.coordinator.openEditor(for: attachment)
+            }
         }
         textView.font = themeManager.font
         textView.isAutomaticQuoteSubstitutionEnabled = false
@@ -156,13 +176,59 @@ struct EditorView: NSViewRepresentable {
     }
 
     @MainActor
-    class Coordinator: NSObject, NSTextViewDelegate {
+    class Coordinator: NSObject, NSTextViewDelegate, QLPreviewPanelDataSource, QLPreviewPanelDelegate {
         var parent: EditorView
         private let autocompleteManager = AutocompleteManager()
         private var syncTask: Task<Void, Never>?
+        var editingAttachment: RemoteImageAttachment?
 
         init(_ parent: EditorView) {
             self.parent = parent
+        }
+
+        func openEditor(for attachment: RemoteImageAttachment) {
+            self.editingAttachment = attachment
+            if let panel = QLPreviewPanel.shared() {
+                panel.dataSource = self
+                panel.delegate = self
+                panel.makeKeyAndOrderFront(nil)
+            }
+        }
+        
+        // MARK: - QLPreviewPanelDataSource
+        func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
+            editingAttachment != nil ? 1 : 0
+        }
+        
+        func previewPanel(_ panel: QLPreviewPanel!, previewItemAt index: Int) -> QLPreviewItem! {
+            editingAttachment?.url as NSURL?
+        }
+        
+        // MARK: - QLPreviewPanelDelegate
+        func previewPanel(_ panel: QLPreviewPanel!, handle event: NSEvent!) -> Bool {
+            false
+        }
+        
+        func previewPanel(_ panel: QLPreviewPanel!, sourceFrameOnScreenFor item: QLPreviewItem!) -> NSRect {
+            .zero
+        }
+        
+        // Enable Markup
+        func previewPanel(_ panel: QLPreviewPanel!, shouldManageEditingModeOf item: QLPreviewItem!) -> Bool {
+            true
+        }
+        
+        func previewPanel(_ panel: QLPreviewPanel!, didUpdateContentsOf item: QLPreviewItem!) {
+            guard let url = editingAttachment?.url else { return }
+            Task {
+                await RemoteImageCache.shared.clear(for: url)
+                await MainActor.run {
+                    // Trigger redraw
+                    if let textView = NSApp.keyWindow?.firstResponder as? NSTextView {
+                        applyStyles(to: textView)
+                    }
+                }
+            }
         }
 
         func handleFileDrop(url: URL, in textView: NSTextView) {
