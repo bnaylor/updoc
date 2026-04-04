@@ -2,9 +2,18 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    struct ConflictInfo: Identifiable {
+        let id = UUID()
+        let noteId: PersistentIdentifier
+        let local: String
+        let remote: String
+        let remoteRevision: String
+    }
+    
     @State private var selectedNote: Note?
     @State private var isSyncing = false
     @State private var syncError: String?
+    @State private var activeConflict: ConflictInfo?
     @State private var showingCommandPalette = false
     @State private var showingGlobalSearch = false
     @State private var showingRuleManager = false
@@ -111,6 +120,13 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showingRuleManager) {
             RuleManagerView()
+        }
+        .sheet(item: $activeConflict) { info in
+            ConflictResolutionView(local: info.local, remote: info.remote) { resolvedContent in
+                resolveConflict(info, with: resolvedContent)
+            } onCancel: {
+                activeConflict = nil
+            }
         }
         .overlay {
             if showingCommandPalette {
@@ -269,12 +285,38 @@ struct ContentView: View {
                 await MainActor.run {
                     isSyncing = false
                 }
+            } catch let error as SyncError {
+                await MainActor.run {
+                    isSyncing = false
+                    if case let .conflict(local, remote, rev) = error {
+                        activeConflict = ConflictInfo(noteId: note.persistentModelID, local: local, remote: remote, remoteRevision: rev)
+                    } else {
+                        syncError = error.localizedDescription
+                    }
+                }
             } catch {
                 await MainActor.run {
                     syncError = error.localizedDescription
                     isSyncing = false
                 }
             }
+        }
+    }
+
+    private func resolveConflict(_ info: ConflictInfo, with content: String) {
+        guard let note = try? modelContext.model(for: info.noteId) as? Note else { return }
+        
+        note.content = content
+        note.lastSyncedRevision = info.remoteRevision
+        
+        do {
+            try modelContext.save()
+            activeConflict = nil
+            // Trigger sync again to push the resolved version
+            triggerSync(for: note)
+        } catch {
+            syncError = "Failed to resolve conflict: \(error.localizedDescription)"
+            activeConflict = nil
         }
     }
 
