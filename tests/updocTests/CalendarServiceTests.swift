@@ -3,10 +3,11 @@ import Foundation
 @testable import updoc
 
 struct CalendarServiceTests {
-    @Test func canFetchMockEvents() async throws {
+    @Test func fetchEventsFailsWhenNotAuthenticated() async throws {
         let service = GCalendarService.shared
-        let events = try await service.fetchTodaysEvents()
-        #expect(events.count > 0)
-        #expect(events.first?.summary == "updoc Architecture Sync")
+        // In unit tests, we are not authenticated, so it should throw
+        await #expect(throws: Error.self) {
+            try await service.fetchTodaysEvents()
+        }
     }
 }

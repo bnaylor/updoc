@@ -10,7 +10,7 @@ struct updocApp: App {
             ContentView()
                 .environment(themeManager)
         }
-        .modelContainer(for: [Note.self, TemplateRule.self, ActionItem.self])
+        .modelContainer(for: [Note.self, TemplateRule.self, ActionItem.self, ImageMap.self])
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("New Note") {

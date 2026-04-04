@@ -7,6 +7,7 @@ public enum MarkdownStyle: Equatable {
     case code
     case link(url: String?)
     case checklist(done: Bool)
+    case image(url: String, title: String?)
 }
 
 public struct MarkdownRange: Equatable {
@@ -62,6 +63,28 @@ public struct MarkdownEngine {
                 let marker = (text as NSString).substring(with: markerRange)
                 let done = marker == "[x]" || marker == "√"
                 ranges.append(MarkdownRange(range: match.range, style: .checklist(done: done)))
+            }
+        }
+        
+        // 5. Images (e.g., ![title](url))
+        let imageRegex = try! NSRegularExpression(pattern: "!\\[(.*?)\\]\\((.*?)\\)", options: [])
+        imageRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
+            if let match = match, match.numberOfRanges >= 3 {
+                let titleRange = match.range(at: 1)
+                let urlRange = match.range(at: 2)
+                let title = (text as NSString).substring(with: titleRange)
+                let url = (text as NSString).substring(with: urlRange)
+                ranges.append(MarkdownRange(range: match.range, style: .image(url: url, title: title.isEmpty ? nil : title)))
+            }
+        }
+        
+        // 6. Local Assets (e.g., ![[assetId]])
+        let assetRegex = try! NSRegularExpression(pattern: "!\\[\\[(.*?)\\]\\]", options: [])
+        assetRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
+            if let match = match, match.numberOfRanges >= 2 {
+                let idRange = match.range(at: 1)
+                let id = (text as NSString).substring(with: idRange)
+                ranges.append(MarkdownRange(range: match.range, style: .image(url: "asset://\(id)", title: nil)))
             }
         }
         

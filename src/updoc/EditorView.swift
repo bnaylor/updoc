@@ -47,6 +47,7 @@ class EditorTextView: NSTextView {
 struct EditorView: NSViewRepresentable {
     @Binding var text: String
     @Binding var assetIds: [String]
+    @Binding var selectionRange: NSRange?
     var onPromoteAction: ((String) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
@@ -93,9 +94,20 @@ struct EditorView: NSViewRepresentable {
             context.coordinator.applyStyles(to: textView)
         }
         
-        if textView.string != text {
+        let currentMarkdown = context.coordinator.convertToMarkdown(from: textView.textStorage ?? NSAttributedString())
+        if currentMarkdown != text {
             textView.string = text
             context.coordinator.applyStyles(to: textView)
+        }
+        
+        if let range = selectionRange {
+            textView.setSelectedRange(range)
+            textView.scrollRangeToVisible(range)
+            
+            // Dispatch to avoid "modifying state during view update"
+            DispatchQueue.main.async {
+                self.selectionRange = nil
+            }
         }
     }
 
@@ -148,7 +160,12 @@ struct EditorView: NSViewRepresentable {
             
             // Handle √ shortcut
             checkForCheckmarkShortcut(in: textView)
-            self.parent.text = textView.string
+            
+            if let textStorage = textView.textStorage {
+                self.parent.text = convertToMarkdown(from: textStorage)
+            } else {
+                self.parent.text = textView.string
+            }
             
             // Basic trigger check
             checkForAutocompleteTrigger(in: textView)
@@ -189,6 +206,8 @@ struct EditorView: NSViewRepresentable {
             }
         }
         
+        private var autocompleteTask: Task<Void, Never>?
+
         private func checkForAutocompleteTrigger(in textView: NSTextView) {
             let selectedRange = textView.selectedRange()
             guard selectedRange.location > 0 else { return }
@@ -198,15 +217,16 @@ struct EditorView: NSViewRepresentable {
             let lastChar = (text as NSString).substring(with: lastCharRange)
             
             if lastChar == "@" {
-                // In a real app, we'd wait for more characters to search, 
-                // but for this demo we'll show a menu immediately or after a short delay.
-                Task {
+                autocompleteTask?.cancel()
+                autocompleteTask = Task {
                     do {
-                        // For demonstration, search for a default or empty query initially
-                        let matches = try await autocompleteManager.findMatches(for: "today")
-                        if !matches.isEmpty {
+                        // findMatches now includes its own 300ms debounce
+                        let matches = try await autocompleteManager.findMatches(for: "")
+                        if !Task.isCancelled {
                             showAutocompleteMenu(for: matches, in: textView)
                         }
+                    } catch is CancellationError {
+                        // Superseded by a newer task
                     } catch {
                         print("Autocomplete error: \(error)")
                     }
@@ -290,14 +310,89 @@ struct EditorView: NSViewRepresentable {
             let text = textView.string
             let ranges = parent.engine.parse(text)
             
+            // 1. Convert back to pure Markdown before restyling
+            // This ensures we have the correct source text for the engine
+            let markdown = convertToMarkdown(from: textStorage)
+            if markdown != text {
+                // If the textStorage had attachments, we might need to sync back
+                // but for now, let's assume 'text' is the source of truth
+            }
+            
             // Reset styles using theme font
             textStorage.setAttributes([.font: parent.themeManager.font], range: NSRange(text.startIndex..., in: text))
             
-            // Apply Markdown styles
-            for markdownRange in ranges {
-                let attributes = attributes(for: markdownRange.style)
-                textStorage.addAttributes(attributes, range: markdownRange.range)
+            // Apply Markdown styles in reverse to avoid shifting ranges when we replace text with attachments
+            for markdownRange in ranges.reversed() {
+                if case .image(let urlString, let title) = markdownRange.style, 
+                   let url = URL(string: urlString) {
+                    renderImage(url: url, title: title, range: markdownRange.range, in: textView)
+                } else {
+                    let attributes = attributes(for: markdownRange.style)
+                    textStorage.addAttributes(attributes, range: markdownRange.range)
+                }
             }
+        }
+        
+        private func renderImage(url: URL, title: String?, range: NSRange, in textView: NSTextView) {
+            guard let textStorage = textView.textStorage else { return }
+            
+            // Check if this range already has a RemoteImageAttachment
+            var alreadyRendered = false
+            textStorage.enumerateAttribute(.attachment, in: range, options: []) { value, _, stop in
+                if value is RemoteImageAttachment {
+                    alreadyRendered = true
+                    stop.pointee = true
+                }
+            }
+            if alreadyRendered { return }
+            
+            let originalMarkdown = (textView.string as NSString).substring(with: range)
+            let attachment = RemoteImageAttachment(url: url, title: title, originalMarkdown: originalMarkdown)
+            attachment.image = NSImage(systemSymbolName: "photo", accessibilityDescription: "Loading image...")
+            
+            // Use a specific character for the attachment
+            let attachmentString = NSAttributedString(attachment: attachment)
+            
+            // Replace the Markdown text with the attachment
+            // This will change the string, so we must be careful with ranges
+            // But since applyStyles is called at the end of textDidChange, it should be fine
+            // as long as we only do it once.
+            
+            // NOTE: Replacing text here will trigger another applyStyles if we are not careful.
+            // But EditorView.updateNSView only calls applyStyles if text changed.
+            
+            // For now, let's try just adding the attachment attribute without replacing?
+            // No, NSTextView only renders it for \u{FFFC}.
+            
+            // Let's use temporary attributes? No.
+            
+            // Okay, let's try replacing but we need to stop the loop.
+            textStorage.replaceCharacters(in: range, with: attachmentString)
+            
+            // Load the image asynchronously
+            Task {
+                if let image = await RemoteImageCache.shared.image(for: url) {
+                    attachment.image = image
+                    // Invalidate layout to show the new image
+                    await MainActor.run {
+                        textView.layoutManager?.invalidateDisplay(forCharacterRange: NSRange(location: range.location, length: 1))
+                    }
+                }
+            }
+        }
+        
+        func convertToMarkdown(from attributedString: NSAttributedString) -> String {
+            let result = NSMutableAttributedString(attributedString: attributedString)
+            var offset = 0
+            
+            attributedString.enumerateAttribute(.attachment, in: NSRange(location: 0, length: attributedString.length), options: []) { value, range, _ in
+                if let attachment = value as? RemoteImageAttachment {
+                    let replacementRange = NSRange(location: range.location + offset, length: range.length)
+                    result.replaceCharacters(in: replacementRange, with: attachment.originalMarkdown)
+                    offset += attachment.originalMarkdown.count - range.length
+                }
+            }
+            return result.string
         }
         
         private func attributes(for style: MarkdownStyle) -> [NSAttributedString.Key: Any] {
@@ -336,6 +431,13 @@ struct EditorView: NSViewRepresentable {
                 return [
                     .foregroundColor: NSColor.systemBlue,
                     .underlineStyle: NSUnderlineStyle.single.rawValue
+                ]
+            case .image(let url, let title):
+                // For now, style as a link until we implement NSTextAttachment
+                return [
+                    .foregroundColor: NSColor.systemGreen,
+                    .underlineStyle: NSUnderlineStyle.single.rawValue,
+                    .toolTip: title ?? url
                 ]
             }
         }

@@ -14,4 +14,20 @@ struct SyncTests {
         #expect(merged.contains("# Local"))
         #expect(merged.contains("# Remote"))
     }
+    
+    @Test func syncFailsWhenNotAuthenticated() async throws {
+        let coordinator = SyncCoordinator()
+        // Create a model context for the test
+        let schema = Schema([Note.self, ActionItem.self])
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: schema, configurations: config)
+        let context = container.mainContext
+        
+        let note = Note(title: "Test", content: "Local", googleDocId: "test-id")
+        context.insert(note)
+        
+        await #expect(throws: Error.self) {
+            try await coordinator.sync(noteId: note.persistentModelID, in: context)
+        }
+    }
 }

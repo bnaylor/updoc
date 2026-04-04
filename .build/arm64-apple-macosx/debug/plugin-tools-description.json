@@ -7,7 +7,104 @@
     }
   ],
   "copyCommands" : {
-
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth_AppAuth.bundle/PrivacyInfo.xcprivacy" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuth/Resources/PrivacyInfo.xcprivacy"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth_AppAuth.bundle/PrivacyInfo.xcprivacy"
+        }
+      ]
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth_AppAuthCore.bundle/PrivacyInfo.xcprivacy" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore/Resources/PrivacyInfo.xcprivacy"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth_AppAuthCore.bundle/PrivacyInfo.xcprivacy"
+        }
+      ]
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth_AppAuthTV.bundle/PrivacyInfo.xcprivacy" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthTV/Resources/PrivacyInfo.xcprivacy"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth_AppAuthTV.bundle/PrivacyInfo.xcprivacy"
+        }
+      ]
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth_GTMAppAuth.bundle/PrivacyInfo.xcprivacy" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/Resources/PrivacyInfo.xcprivacy"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth_GTMAppAuth.bundle/PrivacyInfo.xcprivacy"
+        }
+      ]
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcher_GTMSessionFetcherCore.bundle/PrivacyInfo.xcprivacy" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Resources/PrivacyInfo.xcprivacy"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcher_GTMSessionFetcherCore.bundle/PrivacyInfo.xcprivacy"
+        }
+      ]
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcher_GTMSessionFetcherFull.bundle/PrivacyInfo.xcprivacy" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Full/Resources/PrivacyInfo.xcprivacy"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcher_GTMSessionFetcherFull.bundle/PrivacyInfo.xcprivacy"
+        }
+      ]
+    },
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcher_GTMSessionFetcherLogView.bundle/PrivacyInfo.xcprivacy" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/LogView/Resources/PrivacyInfo.xcprivacy"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcher_GTMSessionFetcherLogView.bundle/PrivacyInfo.xcprivacy"
+        }
+      ]
+    }
   },
   "explicitTargetDependencyImportCheckingMode" : {
     "none" : {
@@ -21,6 +118,308 @@
 
   ],
   "swiftCommands" : {
+    "C.GTMAppAuth-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "fileList" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/sources",
+      "importPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSession.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionDelegate.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/GTMOAuth2Compatibility.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainAttribute.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainHelper.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/DerivedSources/resource_bundle_accessor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<GTMAppAuth-arm64-apple-macosx15.0-debug.module-resources>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcher.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcherLogging.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcherService.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionUploadFetcher.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthState.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationService.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDClientMetadataParameters.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDEndSessionRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDEndSessionResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDError.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDErrorUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDFieldMapping.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDGrantTypes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDIDToken.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDRegistrationRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDRegistrationResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDResponseTypes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDScopeUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDScopes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDServiceConfiguration.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDServiceDiscovery.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDURLQueryComponent.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDURLSessionProvider.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/sources"
+        }
+      ],
+      "isLibrary" : true,
+      "moduleName" : "GTMAppAuth",
+      "moduleOutputPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/GTMAppAuth.swiftmodule",
+      "objects" : [
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSession.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionDelegate.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionStore.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/GTMOAuth2Compatibility.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainAttribute.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainHelper.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainStore.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/resource_bundle_accessor.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx10.13",
+        "-incremental",
+        "-enable-batch-mode",
+        "-serialize-diagnostics",
+        "-index-store-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j14",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+        "-module-cache-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-parse-as-library",
+        "-emit-objc-header",
+        "-emit-objc-header-path",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/include/GTMAppAuth-Swift.h",
+        "-swift-version",
+        "5",
+        "-plugin-path",
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-F",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-I",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-L",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+        "-Xcc",
+        "-F",
+        "-Xcc",
+        "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-suppress-warnings"
+      ],
+      "outputFileMapPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSession.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionDelegate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/GTMOAuth2Compatibility.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainAttribute.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainHelper.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/resource_bundle_accessor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/GTMAppAuth.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSession.swift",
+        "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionDelegate.swift",
+        "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionStore.swift",
+        "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/GTMOAuth2Compatibility.swift",
+        "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainAttribute.swift",
+        "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainHelper.swift",
+        "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainStore.swift",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/DerivedSources/resource_bundle_accessor.swift"
+      ],
+      "tempsPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build",
+      "wholeModuleOptimization" : false
+    },
     "C.updoc-arm64-apple-macosx15.0-debug.module" : {
       "executable" : "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
       "fileList" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/sources",
@@ -48,6 +447,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/Config.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift"
         },
         {
@@ -64,11 +467,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GDocsModels.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift"
         },
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GlobalSearchOverlayView.swift"
         },
         {
           "kind" : "file",
@@ -80,6 +491,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/Models/ImageMap.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift"
         },
         {
@@ -88,7 +503,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/RemoteImageAttachment.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/RemoteImageCache.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SearchEngine.swift"
         },
         {
           "kind" : "file",
@@ -101,6 +528,22 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TagManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TaskRow.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TaskSection.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TaskSidebarView.swift"
         },
         {
           "kind" : "file",
@@ -120,6 +563,54 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/GTMAppAuth.swiftmodule"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDAuthState+IOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDAuthorizationService+IOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentCatalyst.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentIOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentIOSCustomBrowser.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/LoopbackHTTPServer/OIDLoopbackHTTPServer.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDAuthState+Mac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDAuthorizationService+Mac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDExternalUserAgentMac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDRedirectHTTPHandler.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/sources"
         }
       ],
@@ -132,20 +623,31 @@
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/AutocompleteManager.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandEngine.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandPaletteView.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/DateService.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/EditorView.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GCalendarService.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MarkdownEngine.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Note.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SidebarView.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SmartTemplateEngine.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TemplateRule.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ThemeManager.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/updocApp.swift.o"
@@ -164,6 +666,24 @@
         "-DSWIFT_PACKAGE",
         "-DDEBUG",
         "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuth",
         "-module-cache-path",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
         "-parseable-output",
@@ -229,6 +749,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o"
         },
         {
@@ -245,11 +769,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o"
         },
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.swift.o"
         },
         {
           "kind" : "file",
@@ -261,6 +793,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.swift.o"
         },
         {
@@ -269,7 +805,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.swift.o"
         },
         {
           "kind" : "file",
@@ -282,6 +830,22 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.swift.o"
         },
         {
           "kind" : "file",
@@ -307,20 +871,31 @@
         "/Users/bnaylor/src/updoc/src/updoc/AutocompleteManager.swift",
         "/Users/bnaylor/src/updoc/src/updoc/CommandEngine.swift",
         "/Users/bnaylor/src/updoc/src/updoc/CommandPaletteView.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/Config.swift",
         "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift",
         "/Users/bnaylor/src/updoc/src/updoc/DateService.swift",
         "/Users/bnaylor/src/updoc/src/updoc/EditorView.swift",
         "/Users/bnaylor/src/updoc/src/updoc/GCalendarService.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/GDocsModels.swift",
         "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift",
         "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/GlobalSearchOverlayView.swift",
         "/Users/bnaylor/src/updoc/src/updoc/ImageLibraryManager.swift",
         "/Users/bnaylor/src/updoc/src/updoc/MarkdownEngine.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/Models/ImageMap.swift",
         "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift",
         "/Users/bnaylor/src/updoc/src/updoc/Note.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/RemoteImageAttachment.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/RemoteImageCache.swift",
         "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/SearchEngine.swift",
         "/Users/bnaylor/src/updoc/src/updoc/SidebarView.swift",
         "/Users/bnaylor/src/updoc/src/updoc/SmartTemplateEngine.swift",
         "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/TagManager.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/TaskRow.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/TaskSection.swift",
+        "/Users/bnaylor/src/updoc/src/updoc/TaskSidebarView.swift",
         "/Users/bnaylor/src/updoc/src/updoc/TemplateRule.swift",
         "/Users/bnaylor/src/updoc/src/updoc/ThemeManager.swift",
         "/Users/bnaylor/src/updoc/src/updoc/updocApp.swift"
@@ -372,6 +947,24 @@
         "-DSWIFT_PACKAGE",
         "-DDEBUG",
         "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuth",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
         "-module-cache-path",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
         "-parseable-output",
@@ -436,6 +1029,10 @@
       "inputs" : [
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ActionItemTests.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift"
         },
         {
@@ -456,11 +1053,31 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/EditorSyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/GDriveServiceTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ImageLibraryManagerTests.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift"
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/MomaServiceTests.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/SearchEngineTests.swift"
         },
         {
           "kind" : "file",
@@ -469,6 +1086,10 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/TagManagerTests.swift"
         },
         {
           "kind" : "file",
@@ -491,15 +1112,22 @@
       "moduleName" : "updocTests",
       "moduleOutputPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules/updocTests.swiftmodule",
       "objects" : [
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ActionItemTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AutocompleteTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CalendarServiceTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ChecklistTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/CommandEngineTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/EditorSyncTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/GDriveServiceTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ImageLibraryManagerTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MomaServiceTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SearchEngineTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ServiceTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swift.o",
+        "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TagManagerTests.swift.o",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TemplateEngineTests.swift.o"
       ],
       "otherArguments" : [
@@ -518,6 +1146,24 @@
         "-DSWIFT_PACKAGE",
         "-DDEBUG",
         "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuth",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+        "-Xcc",
+        "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+        "-Xcc",
+        "-I",
+        "-Xcc",
+        "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
         "-module-cache-path",
         "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
         "-parseable-output",
@@ -560,6 +1206,10 @@
       "outputs" : [
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ActionItemTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/AuthManagerTests.swift.o"
         },
         {
@@ -580,11 +1230,31 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/EditorSyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/GDriveServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ImageLibraryManagerTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swift.o"
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MomaServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SearchEngineTests.swift.o"
         },
         {
           "kind" : "file",
@@ -593,6 +1263,10 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TagManagerTests.swift.o"
         },
         {
           "kind" : "file",
@@ -605,15 +1279,22 @@
       ],
       "prepareForIndexing" : false,
       "sources" : [
+        "/Users/bnaylor/src/updoc/tests/updocTests/ActionItemTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/AutocompleteTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/CalendarServiceTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/ChecklistTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/CommandEngineTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/EditorSyncTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/GDriveServiceTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/ImageLibraryManagerTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/MomaServiceTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/SearchEngineTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/ServiceTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift",
+        "/Users/bnaylor/src/updoc/tests/updocTests/TagManagerTests.swift",
         "/Users/bnaylor/src/updoc/tests/updocTests/TemplateEngineTests.swift"
       ],
       "tempsPath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build",
@@ -624,6 +1305,88 @@
 
   },
   "swiftTargetScanArgs" : {
+    "GTMAppAuth" : [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
+      "-module-name",
+      "GTMAppAuth",
+      "-c",
+      "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSession.swift",
+      "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionDelegate.swift",
+      "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionStore.swift",
+      "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/GTMOAuth2Compatibility.swift",
+      "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainAttribute.swift",
+      "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainHelper.swift",
+      "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainStore.swift",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/DerivedSources/resource_bundle_accessor.swift",
+      "-I",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx10.13",
+      "-incremental",
+      "-enable-batch-mode",
+      "-serialize-diagnostics",
+      "-index-store-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j14",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+      "-module-cache-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-parse-as-library",
+      "-emit-objc-header",
+      "-emit-objc-header-path",
+      "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/include/GTMAppAuth-Swift.h",
+      "-swift-version",
+      "5",
+      "-plugin-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-F",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-I",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-L",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks",
+      "-Xcc",
+      "-F",
+      "-Xcc",
+      "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-suppress-warnings",
+      "-driver-use-frontend-path",
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
+    ],
     "updoc" : [
       "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc",
       "-module-name",
@@ -636,20 +1399,31 @@
       "/Users/bnaylor/src/updoc/src/updoc/AutocompleteManager.swift",
       "/Users/bnaylor/src/updoc/src/updoc/CommandEngine.swift",
       "/Users/bnaylor/src/updoc/src/updoc/CommandPaletteView.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/Config.swift",
       "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift",
       "/Users/bnaylor/src/updoc/src/updoc/DateService.swift",
       "/Users/bnaylor/src/updoc/src/updoc/EditorView.swift",
       "/Users/bnaylor/src/updoc/src/updoc/GCalendarService.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/GDocsModels.swift",
       "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift",
       "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/GlobalSearchOverlayView.swift",
       "/Users/bnaylor/src/updoc/src/updoc/ImageLibraryManager.swift",
       "/Users/bnaylor/src/updoc/src/updoc/MarkdownEngine.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/Models/ImageMap.swift",
       "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift",
       "/Users/bnaylor/src/updoc/src/updoc/Note.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/RemoteImageAttachment.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/RemoteImageCache.swift",
       "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/SearchEngine.swift",
       "/Users/bnaylor/src/updoc/src/updoc/SidebarView.swift",
       "/Users/bnaylor/src/updoc/src/updoc/SmartTemplateEngine.swift",
       "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/TagManager.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/TaskRow.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/TaskSection.swift",
+      "/Users/bnaylor/src/updoc/src/updoc/TaskSidebarView.swift",
       "/Users/bnaylor/src/updoc/src/updoc/TemplateRule.swift",
       "/Users/bnaylor/src/updoc/src/updoc/ThemeManager.swift",
       "/Users/bnaylor/src/updoc/src/updoc/updocApp.swift",
@@ -668,6 +1442,24 @@
       "-DSWIFT_PACKAGE",
       "-DDEBUG",
       "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuth",
       "-module-cache-path",
       "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
       "-parseable-output",
@@ -736,6 +1528,24 @@
       "-DSWIFT_PACKAGE",
       "-DDEBUG",
       "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuth",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
       "-module-cache-path",
       "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
       "-parseable-output",
@@ -784,15 +1594,22 @@
       "-package-name",
       "updoc",
       "-c",
+      "/Users/bnaylor/src/updoc/tests/updocTests/ActionItemTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/AuthManagerTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/AutocompleteTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/CalendarServiceTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/ChecklistTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/CommandEngineTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/EditorSyncTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/GDriveServiceTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/ImageLibraryManagerTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/MomaServiceTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/SearchEngineTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/ServiceTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift",
+      "/Users/bnaylor/src/updoc/tests/updocTests/TagManagerTests.swift",
       "/Users/bnaylor/src/updoc/tests/updocTests/TemplateEngineTests.swift",
       "-I",
       "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/Modules",
@@ -811,6 +1628,24 @@
       "-DSWIFT_PACKAGE",
       "-DDEBUG",
       "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuth",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/AppAuth-iOS/Sources/AppAuthCore",
+      "-Xcc",
+      "-fmodule-map-file=/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/module.modulemap",
+      "-Xcc",
+      "-I",
+      "-Xcc",
+      "/Users/bnaylor/src/updoc/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
       "-module-cache-path",
       "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/ModuleCache",
       "-parseable-output",
@@ -853,15 +1688,48 @@
     ]
   },
   "targetDependencyMap" : {
-    "updoc" : [
+    "AppAuth" : [
+      "AppAuthCore"
+    ],
+    "AppAuthCore" : [
 
+    ],
+    "AppAuthTV" : [
+      "AppAuthCore"
+    ],
+    "GTMAppAuth" : [
+      "AppAuthCore",
+      "GTMSessionFetcherCore"
+    ],
+    "GTMSessionFetcherCore" : [
+
+    ],
+    "GTMSessionFetcherFull" : [
+      "GTMSessionFetcherCore"
+    ],
+    "GTMSessionFetcherLogView" : [
+      "GTMSessionFetcherCore"
+    ],
+    "updoc" : [
+      "AppAuth",
+      "GTMAppAuth",
+      "AppAuthCore",
+      "GTMSessionFetcherCore"
     ],
     "updocPackageTests" : [
       "updocTests",
-      "updoc"
+      "updoc",
+      "AppAuth",
+      "GTMAppAuth",
+      "AppAuthCore",
+      "GTMSessionFetcherCore"
     ],
     "updocTests" : [
-      "updoc"
+      "updoc",
+      "AppAuth",
+      "GTMAppAuth",
+      "AppAuthCore",
+      "GTMSessionFetcherCore"
     ]
   },
   "testDiscoveryCommands" : {
@@ -886,6 +1754,48 @@
     }
   },
   "writeCommands" : {
+    "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSession.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionDelegate.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/AuthSessionStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/GTMOAuth2Compatibility.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainAttribute.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainHelper.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/checkouts/GTMAppAuth/GTMAppAuth/Sources/KeychainStore/KeychainStore.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/DerivedSources/resource_bundle_accessor.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/sources"
+    },
     "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt" : {
       "alwaysOutOfDate" : true,
       "inputs" : [
@@ -943,6 +1853,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/Config.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift"
         },
         {
@@ -959,11 +1873,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GDocsModels.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift"
         },
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/GDriveService.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/GlobalSearchOverlayView.swift"
         },
         {
           "kind" : "file",
@@ -975,6 +1897,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/Models/ImageMap.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift"
         },
         {
@@ -983,7 +1909,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/RemoteImageAttachment.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/RemoteImageCache.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/SearchEngine.swift"
         },
         {
           "kind" : "file",
@@ -996,6 +1934,22 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/src/updoc/SyncCoordinator.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TagManager.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TaskRow.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TaskSection.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/src/updoc/TaskSidebarView.swift"
         },
         {
           "kind" : "file",
@@ -1021,6 +1975,202 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDAuthState+IOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDAuthorizationService+IOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentCatalyst.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentIOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentIOSCustomBrowser.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/LoopbackHTTPServer/OIDLoopbackHTTPServer.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDAuthState+Mac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDAuthorizationService+Mac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDExternalUserAgentMac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDRedirectHTTPHandler.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthState.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationService.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDClientMetadataParameters.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDEndSessionRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDEndSessionResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDError.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDErrorUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDFieldMapping.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDGrantTypes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDIDToken.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDRegistrationRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDRegistrationResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDResponseTypes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDScopeUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDScopes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDServiceConfiguration.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDServiceDiscovery.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDURLQueryComponent.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDURLSessionProvider.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSession.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionDelegate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/GTMOAuth2Compatibility.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainAttribute.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainHelper.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/resource_bundle_accessor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcher.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcherLogging.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcherService.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionUploadFetcher.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ActionItem.swift.o"
         },
         {
@@ -1041,6 +2191,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o"
         },
         {
@@ -1057,6 +2211,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o"
         },
         {
@@ -1065,7 +2223,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.swift.o"
         },
         {
           "kind" : "file",
@@ -1081,7 +2247,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.swift.o"
         },
         {
           "kind" : "file",
@@ -1094,6 +2272,22 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.swift.o"
         },
         {
           "kind" : "file",
@@ -1133,6 +2327,202 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDAuthState+IOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDAuthorizationService+IOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentCatalyst.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentIOS.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/iOS/OIDExternalUserAgentIOSCustomBrowser.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/LoopbackHTTPServer/OIDLoopbackHTTPServer.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDAuthState+Mac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDAuthorizationService+Mac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDExternalUserAgentMac.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/macOS/OIDRedirectHTTPHandler.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuth.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthState.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDAuthorizationService.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDClientMetadataParameters.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDEndSessionRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDEndSessionResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDError.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDErrorUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDFieldMapping.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDGrantTypes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDIDToken.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDRegistrationRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDRegistrationResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDResponseTypes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDScopeUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDScopes.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDServiceConfiguration.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDServiceDiscovery.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenRequest.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenResponse.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDTokenUtilities.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDURLQueryComponent.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/OIDURLSessionProvider.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/AppAuthCore.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSession.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionDelegate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/AuthSessionStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/GTMOAuth2Compatibility.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainAttribute.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainHelper.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/KeychainStore.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMAppAuth.build/resource_bundle_accessor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcher.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcherLogging.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionFetcherService.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/GTMSessionUploadFetcher.m.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/GTMSessionFetcherCore.build/resource_bundle_accessor.m.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ActionItem.swift.o"
         },
         {
@@ -1153,6 +2543,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o"
         },
         {
@@ -1169,6 +2563,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o"
         },
         {
@@ -1177,7 +2575,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.swift.o"
         },
         {
           "kind" : "file",
@@ -1193,7 +2599,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.swift.o"
         },
         {
           "kind" : "file",
@@ -1206,6 +2624,22 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.swift.o"
         },
         {
           "kind" : "file",
@@ -1222,6 +2656,10 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocPackageTests.build/runner.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ActionItemTests.swift.o"
         },
         {
           "kind" : "file",
@@ -1245,11 +2683,31 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/EditorSyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/GDriveServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/ImageLibraryManagerTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MarkdownEngineTests.swift.o"
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/MomaServiceTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/NoteTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SearchEngineTests.swift.o"
         },
         {
           "kind" : "file",
@@ -1258,6 +2716,10 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/SyncTests.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updocTests.build/TagManagerTests.swift.o"
         },
         {
           "kind" : "file",
@@ -1272,6 +2734,10 @@
         {
           "kind" : "virtual",
           "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ActionItemTests.swift"
         },
         {
           "kind" : "file",
@@ -1295,11 +2761,31 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/EditorSyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/GDriveServiceTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/ImageLibraryManagerTests.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/tests/updocTests/MarkdownEngineTests.swift"
         },
         {
           "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/MomaServiceTests.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/tests/updocTests/NoteTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/SearchEngineTests.swift"
         },
         {
           "kind" : "file",
@@ -1308,6 +2794,10 @@
         {
           "kind" : "file",
           "name" : "/Users/bnaylor/src/updoc/tests/updocTests/SyncTests.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/bnaylor/src/updoc/tests/updocTests/TagManagerTests.swift"
         },
         {
           "kind" : "file",

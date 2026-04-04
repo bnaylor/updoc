@@ -41,4 +41,30 @@ struct MarkdownEngineTests {
         #expect(ranges.contains { $0.style == .bold })
         #expect(ranges.contains { $0.style == .italic })
     }
+    
+    @Test func detectsStandardImageSyntax() throws {
+        let text = "Check this out: ![My Image](https://example.com/image.png)"
+        let ranges = engine.parse(text)
+        
+        let imageRange = try #require(ranges.first { 
+            if case .image(let url, let title) = $0.style {
+                return url == "https://example.com/image.png" && title == "My Image"
+            }
+            return false
+        })
+        #expect(imageRange.range.length == 42) // length of "![My Image](https://example.com/image.png)"
+    }
+    
+    @Test func detectsLocalAssetSyntax() throws {
+        let text = "Check this out: ![[my-asset-123]]"
+        let ranges = engine.parse(text)
+        
+        let assetRange = try #require(ranges.first { 
+            if case .image(let url, let title) = $0.style {
+                return url == "asset://my-asset-123" && title == nil
+            }
+            return false
+        })
+        #expect(assetRange.range.length == 17) // length of "![[my-asset-123]]"
+    }
 }

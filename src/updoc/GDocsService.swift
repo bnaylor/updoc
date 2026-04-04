@@ -20,29 +20,59 @@ public struct GDocsService: Sendable {
         return convertToMarkdown(doc)
     }
     
-    public func updateDocContent(docId: String, content: String) async throws {
-        // For simplicity in this implementation, we'll replace the entire body.
-        // Google Docs batchUpdate requires complex range-based edits.
-        // A common pattern for "replacing all" is:
-        // 1. Delete existing content (from 1 to end-1)
-        // 2. Insert new content at index 1
-        
+    public func updateDocContent(docId: String, content: String, assetMappings: [String: String] = [:]) async throws {
         let token = try await AuthManager.shared.getAccessToken()
         
-        // We first need the end index to delete everything
+        // 1. Get doc to find end index
         let url = URL(string: "https://docs.googleapis.com/v1/documents/\(docId)")!
         var getRequest = URLRequest(url: url)
         getRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         let (data, _) = try await URLSession.shared.data(for: getRequest)
         let doc = try JSONDecoder().decode(GDocsDocument.self, from: data)
-        
-        // Find the end index of the body (excluding the final newline)
         let endIndex = doc.body.content.last?.endIndex ?? 2
         
-        let deleteRequest = GDocsRequest(insertText: nil, deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: max(1, endIndex - 1))), insertInlineImage: nil, updateEmbeddedObjectProperties: nil)
-        let insertRequest = GDocsRequest(insertText: GDocsInsertTextRequest(text: content, location: GDocsLocation(index: 1)), deleteContentRange: nil, insertInlineImage: nil, updateEmbeddedObjectProperties: nil)
+        // 2. Parse content into segments
+        let segments = parseSegments(content: content, assetMappings: assetMappings)
         
-        let batchRequest = GDocsBatchUpdateRequest(requests: [deleteRequest, insertRequest])
+        // 3. Prepare requests
+        var requests: [GDocsRequest] = []
+        
+        // Delete existing content
+        requests.append(GDocsRequest(
+            insertText: nil,
+            deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: max(1, endIndex - 1))),
+            insertInlineImage: nil,
+            updateEmbeddedObjectProperties: nil
+        ))
+        
+        // Build the document from segments in reverse to keep indices stable
+        // Actually, it's easier to build it forward if we keep track of the current index, 
+        // but batchUpdate indices are based on the state BEFORE any requests are applied.
+        // Google Docs recommendation is to perform deletions first, then insertions in reverse order.
+        
+        for segment in segments.reversed() {
+            switch segment {
+            case .text(let text):
+                requests.append(GDocsRequest(
+                    insertText: GDocsInsertTextRequest(text: text, location: GDocsLocation(index: 1)),
+                    deleteContentRange: nil,
+                    insertInlineImage: nil,
+                    updateEmbeddedObjectProperties: nil
+                ))
+            case .image(let uri, _):
+                requests.append(GDocsRequest(
+                    insertText: nil,
+                    deleteContentRange: nil,
+                    insertInlineImage: GDocsInsertInlineImageRequest(uri: uri, location: GDocsLocation(index: 1)),
+                    updateEmbeddedObjectProperties: nil
+                ))
+                // Note: We can't tag it in the same batchUpdate if we don't know the objectId yet.
+                // We'll have to do a second pass or handle it differently.
+                // For now, let's just insert it.
+            }
+        }
+        
+        let batchRequest = GDocsBatchUpdateRequest(requests: [requests[0]]) // Just delete first
         let batchData = try JSONEncoder().encode(batchRequest)
         
         var updateRequest = URLRequest(url: URL(string: "https://docs.googleapis.com/v1/documents/\(docId):batchUpdate")!)
@@ -51,11 +81,65 @@ public struct GDocsService: Sendable {
         updateRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         updateRequest.httpBody = batchData
         
-        let (_, updateResponse) = try await URLSession.shared.data(for: updateRequest)
+        let _ = try await URLSession.shared.data(for: updateRequest)
         
-        if let httpResponse = updateResponse as? HTTPURLResponse, httpResponse.statusCode != 200 {
-            throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to update doc"])
+        // Now insert everything
+        let insertBatchRequest = GDocsBatchUpdateRequest(requests: Array(requests.dropFirst()))
+        let insertBatchData = try JSONEncoder().encode(insertBatchRequest)
+        updateRequest.httpBody = insertBatchData
+        
+        let (responseData, _) = try await URLSession.shared.data(for: updateRequest)
+        
+        // Tag images if we have them
+        let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: responseData)
+        var replyIdx = 0
+        for segment in segments.reversed() {
+            if case .image(_, let assetId) = segment {
+                if let objectId = batchResponse.replies[replyIdx].insertInlineImage?.objectId {
+                    try await tagImage(docId: docId, objectId: objectId, assetId: assetId)
+                }
+                replyIdx += 1
+            } else {
+                replyIdx += 1
+            }
         }
+    }
+    
+    private enum ContentSegment {
+        case text(String)
+        case image(uri: String, assetId: String)
+    }
+    
+    private func parseSegments(content: String, assetMappings: [String: String]) -> [ContentSegment] {
+        var segments: [ContentSegment] = []
+        let regex = try! NSRegularExpression(pattern: "!\\[\\[(.*?)\\]\\]", options: [])
+        let nsString = content as NSString
+        let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsString.length))
+        
+        var lastEnd = 0
+        for match in matches {
+            let range = match.range
+            if range.location > lastEnd {
+                let text = nsString.substring(with: NSRange(location: lastEnd, length: range.location - lastEnd))
+                segments.append(.text(text))
+            }
+            
+            let assetId = nsString.substring(with: match.range(at: 1))
+            if let uri = assetMappings[assetId] {
+                segments.append(.image(uri: uri, assetId: assetId))
+            } else {
+                // Fallback to raw text if no mapping found
+                segments.append(.text(nsString.substring(with: range)))
+            }
+            lastEnd = range.location + range.length
+        }
+        
+        if lastEnd < nsString.length {
+            let text = nsString.substring(with: NSRange(location: lastEnd, length: nsString.length - lastEnd))
+            segments.append(.text(text))
+        }
+        
+        return segments
     }
     
     public func insertImage(docId: String, index: Int, uri: String, assetId: String) async throws {

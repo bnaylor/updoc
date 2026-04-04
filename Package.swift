@@ -20,8 +20,7 @@ let package = Package(
                 .product(name: "GTMAppAuth", package: "GTMAppAuth"),
                 .product(name: "AppAuth", package: "AppAuth-iOS")
             ],
-            path: "src/updoc",
-            infoPlist: "Info.plist"
+            path: "src/updoc"
         ),
         .testTarget(
             name: "updocTests",

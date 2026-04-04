@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 public actor ImageLibraryManager {
     public static let shared = ImageLibraryManager()
@@ -33,5 +34,36 @@ public actor ImageLibraryManager {
         // Construct URL directly since ID is now the safeFilename
         let fileURL = assetsDir.appendingPathComponent(id)
         return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
+    }
+
+    public nonisolated func getDriveId(for assetId: String, in context: ModelContext) -> String? {
+        let descriptor = FetchDescriptor<ImageMap>(
+            predicate: #Predicate<ImageMap> { $0.assetId == assetId }
+        )
+        return (try? context.fetch(descriptor))?.first?.driveFileId
+    }
+
+    public nonisolated func getDriveUrl(for assetId: String, in context: ModelContext) -> String? {
+        let descriptor = FetchDescriptor<ImageMap>(
+            predicate: #Predicate<ImageMap> { $0.assetId == assetId }
+        )
+        return (try? context.fetch(descriptor))?.first?.driveUrl
+    }
+
+    public nonisolated func saveMapping(assetId: String, driveFileId: String, driveUrl: String, in context: ModelContext) {
+        let descriptor = FetchDescriptor<ImageMap>(
+            predicate: #Predicate<ImageMap> { $0.assetId == assetId }
+        )
+        
+        if let existing = (try? context.fetch(descriptor))?.first {
+            existing.driveFileId = driveFileId
+            existing.driveUrl = driveUrl
+            existing.lastSyncedAt = Date()
+        } else {
+            let newMap = ImageMap(assetId: assetId, driveFileId: driveFileId, driveUrl: driveUrl)
+            context.insert(newMap)
+        }
+        
+        try? context.save()
     }
 }

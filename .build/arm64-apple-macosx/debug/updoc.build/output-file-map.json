@@ -37,6 +37,13 @@
     "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandPaletteView.swiftdeps",
     "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/CommandPaletteView.dia"
   },
+  "/Users/bnaylor/src/updoc/src/updoc/Config.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Config.dia"
+  },
   "/Users/bnaylor/src/updoc/src/updoc/ContentView.swift": {
     "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.d",
     "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ContentView.swift.o",
@@ -65,6 +72,13 @@
     "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GCalendarService.swiftdeps",
     "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GCalendarService.dia"
   },
+  "/Users/bnaylor/src/updoc/src/updoc/GDocsModels.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsModels.dia"
+  },
   "/Users/bnaylor/src/updoc/src/updoc/GDocsService.swift": {
     "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.d",
     "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDocsService.swift.o",
@@ -78,6 +92,13 @@
     "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService~partial.swiftmodule",
     "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.swiftdeps",
     "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GDriveService.dia"
+  },
+  "/Users/bnaylor/src/updoc/src/updoc/GlobalSearchOverlayView.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/GlobalSearchOverlayView.dia"
   },
   "/Users/bnaylor/src/updoc/src/updoc/ImageLibraryManager.swift": {
     "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageLibraryManager.d",
@@ -93,6 +114,13 @@
     "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MarkdownEngine.swiftdeps",
     "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MarkdownEngine.dia"
   },
+  "/Users/bnaylor/src/updoc/src/updoc/Models/ImageMap.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/ImageMap.dia"
+  },
   "/Users/bnaylor/src/updoc/src/updoc/MomaService.swift": {
     "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.d",
     "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/MomaService.swift.o",
@@ -107,12 +135,33 @@
     "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Note.swiftdeps",
     "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/Note.dia"
   },
+  "/Users/bnaylor/src/updoc/src/updoc/RemoteImageAttachment.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageAttachment.dia"
+  },
+  "/Users/bnaylor/src/updoc/src/updoc/RemoteImageCache.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RemoteImageCache.dia"
+  },
   "/Users/bnaylor/src/updoc/src/updoc/RuleManagerView.swift": {
     "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.d",
     "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swift.o",
     "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView~partial.swiftmodule",
     "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.swiftdeps",
     "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/RuleManagerView.dia"
+  },
+  "/Users/bnaylor/src/updoc/src/updoc/SearchEngine.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SearchEngine.dia"
   },
   "/Users/bnaylor/src/updoc/src/updoc/SidebarView.swift": {
     "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SidebarView.d",
@@ -134,6 +183,34 @@
     "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator~partial.swiftmodule",
     "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.swiftdeps",
     "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/SyncCoordinator.dia"
+  },
+  "/Users/bnaylor/src/updoc/src/updoc/TagManager.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TagManager.dia"
+  },
+  "/Users/bnaylor/src/updoc/src/updoc/TaskRow.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskRow.dia"
+  },
+  "/Users/bnaylor/src/updoc/src/updoc/TaskSection.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSection.dia"
+  },
+  "/Users/bnaylor/src/updoc/src/updoc/TaskSidebarView.swift": {
+    "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.d",
+    "object": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.swift.o",
+    "swiftmodule": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView~partial.swiftmodule",
+    "swift-dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.swiftdeps",
+    "diagnostics": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TaskSidebarView.dia"
   },
   "/Users/bnaylor/src/updoc/src/updoc/TemplateRule.swift": {
     "dependencies": "/Users/bnaylor/src/updoc/.build/arm64-apple-macosx/debug/updoc.build/TemplateRule.d",

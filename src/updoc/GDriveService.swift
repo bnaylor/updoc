@@ -1,4 +1,5 @@
 import Foundation
+import UniformTypeIdentifiers
 
 public struct GDriveResponse: Codable {
     public let headRevisionId: String?
@@ -104,8 +105,11 @@ public struct GDriveService: Sendable {
         body.append("\r\n".data(using: .utf8)!)
         
         // Media part
+        let type = UTType(filenameExtension: (filename as NSString).pathExtension) ?? .data
+        let mimeType = type.preferredMIMEType ?? "application/octet-stream"
+        
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
         body.append(data)
         body.append("\r\n".data(using: .utf8)!)
         

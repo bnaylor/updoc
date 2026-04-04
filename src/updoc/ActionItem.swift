@@ -17,6 +17,11 @@ public class ActionItem {
         self.status = status
         self.createdAt = createdAt
     }
+    
+    public var isOverdue: Bool {
+        guard let dueDate = dueDate, status != .done else { return false }
+        return dueDate < Calendar.current.startOfDay(for: .now)
+    }
 }
 
 public enum ActionItemStatus: String, Codable, CaseIterable {
