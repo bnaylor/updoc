@@ -13,14 +13,21 @@ struct ServiceTests {
     @Test func gDocsServiceFailsWhenNotAuthenticated() async throws {
         let service = GDocsService()
         await #expect(throws: Error.self) {
-            try await service.fetchDocContent(docId: "test-id")
+            _ = try await service.fetchDocContent(docId: "test-id")
         }
     }
 
     @Test func gDocsServiceUpdateFailsWhenNotAuthenticated() async throws {
         let service = GDocsService()
+        let dummyDoc = GDocsDocument(
+            documentId: "test-id",
+            revisionId: "rev-1",
+            title: "Test",
+            body: GDocsBody(content: []),
+            inlineObjects: nil
+        )
         await #expect(throws: Error.self) {
-            try await service.updateDocContent(docId: "test-id", content: "# New Content")
+            try await service.updateDocContent(docId: "test-id", content: "# New Content", baseDocument: dummyDoc)
         }
     }
 

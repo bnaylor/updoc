@@ -22,7 +22,11 @@ public class SyncCoordinator {
     
     public func sync(noteId: PersistentIdentifier, in context: ModelContext) async throws {
         // First check authentication robustly
-        _ = try await AuthManager.shared.getAccessToken()
+        do {
+            _ = try await AuthManager.shared.getAccessToken()
+        } catch {
+            throw SyncError.notAuthenticated
+        }
         
         guard let note = context.model(for: noteId) as? Note, let docId = note.googleDocId else { return }
         
@@ -39,7 +43,7 @@ public class SyncCoordinator {
             
             if remoteRev != lastRevision {
                 // Pull and merge
-                let remoteContent = try await gDocs.fetchDocContent(docId: docId)
+                let (remoteContent, _) = try await gDocs.fetchDocContent(docId: docId)
                 
                 // ONLY throw if content is actually different
                 if localContent != remoteContent {
@@ -50,6 +54,9 @@ public class SyncCoordinator {
                     try context.save()
                 }
             } else {
+                // Fetch document once to get current state (e.g. endIndex)
+                let (_, baseDoc) = try await gDocs.fetchDocContent(docId: docId)
+                
                 // Push local changes
                 let assetIds = extractAssetIds(from: localContent)
                 var mappings: [String: String] = [:]
@@ -58,7 +65,7 @@ public class SyncCoordinator {
                         mappings[id] = driveUrl
                     }
                 }
-                try await gDocs.updateDocContent(docId: docId, content: localContent, assetMappings: mappings)
+                try await gDocs.updateDocContent(docId: docId, content: localContent, baseDocument: baseDoc, assetMappings: mappings)
             }
         } catch {
             if error is SyncError {

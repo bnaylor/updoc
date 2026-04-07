@@ -3,7 +3,7 @@ import Foundation
 public struct GDocsService: Sendable {
     public init() {}
     
-    public func fetchDocContent(docId: String) async throws -> String {
+    public func fetchDocContent(docId: String) async throws -> (markdown: String, document: GDocsDocument) {
         let token = try await AuthManager.shared.getAccessToken()
         let url = URL(string: "https://docs.googleapis.com/v1/documents/\(docId)")!
         var request = URLRequest(url: url)
@@ -17,18 +17,14 @@ public struct GDocsService: Sendable {
         }
         
         let doc = try JSONDecoder().decode(GDocsDocument.self, from: data)
-        return convertToMarkdown(doc)
+        return (markdown: convertToMarkdown(doc), document: doc)
     }
     
-    public func updateDocContent(docId: String, content: String, assetMappings: [String: String] = [:]) async throws {
+    public func updateDocContent(docId: String, content: String, baseDocument: GDocsDocument, assetMappings: [String: String] = [:]) async throws {
         let token = try await AuthManager.shared.getAccessToken()
         
-        // 1. Get doc to find end index
-        let url = URL(string: "https://docs.googleapis.com/v1/documents/\(docId)")!
-        var getRequest = URLRequest(url: url)
-        getRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        let (data, _) = try await URLSession.shared.data(for: getRequest)
-        let doc = try JSONDecoder().decode(GDocsDocument.self, from: data)
+        // 1. Use provided baseDocument to find end index
+        let doc = baseDocument
         let endIndex = doc.body.content.last?.endIndex ?? 2
         
         // 2. Parse content into segments
