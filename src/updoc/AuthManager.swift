@@ -3,25 +3,36 @@ import AppKit
 import AuthenticationServices
 import GTMAppAuth
 @preconcurrency import AppAuth
+import Observation
 
 @MainActor
+@Observable
 public final class AuthManager: NSObject, @unchecked Sendable {
     public static let shared = AuthManager()
     
     private var authState: OIDAuthState?
+    public private(set) var userEmail: String?
     private var isAuthorizing = false
     private var activeFlow: OIDExternalUserAgentSession?
     
+    private static let keychainService = "com.example.updoc.auth"
+    private static let keychainAccount = "authState"
+
     private override init() {
         super.init()
         loadAuthState()
     }
     
-    public func authorize(in window: NSWindow) async throws {
-        guard !isAuthorizing else {
-            print("AuthManager: Authorization already in progress")
-            return
+    public func load() async {
+        // Just triggers the init-time loading or refreshes if needed
+        if let authState = authState {
+            self.userEmail = authState.lastTokenResponse?.idToken != nil ? 
+                AuthSession(authState: authState).userEmail : nil
         }
+    }
+    
+    public func authorize(in window: NSWindow) async throws {
+        guard !isAuthorizing else { return }
         isAuthorizing = true
         defer { isAuthorizing = false }
         
@@ -29,24 +40,16 @@ public final class AuthManager: NSObject, @unchecked Sendable {
         let clientSecret = Config.clientSecret
         let redirectURIString = Config.redirectURI
         
-        print("AuthManager: Starting flow for \(clientID.prefix(10))..."); fflush(stdout)
-        
         guard let redirectURL = URL(string: redirectURIString) else {
             throw NSError(domain: "AuthManager", code: -5, userInfo: [NSLocalizedDescriptionKey: "Invalid redirect URI"])
         }
         
-        print("AuthManager: Discovering configuration..."); fflush(stdout)
         let issuer = URL(string: "https://accounts.google.com")!
-        
         let configuration = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<OIDServiceConfiguration, Error>) in
             OIDAuthorizationService.discoverConfiguration(forIssuer: issuer) { config, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else if let config = config {
-                    continuation.resume(returning: config)
-                } else {
-                    continuation.resume(throwing: NSError(domain: "AuthManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Discovery failed"]))
-                }
+                if let error = error { continuation.resume(throwing: error) }
+                else if let config = config { continuation.resume(returning: config) }
+                else { continuation.resume(throwing: NSError(domain: "AuthManager", code: -1)) }
             }
         }
         
@@ -59,35 +62,34 @@ public final class AuthManager: NSObject, @unchecked Sendable {
                 "email",
                 "https://www.googleapis.com/auth/documents",
                 "https://www.googleapis.com/auth/drive.metadata.readonly",
-                "https://www.googleapis.com/auth/drive.file"
+                "https://www.googleapis.com/auth/drive.file",
+                "https://www.googleapis.com/auth/calendar.events.readonly"
             ],
             redirectURL: redirectURL,
             responseType: OIDResponseTypeCode,
             additionalParameters: nil
         )
         
-        print("AuthManager: Starting auth session via AppAuth UI..."); fflush(stdout)
-        
-        // Use the built-in AppAuth external user agent for macOS
         let externalUserAgent = OIDExternalUserAgentMac(presenting: window)
         
         let finalAuthState = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<OIDAuthState, Error>) in
-            // CRITICAL: We MUST hold the returned session, otherwise the flow is dropped immediately.
             self.activeFlow = OIDAuthState.authState(byPresenting: request, externalUserAgent: externalUserAgent) { authState, error in
                 if let error = error {
-                    print("AuthManager: Auth flow error: \(error.localizedDescription)"); fflush(stdout)
                     continuation.resume(throwing: error)
                 } else if let authState = authState {
-                    print("AuthManager: Auth flow SUCCESS"); fflush(stdout)
                     continuation.resume(returning: authState)
                 } else {
-                    continuation.resume(throwing: NSError(domain: "AuthManager", code: -7, userInfo: [NSLocalizedDescriptionKey: "Auth flow returned nil"]))
+                    continuation.resume(throwing: NSError(domain: "AuthManager", code: -7))
                 }
             }
         }
         
         self.activeFlow = nil
         self.setAuthState(finalAuthState)
+    }
+    
+    public func signOut() {
+        self.setAuthState(nil)
     }
     
     public func getAccessToken() async throws -> String {
@@ -107,26 +109,40 @@ public final class AuthManager: NSObject, @unchecked Sendable {
     
     private func setAuthState(_ authState: OIDAuthState?) {
         self.authState = authState
-        saveAuthState()
+        if let authState = authState {
+            self.userEmail = AuthSession(authState: authState).userEmail
+            saveAuthState(authState)
+        } else {
+            self.userEmail = nil
+            removeAuthSession()
+        }
     }
     
-    private func saveAuthState() {
-        if let authState = authState {
-            do {
-                try KeychainStore.save(authState: authState)
-            } catch {
-                print("AuthManager: Failed to save auth state: \(error)")
-            }
-        } else {
-            try? KeychainStore.removeAuthSession()
+    private func saveAuthState(_ authState: OIDAuthState) {
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: authState, requiringSecureCoding: false)
+            let value = data.base64EncodedString()
+            try KeychainHelper.save(service: Self.keychainService, account: Self.keychainAccount, value: value)
+        } catch {
+            print("AuthManager: Failed to save auth state: \(error)")
         }
     }
     
     private func loadAuthState() {
-        do {
-            self.authState = try KeychainStore.retrieveAuthState()
-        } catch {
-            // No existing auth state
+        if let value = KeychainHelper.read(service: Self.keychainService, account: Self.keychainAccount),
+           let data = Data(base64Encoded: value) {
+            do {
+                self.authState = try NSKeyedUnarchiver.unarchivedObject(ofClass: OIDAuthState.self, from: data)
+                if let authState = self.authState {
+                    self.userEmail = AuthSession(authState: authState).userEmail
+                }
+            } catch {
+                print("AuthManager: Failed to load auth state: \(error)")
+            }
         }
+    }
+    
+    private func removeAuthSession() {
+        try? KeychainHelper.delete(service: Self.keychainService, account: Self.keychainAccount)
     }
 }

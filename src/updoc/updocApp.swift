@@ -9,6 +9,9 @@ struct updocApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    await AuthManager.shared.load()
+                }
                 .environment(themeManager)
         }
         .modelContainer(for: [Note.self, TemplateRule.self, ActionItem.self, ImageMap.self])

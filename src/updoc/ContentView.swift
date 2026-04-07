@@ -18,7 +18,6 @@ struct ContentView: View {
     @State private var showingGlobalSearch = false
     @State private var showingRuleManager = false
     @State private var showingSettings = false
-    @State private var isAuthenticated = false
     @State private var selectionRange: NSRange?
     @State private var columnVisibility = NavigationSplitViewVisibility.automatic
     
@@ -55,14 +54,14 @@ struct ContentView: View {
                             Button(action: { triggerSync(for: note) }) {
                                 Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
                             }
-                            .disabled(isSyncing || !isAuthenticated)
+                            .disabled(isSyncing || !AuthManager.shared.isAuthenticated())
                             .keyboardShortcut("s", modifiers: .command)
                             .help("Sync changes with Google Docs (Cmd+S)")
                         } else {
                             Button(action: { publishDraft(note) }) {
                                 Label("Publish to Google Docs", systemImage: "arrow.up.doc.fill")
                             }
-                            .disabled(isSyncing || !isAuthenticated)
+                            .disabled(isSyncing || !AuthManager.shared.isAuthenticated())
                             .buttonStyle(.borderedProminent)
                         }
                     }
@@ -164,9 +163,6 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openCommandPalette)) { _ in
             showingCommandPalette = true
         }
-        .onAppear {
-            isAuthenticated = AuthManager.shared.isAuthenticated()
-        }
         .task {
             // Short delay to ensure view hierarchy is ready
             try? await Task.sleep(nanoseconds: 500_000_000)
@@ -214,9 +210,6 @@ struct ContentView: View {
         Task {
             do {
                 try await AuthManager.shared.authorize(in: window)
-                await MainActor.run {
-                    self.isAuthenticated = AuthManager.shared.isAuthenticated()
-                }
             } catch {
                 syncError = "Login failed: \(error.localizedDescription)"
             }

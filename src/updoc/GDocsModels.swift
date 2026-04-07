@@ -54,6 +54,12 @@ public struct GDocsInlineObjectElement: Codable {
 
 public struct GDocsTextRun: Codable {
     public let content: String?
+    public let textStyle: GDocsTextStyle?
+}
+
+public struct GDocsTextStyle: Codable {
+    public let bold: Bool?
+    public let italic: Bool?
 }
 
 public struct GDocsWriteControl: Codable {

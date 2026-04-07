@@ -30,34 +30,27 @@ public class SyncCoordinator {
         
         guard let note = context.model(for: noteId) as? Note, let docId = note.googleDocId else { return }
         
-        // Capture local state BEFORE any network calls (like syncImages)
-        // to ensure we are syncing exactly what we expect even if it changes during the process.
+        // Capture local state BEFORE any network calls
         let localContent = note.content
-        let lastRevision = note.lastSyncedRevision
         
         // Sync images to Drive first
         try await syncImages(note: note, in: context)
         
         do {
-            let remoteRev = try await gDrive.getFileRevision(fileId: docId)
+            // Fetch current document state
+            let (remoteContent, baseDoc) = try await gDocs.fetchDocContent(docId: docId)
+            let remoteRev = baseDoc.revisionId ?? ""
             
-            if remoteRev != lastRevision {
-                // Pull and merge
-                let (remoteContent, _) = try await gDocs.fetchDocContent(docId: docId)
-                
-                // ONLY throw if content is actually different
-                if localContent != remoteContent {
-                    throw SyncError.conflict(local: localContent, remote: remoteContent, remoteRevision: remoteRev)
-                } else {
-                    // Content is identical, just update revision
+            if localContent == remoteContent {
+                // If content is identical, just update the revision tracking
+                if note.lastSyncedRevision != remoteRev {
                     note.lastSyncedRevision = remoteRev
                     try context.save()
                 }
             } else {
-                // Fetch document once to get current state (e.g. endIndex)
-                let (_, baseDoc) = try await gDocs.fetchDocContent(docId: docId)
-                
-                // Push local changes
+                // If content differs, attempt a seamless push.
+                // GDocsService will handle the 3-way merge (rebase) internally
+                // using WriteControl to ensure safety.
                 let assetIds = extractAssetIds(from: localContent)
                 var mappings: [String: String] = [:]
                 for id in assetIds {
@@ -65,7 +58,10 @@ public class SyncCoordinator {
                         mappings[id] = driveUrl
                     }
                 }
-                try await gDocs.updateDocContent(docId: docId, content: localContent, baseDocument: baseDoc, assetMappings: mappings)
+                
+                let newRev = try await gDocs.updateDocContent(docId: docId, content: localContent, baseDocument: baseDoc, assetMappings: mappings)
+                note.lastSyncedRevision = newRev
+                try context.save()
             }
         } catch {
             if error is SyncError {
@@ -83,14 +79,11 @@ public class SyncCoordinator {
         let folderId = try await gDrive.getOrCreateFolder(named: "updoc_assets")
         
         for assetId in assetIds {
-            // Check if mapping exists
             if ImageLibraryManager.shared.getDriveId(for: assetId, in: context) == nil {
-                // Not uploaded yet, so upload it
                 if let localURL = await ImageLibraryManager.shared.getAssetURL(for: assetId),
                    let data = try? Data(contentsOf: localURL) {
                     
                     let driveFileId = try await gDrive.uploadFile(data: data, filename: assetId, parentId: folderId)
-                    // Construct a direct viewing URL (placeholder format)
                     let driveUrl = "https://lh3.googleusercontent.com/u/0/d/\(driveFileId)"
                     
                     ImageLibraryManager.shared.saveMapping(assetId: assetId, driveFileId: driveFileId, driveUrl: driveUrl, in: context)

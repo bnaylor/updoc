@@ -56,7 +56,8 @@ public actor GCalendarService {
         let (data, response) = try await URLSession.shared.data(for: request)
         
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
-            throw NSError(domain: "GCalendarService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch calendar events"])
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GCalendarService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch calendar events: \(errorBody)"])
         }
         
         let decoder = JSONDecoder()

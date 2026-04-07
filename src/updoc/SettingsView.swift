@@ -10,6 +10,24 @@ struct SettingsView: View {
     var body: some View {
         VStack(spacing: 20) {
             Form {
+                Section("Google Account") {
+                    if AuthManager.shared.isAuthenticated() {
+                        HStack {
+                            Text("Signed in as:")
+                            Text(AuthManager.shared.userEmail ?? "Unknown")
+                                .fontWeight(.bold)
+                            Spacer()
+                            Button("Sign Out") {
+                                AuthManager.shared.signOut()
+                            }
+                        }
+                    } else {
+                        Button("Sign In with Google") {
+                            login()
+                        }
+                    }
+                }
+                
                 Section("Google API Credentials") {
                     TextField("Client ID", text: $clientID)
                     TextField("Client Secret", text: $clientSecret)
@@ -64,7 +82,7 @@ struct SettingsView: View {
         UserDefaults.standard.removeObject(forKey: "googleClientSecret")
         UserDefaults.standard.removeObject(forKey: "googleRedirectURI")
         
-        try? KeychainStore.removeAuthSession()
+        AuthManager.shared.signOut()
     }
     
     private func save() {
@@ -72,6 +90,17 @@ struct SettingsView: View {
             try Config.saveCredentials(clientID: clientID, clientSecret: clientSecret, redirectURI: redirectURI)
         } catch {
             print("Failed to save credentials to Keychain: \(error)")
+        }
+    }
+    
+    private func login() {
+        guard let window = NSApp.keyWindow else { return }
+        Task {
+            do {
+                try await AuthManager.shared.authorize(in: window)
+            } catch {
+                print("Settings login failed: \(error)")
+            }
         }
     }
 }

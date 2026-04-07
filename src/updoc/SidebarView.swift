@@ -8,31 +8,37 @@ struct SidebarView: View {
     @Binding var selectedNote: Note?
     
     @State private var meetings: [CalendarEvent] = []
-    @State private var isAuthenticated = false
     private let templateEngine = SmartTemplateEngine()
     
     var body: some View {
         List(selection: $selectedNote) {
             Section {
-                if isAuthenticated {
+                if AuthManager.shared.isAuthenticated() {
                     ForEach(meetings) { meeting in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(meeting.summary)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(meeting.summary)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .lineLimit(1)
+                                
+                                Text(meeting.start.formatted(date: .omitted, time: .shortened))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
                             
-                            Text(meeting.start.formatted(date: .omitted, time: .shortened))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            Spacer()
                             
                             Button(action: { startNote(for: meeting) }) {
-                                Text("Start Note")
-                                    .font(.caption)
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title3)
+                                    .foregroundColor(.accentColor)
                             }
-                            .buttonStyle(.bordered)
-                            .controlSize(.small)
+                            .buttonStyle(.plain)
+                            .help("Start Note")
                         }
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 4)
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 8) {
@@ -53,7 +59,7 @@ struct SidebarView: View {
                 HStack {
                     Text("TODAY'S MEETINGS")
                     Spacer()
-                    if isAuthenticated {
+                    if AuthManager.shared.isAuthenticated() {
                         Button(action: refreshMeetings) {
                             Image(systemName: "arrow.clockwise")
                         }
@@ -91,14 +97,19 @@ struct SidebarView: View {
             }
         }
         .onAppear {
-            isAuthenticated = AuthManager.shared.isAuthenticated()
-            if isAuthenticated {
+            if AuthManager.shared.isAuthenticated() {
                 refreshMeetings()
             }
         }
+        .onChange(of: AuthManager.shared.userEmail) {
+            if AuthManager.shared.isAuthenticated() {
+                refreshMeetings()
+            } else {
+                meetings = []
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .syncAllNotes)) { _ in
-            isAuthenticated = AuthManager.shared.isAuthenticated()
-            if isAuthenticated {
+            if AuthManager.shared.isAuthenticated() {
                 refreshMeetings()
             }
         }
@@ -112,20 +123,14 @@ struct SidebarView: View {
         Task {
             do {
                 try await AuthManager.shared.authorize(in: window)
-                await MainActor.run {
-                    self.isAuthenticated = AuthManager.shared.isAuthenticated()
-                    if self.isAuthenticated {
-                        refreshMeetings()
-                    }
-                }
             } catch {
-                print("Login failed: \(error)")
+                print("Sidebar login failed: \(error)")
             }
         }
     }
     
     private func refreshMeetings() {
-        guard isAuthenticated else { return }
+        guard AuthManager.shared.isAuthenticated() else { return }
         Task {
             do {
                 let fetchedMeetings = try await GCalendarService.shared.fetchTodaysEvents()
@@ -147,7 +152,6 @@ struct SidebarView: View {
     private func startNote(for meeting: CalendarEvent) {
         let content = templateEngine.resolveTemplate(for: meeting, rules: templateRules)
         
-        // Extract Doc ID from location if it's a Google Doc
         let docId = extractDocId(from: meeting.location)
         
         let newNote = Note(
@@ -163,7 +167,6 @@ struct SidebarView: View {
     
     private func extractDocId(from location: String?) -> String? {
         guard let location = location else { return nil }
-        // Simple regex or check for Google Doc patterns
         if location.contains("docs.google.com/document/d/"),
            let range = location.range(of: "/d/") {
             let start = range.upperBound
