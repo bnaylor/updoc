@@ -6,3 +6,4 @@
 .worktrees/
 .build/
 updoc.app/
+tests/ui/latest_render.png
