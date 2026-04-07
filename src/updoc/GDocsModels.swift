@@ -2,6 +2,7 @@ import Foundation
 
 public struct GDocsDocument: Codable {
     public let documentId: String
+    public let revisionId: String?
     public let title: String
     public let body: GDocsBody
     public let inlineObjects: [String: GDocsInlineObject]?
@@ -55,9 +56,23 @@ public struct GDocsTextRun: Codable {
     public let content: String?
 }
 
+public struct GDocsWriteControl: Codable {
+    public let requiredRevisionId: String?
+    
+    public init(requiredRevisionId: String?) {
+        self.requiredRevisionId = requiredRevisionId
+    }
+}
+
 // Request models for batchUpdate
 public struct GDocsBatchUpdateRequest: Codable {
     public let requests: [GDocsRequest]
+    public let writeControl: GDocsWriteControl?
+
+    public init(requests: [GDocsRequest], writeControl: GDocsWriteControl? = nil) {
+        self.requests = requests
+        self.writeControl = writeControl
+    }
 }
 
 public struct GDocsRequest: Codable {
