@@ -23,17 +23,62 @@ public struct GDocsService: Sendable {
     public func updateDocContent(docId: String, content: String, baseDocument: GDocsDocument, assetMappings: [String: String] = [:]) async throws {
         let token = try await AuthManager.shared.getAccessToken()
         
-        // 1. Use provided baseDocument to find end index
-        let doc = baseDocument
+        let (requests, segments) = generateUpdateRequests(from: "", to: content, doc: baseDocument, assetMappings: assetMappings)
+        
+        if requests.isEmpty { return }
+        
+        let writeControl = GDocsWriteControl(requiredRevisionId: baseDocument.revisionId)
+        
+        // 1. Delete first
+        let deleteBatchRequest = GDocsBatchUpdateRequest(requests: [requests[0]], writeControl: writeControl)
+        let deleteBatchData = try JSONEncoder().encode(deleteBatchRequest)
+        
+        var updateRequest = URLRequest(url: URL(string: "https://docs.googleapis.com/v1/documents/\(docId):batchUpdate")!)
+        updateRequest.httpMethod = "POST"
+        updateRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        updateRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        updateRequest.httpBody = deleteBatchData
+        
+        let (deleteData, deleteResponse) = try await URLSession.shared.data(for: updateRequest)
+        if let httpResponse = deleteResponse as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: deleteData, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to delete doc content: \(errorBody)"])
+        }
+        
+        // 2. Insert everything
+        let insertBatchRequest = GDocsBatchUpdateRequest(requests: Array(requests.dropFirst()), writeControl: writeControl)
+        let insertBatchData = try JSONEncoder().encode(insertBatchRequest)
+        updateRequest.httpBody = insertBatchData
+        
+        let (responseData, response) = try await URLSession.shared.data(for: updateRequest)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: responseData, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to update doc: \(errorBody)"])
+        }
+        
+        // Tag images if we have them
+        let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: responseData)
+        var replyIdx = 0
+        for segment in segments.reversed() {
+            if case .image(_, let assetId) = segment {
+                if let objectId = batchResponse.replies[replyIdx].insertInlineImage?.objectId {
+                    try await tagImage(docId: docId, objectId: objectId, assetId: assetId)
+                }
+                replyIdx += 1
+            } else {
+                replyIdx += 1
+            }
+        }
+    }
+    
+    private func generateUpdateRequests(from oldContent: String, to newContent: String, doc: GDocsDocument, assetMappings: [String: String]) -> ([GDocsRequest], [ContentSegment]) {
         let endIndex = doc.body.content.last?.endIndex ?? 2
+        let segments = parseSegments(content: newContent, assetMappings: assetMappings)
         
-        // 2. Parse content into segments
-        let segments = parseSegments(content: content, assetMappings: assetMappings)
-        
-        // 3. Prepare requests
         var requests: [GDocsRequest] = []
         
-        // Delete existing content
+        // Delete existing content (from index 1 to endIndex-1)
         requests.append(GDocsRequest(
             insertText: nil,
             deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: max(1, endIndex - 1))),
@@ -41,11 +86,7 @@ public struct GDocsService: Sendable {
             updateEmbeddedObjectProperties: nil
         ))
         
-        // Build the document from segments in reverse to keep indices stable
-        // Actually, it's easier to build it forward if we keep track of the current index, 
-        // but batchUpdate indices are based on the state BEFORE any requests are applied.
-        // Google Docs recommendation is to perform deletions first, then insertions in reverse order.
-        
+        // Insert new content in reverse order at index 1
         for segment in segments.reversed() {
             switch segment {
             case .text(let text):
@@ -62,43 +103,10 @@ public struct GDocsService: Sendable {
                     insertInlineImage: GDocsInsertInlineImageRequest(uri: uri, location: GDocsLocation(index: 1)),
                     updateEmbeddedObjectProperties: nil
                 ))
-                // Note: We can't tag it in the same batchUpdate if we don't know the objectId yet.
-                // We'll have to do a second pass or handle it differently.
-                // For now, let's just insert it.
             }
         }
         
-        let batchRequest = GDocsBatchUpdateRequest(requests: [requests[0]]) // Just delete first
-        let batchData = try JSONEncoder().encode(batchRequest)
-        
-        var updateRequest = URLRequest(url: URL(string: "https://docs.googleapis.com/v1/documents/\(docId):batchUpdate")!)
-        updateRequest.httpMethod = "POST"
-        updateRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        updateRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        updateRequest.httpBody = batchData
-        
-        let _ = try await URLSession.shared.data(for: updateRequest)
-        
-        // Now insert everything
-        let insertBatchRequest = GDocsBatchUpdateRequest(requests: Array(requests.dropFirst()))
-        let insertBatchData = try JSONEncoder().encode(insertBatchRequest)
-        updateRequest.httpBody = insertBatchData
-        
-        let (responseData, _) = try await URLSession.shared.data(for: updateRequest)
-        
-        // Tag images if we have them
-        let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: responseData)
-        var replyIdx = 0
-        for segment in segments.reversed() {
-            if case .image(_, let assetId) = segment {
-                if let objectId = batchResponse.replies[replyIdx].insertInlineImage?.objectId {
-                    try await tagImage(docId: docId, objectId: objectId, assetId: assetId)
-                }
-                replyIdx += 1
-            } else {
-                replyIdx += 1
-            }
-        }
+        return (requests, segments)
     }
     
     private enum ContentSegment {
