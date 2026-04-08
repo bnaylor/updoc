@@ -78,8 +78,10 @@ struct SidebarView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: addNote) {
-                    Label("Add Note", systemImage: "plus")
+                    Label(selectedMeetingID != nil ? "Start Meeting Note" : "Add Note", systemImage: "plus.circle.fill")
                 }
+                .buttonStyle(selectedMeetingID != nil ? .borderedProminent : .automatic)
+                .help(selectedMeetingID != nil ? "Create note for selected meeting" : "Add a blank note")
             }
         }
         .onAppear {
@@ -92,6 +94,7 @@ struct SidebarView: View {
                 refreshMeetings()
             } else {
                 meetings = []
+                selectedMeetingID = nil
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .syncAllNotes)) { _ in
@@ -122,6 +125,11 @@ struct SidebarView: View {
                 let fetchedMeetings = try await GCalendarService.shared.fetchTodaysEvents()
                 await MainActor.run {
                     self.meetings = fetchedMeetings
+                    // Clear selection if the meeting is no longer in the list
+                    if let currentID = self.selectedMeetingID,
+                       !fetchedMeetings.contains(where: { $0.id == currentID }) {
+                        self.selectedMeetingID = nil
+                    }
                 }
             } catch {
                 print("Failed to fetch meetings: \(error)")
@@ -130,9 +138,14 @@ struct SidebarView: View {
     }
     
     private func addNote() {
-        let newNote = Note(title: "New Note", content: "")
-        modelContext.insert(newNote)
-        selectedNote = newNote
+        if let meetingID = selectedMeetingID,
+           let meeting = meetings.first(where: { $0.id == meetingID }) {
+            startNote(for: meeting)
+        } else {
+            let newNote = Note(title: "New Note", content: "")
+            modelContext.insert(newNote)
+            selectedNote = newNote
+        }
     }
     
     private func startNote(for meeting: CalendarEvent) {
