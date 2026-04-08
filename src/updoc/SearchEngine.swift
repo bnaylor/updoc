@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SearchResult: Identifiable, Sendable {
+public struct SearchResult: Identifiable {
     public let id = UUID()
     public let note: Note
     public let snippets: [SearchSnippet]
@@ -11,7 +11,7 @@ public struct SearchResult: Identifiable, Sendable {
     }
 }
 
-public struct SearchSnippet: Identifiable, Sendable {
+public struct SearchSnippet: Identifiable {
     public let id = UUID()
     public let text: String
     public let matchRange: NSRange // Range of the match within 'text'

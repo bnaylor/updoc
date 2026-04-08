@@ -44,7 +44,27 @@ struct TaskSidebarView: View {
     }
     
     var body: some View {
-        NavigationStack {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("Action Items")
+                    .font(.headline)
+                Spacer()
+                
+                // Toggle completed tasks
+                Button {
+                    hideCompleted.toggle()
+                } label: {
+                    Image(systemName: hideCompleted ? "checkmark.circle.fill" : "checkmark.circle")
+                        .foregroundColor(hideCompleted ? .accentColor : .secondary)
+                }
+                .buttonStyle(.plain)
+                .help(hideCompleted ? "Show Completed" : "Hide Completed")
+            }
+            .padding()
+            .background(Color(NSColor.windowBackgroundColor))
+            
+            Divider()
+            
             List {
                 ForEach(TaskSection.allCases) { section in
                     if let sectionTasks = groupedTasks[section], !sectionTasks.isEmpty {
@@ -56,34 +76,7 @@ struct TaskSidebarView: View {
                     }
                 }
             }
-            .navigationTitle("Action Items")
             .listStyle(.sidebar)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        hideCompleted.toggle()
-                    } label: {
-                        Label(hideCompleted ? "Show Completed" : "Hide Completed", 
-                              systemImage: hideCompleted ? "eye" : "eye.slash")
-                    }
-                    .help("Toggle completed tasks")
-                }
-            }
         }
     }
-}
-
-#Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: Note.self, ActionItem.self, configurations: config)
-    
-    let note = Note(title: "Sample Note", content: "Some content")
-    container.mainContext.insert(note)
-    
-    let task = ActionItem(title: "Sample Task", dueDate: .now)
-    task.note = note
-    container.mainContext.insert(task)
-    
-    return TaskSidebarView(selectedNote: .constant(note))
-        .modelContainer(container)
 }

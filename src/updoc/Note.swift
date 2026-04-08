@@ -68,7 +68,6 @@ public class Note {
 }
 
 // Add Hashable and Sendable conformance for SwiftUI navigation and concurrency
-// Note: @Model macro may provide Sendable in some contexts, but it's explicitly required for our Search/Command engines.
 extension Note: Hashable, @unchecked Sendable {
     public static func == (lhs: Note, rhs: Note) -> Bool {
         lhs.id == rhs.id

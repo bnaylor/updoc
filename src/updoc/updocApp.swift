@@ -7,7 +7,7 @@ struct updocApp: App {
     @State private var themeManager = ThemeManager.shared
     
     var body: some Scene {
-        WindowGroup {
+        WindowGroup("updoc") {
             ContentView()
                 .task {
                     await AuthManager.shared.load()

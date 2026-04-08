@@ -29,9 +29,9 @@ sleep 30
 
 # 5. Capture snapshot using getwindowid
 echo "Capturing snapshot..."
-# getwindowid <process_name> <window_title>
-# Here we assume both are "updoc" as per user suggestion
-WINDOW_ID=$(getwindowid "${APP_NAME}" "${APP_NAME}" 2>/dev/null || echo "")
+# getwindowid <bundle_name> <window_name>
+# We've updated WindowGroup title to "updoc" in updocApp.swift
+WINDOW_ID=$(getwindowid "${APP_NAME}" "Note List" 2>/dev/null || echo "")
 
 if [ -n "$WINDOW_ID" ]; then
     echo "Found Window ID: ${WINDOW_ID}. Capturing window..."

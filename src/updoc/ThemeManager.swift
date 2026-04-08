@@ -24,7 +24,7 @@ public class ThemeManager {
         }
     }
     
-    public var bodyFontSize: CGFloat { 14 }
+    public var bodyFontSize: CGFloat { 16 }
     
     public var font: NSFont {
         switch currentTheme {
@@ -40,6 +40,10 @@ public class ThemeManager {
 
 extension NSFont {
     static func serifFont(ofSize size: CGFloat) -> NSFont {
+        // Try New York first (macOS system serif)
+        if let font = NSFont(name: "New York", size: size) {
+            return font
+        }
         if let font = NSFont(name: "Times New Roman", size: size) {
             return font
         }
