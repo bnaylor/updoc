@@ -2,43 +2,49 @@ import SwiftUI
 import SwiftData
 
 struct SidebarView: View {
-    @Query(sort: \Note.createdAt, order: .reverse) private var notes: [Note]
     @Query private var templateRules: [TemplateRule]
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedNote: Note?
     
     @State private var meetings: [CalendarEvent] = []
+    @State private var selectedMeetingID: String? = nil
     private let templateEngine = SmartTemplateEngine()
     
     var body: some View {
-        List(selection: $selectedNote) {
+        List {
+            Section("CATEGORIES") {
+                Label("All Notes", systemImage: "note.text")
+                    .foregroundColor(.accentColor)
+            }
+            
             Section {
                 if AuthManager.shared.isAuthenticated() {
                     ForEach(meetings) { meeting in
                         HStack {
-                            VStack(alignment: .leading, spacing: 2) {
+                            VStack(alignment: .leading, spacing: 1) {
                                 Text(meeting.summary)
                                     .font(.subheadline)
-                                    .fontWeight(.semibold)
+                                    .fontWeight(selectedMeetingID == meeting.id ? .bold : .semibold)
                                     .lineLimit(1)
                                 
                                 Text(meeting.start.formatted(date: .omitted, time: .shortened))
                                     .font(.caption2)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(selectedMeetingID == meeting.id ? .primary : .secondary)
                             }
-                            
                             Spacer()
-                            
-                            Button(action: { startNote(for: meeting) }) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title3)
-                                    .foregroundColor(.accentColor)
-                            }
-                            .buttonStyle(.plain)
-                            .help("Start Note")
                         }
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 4)
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .background(selectedMeetingID == meeting.id ? Color.accentColor.opacity(0.15) : Color.clear)
+                        .cornerRadius(6)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            if selectedMeetingID == meeting.id {
+                                selectedMeetingID = nil
+                            } else {
+                                selectedMeetingID = meeting.id
+                            }
+                        }
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 8) {
@@ -64,26 +70,6 @@ struct SidebarView: View {
                             Image(systemName: "arrow.clockwise")
                         }
                         .buttonStyle(.plain)
-                    }
-                }
-            }
-            
-            Section("NOTES") {
-                ForEach(notes) { note in
-                    NavigationLink(value: note) {
-                        HStack {
-                            Text(note.title)
-                            if note.googleDocId == nil {
-                                Spacer()
-                                Text("DRAFT")
-                                    .font(.system(size: 8, weight: .bold))
-                                    .padding(.horizontal, 4)
-                                    .padding(.vertical, 2)
-                                    .background(Color.orange.opacity(0.8))
-                                    .foregroundColor(.white)
-                                    .cornerRadius(4)
-                            }
-                        }
                     }
                 }
             }
