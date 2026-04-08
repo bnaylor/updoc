@@ -12,77 +12,12 @@ struct SidebarView: View {
     
     var body: some View {
         List {
-            Section("CATEGORIES") {
-                Label("All Notes", systemImage: "note.text")
-                    .foregroundColor(.accentColor)
-            }
-            
-            Section {
-                if AuthManager.shared.isAuthenticated() {
-                    ForEach(meetings) { meeting in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(meeting.summary)
-                                    .font(.subheadline)
-                                    .fontWeight(selectedMeetingID == meeting.id ? .bold : .semibold)
-                                    .lineLimit(1)
-                                
-                                Text(meeting.start.formatted(date: .omitted, time: .shortened))
-                                    .font(.caption2)
-                                    .foregroundColor(selectedMeetingID == meeting.id ? .primary : .secondary)
-                            }
-                            Spacer()
-                        }
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 8)
-                        .background(selectedMeetingID == meeting.id ? Color.accentColor.opacity(0.15) : Color.clear)
-                        .cornerRadius(6)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            if selectedMeetingID == meeting.id {
-                                selectedMeetingID = nil
-                            } else {
-                                selectedMeetingID = meeting.id
-                            }
-                        }
-                    }
-                } else {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Log in to see meetings")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Button(action: login) {
-                            Text("Log in with Google")
-                                .font(.caption)
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                    }
-                    .padding(.vertical, 4)
-                }
-            } header: {
-                HStack {
-                    Text("TODAY'S MEETINGS")
-                    Spacer()
-                    if AuthManager.shared.isAuthenticated() {
-                        Button(action: refreshMeetings) {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            categoriesSection
+            meetingsSection
         }
         .listStyle(.sidebar)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: addNote) {
-                    Label(selectedMeetingID != nil ? "Start Meeting Note" : "Add Note", systemImage: "plus.circle.fill")
-                }
-                .buttonStyle(selectedMeetingID != nil ? .borderedProminent : .automatic)
-                .help(selectedMeetingID != nil ? "Create note for selected meeting" : "Add a blank note")
-            }
+            toolbarItems
         }
         .onAppear {
             if AuthManager.shared.isAuthenticated() {
@@ -104,6 +39,77 @@ struct SidebarView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .addNewNote)) { _ in
             addNote()
+        }
+    }
+    
+    private var categoriesSection: some View {
+        Section("CATEGORIES") {
+            Label("All Notes", systemImage: "note.text")
+                .foregroundColor(.accentColor)
+        }
+    }
+    
+    private var meetingsSection: some View {
+        Section {
+            if AuthManager.shared.isAuthenticated() {
+                ForEach(meetings) { meeting in
+                    MeetingRow(
+                        meeting: meeting,
+                        isSelected: selectedMeetingID == meeting.id,
+                        onTap: {
+                            if selectedMeetingID == meeting.id {
+                                selectedMeetingID = nil
+                            } else {
+                                selectedMeetingID = meeting.id
+                            }
+                        }
+                    )
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Log in to see meetings")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Button(action: login) {
+                        Text("Log in with Google")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+                .padding(.vertical, 4)
+            }
+        } header: {
+            HStack {
+                Text("TODAY'S MEETINGS")
+                Spacer()
+                if AuthManager.shared.isAuthenticated() {
+                    Button(action: refreshMeetings) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+    
+    private var toolbarItems: some ToolbarContent {
+        ToolbarItem(placement: .primaryAction) {
+            HStack {
+                if selectedMeetingID != nil {
+                    Button(action: addNote) {
+                        Label("Start Meeting Note", systemImage: "plus.circle.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .help("Create note for selected meeting")
+                } else {
+                    Button(action: addNote) {
+                        Label("Add Note", systemImage: "plus")
+                    }
+                    .help("Add a blank note")
+                }
+            }
         }
     }
     
@@ -173,5 +179,33 @@ struct SidebarView: View {
             return String(location[start..<end])
         }
         return nil
+    }
+}
+
+struct MeetingRow: View {
+    let meeting: CalendarEvent
+    let isSelected: Bool
+    let onTap: () -> Void
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(meeting.summary)
+                    .font(.subheadline)
+                    .fontWeight(isSelected ? .bold : .semibold)
+                    .lineLimit(1)
+                
+                Text(meeting.start.formatted(date: .omitted, time: .shortened))
+                    .font(.caption2)
+                    .foregroundColor(isSelected ? .primary : .secondary)
+            }
+            Spacer()
+        }
+        .padding(.vertical, 4)
+        .padding(.horizontal, 8)
+        .background(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
+        .cornerRadius(6)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onTap)
     }
 }
