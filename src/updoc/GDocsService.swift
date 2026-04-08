@@ -40,24 +40,26 @@ public struct GDocsService: Sendable {
     }
     
     @discardableResult
-    public func updateDocContent(docId: String, content: String, baseDocument: GDocsDocument, assetMappings: [String: String] = [:]) async throws -> String {
+    public func updateDocContent(docId: String, content: String, baseDocument: GDocsDocument, assetMappings: [String: String] = [:]) async throws -> (revisionId: String, mergedContent: String?) {
         var currentBase = baseDocument
         var currentContent = content
         var attempts = 0
         let maxAttempts = 5
+        var wasMerged = false
 
         while attempts < maxAttempts {
             do {
                 try await performUpdate(docId: docId, content: currentContent, baseDocument: currentBase, assetMappings: assetMappings)
                 // Re-fetch to get the latest revision ID after the successful push
                 let (_, finalDoc) = try await fetchDocContent(docId: docId)
-                return finalDoc.revisionId ?? ""
+                return (revisionId: finalDoc.revisionId ?? "", mergedContent: wasMerged ? currentContent : nil)
             } catch let error as NSError {
                 let errorBody = error.userInfo[NSLocalizedDescriptionKey] as? String ?? ""
                 let isRevisionMismatch = error.code == 400 && (errorBody.contains("revision ID") || errorBody.contains("revisionId"))
 
                 if isRevisionMismatch && attempts < maxAttempts - 1 {
                     attempts += 1
+                    wasMerged = true
 
                     // Exponential backoff: 500ms, 1s, 2s, 4s
                     let delaySeconds = 0.5 * pow(2.0, Double(attempts - 1))
@@ -76,7 +78,7 @@ public struct GDocsService: Sendable {
                 throw error
             }
         }
-        return "" // Should not be reached
+        return ("", nil) // Should not be reached
     }
 
     private func performUpdate(docId: String, content: String, baseDocument: GDocsDocument, assetMappings: [String: String]) async throws {

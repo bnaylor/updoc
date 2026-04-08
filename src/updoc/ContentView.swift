@@ -19,7 +19,8 @@ struct ContentView: View {
     @State private var showingRuleManager = false
     @State private var showingSettings = false
     @State private var selectionRange: NSRange?
-    @State private var columnVisibility = NavigationSplitViewVisibility.automatic
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
+    @State private var showingTaskSidebar = true
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -30,7 +31,11 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView(selectedNote: $selectedNote)
+                .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
         } content: {
+            NoteListView(selectedNote: $selectedNote)
+                .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
+        } detail: {
             if let note = selectedNote {
                 VStack(spacing: 0) {
                     HStack {
@@ -64,6 +69,15 @@ struct ContentView: View {
                             .disabled(isSyncing || !AuthManager.shared.isAuthenticated())
                             .buttonStyle(.borderedProminent)
                         }
+                        
+                        Button {
+                            showingTaskSidebar.toggle()
+                        } label: {
+                            Image(systemName: "sidebar.right")
+                        }
+                        .buttonStyle(.plain)
+                        .help("Toggle Action Items")
+                        .padding(.leading, 8)
                     }
                     .padding()
                     .background(Color(NSColor.windowBackgroundColor))
@@ -97,12 +111,16 @@ struct ContentView: View {
                         NotificationCenter.default.post(name: .focusEditor, object: nil)
                     }
                 }
+                .navigationTitle(note.title)
+                .inspector(isPresented: $showingTaskSidebar) {
+                    TaskSidebarView(selectedNote: $selectedNote)
+                        .inspectorColumnWidth(min: 250, ideal: 280, max: 400)
+                }
             } else {
                 Text("Select a note to begin")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .foregroundColor(.secondary)
             }
-        } detail: {
-            TaskSidebarView(selectedNote: $selectedNote)
         }
         .navigationSplitViewStyle(.balanced)
         .sheet(isPresented: $showingRuleManager) {
@@ -270,20 +288,31 @@ struct ContentView: View {
     }
     
     private func syncAllNotes() {
-        guard !isSyncing else { return }
-        
         Task {
+            // Use a local set or similar if we wanted to track multiple, 
+            // but for now we just want to ensure we don't start overlapping global syncs.
+            guard !isSyncing else { return }
             isSyncing = true
-            for note in notes {
-                if let _ = note.googleDocId {
-                    do {
-                        try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
-                    } catch {
-                        print("Failed to sync note: \(note.title)")
+            defer { isSyncing = false }
+            
+            let container = modelContext.container
+            await withTaskGroup(of: Void.self) { group in
+                for note in notes {
+                    if let _ = note.googleDocId {
+                        let noteId = note.persistentModelID
+                        group.addTask {
+                            do {
+                                // sync() is already @MainActor, so it will serialize on main 
+                                // thread but allow other tasks to interleave.
+                                let context = ModelContext(container)
+                                try await Self.syncCoordinator.sync(noteId: noteId, in: context)
+                            } catch {
+                                print("Failed to sync note: \(noteId)")
+                            }
+                        }
                     }
                 }
             }
-            isSyncing = false
         }
     }
     

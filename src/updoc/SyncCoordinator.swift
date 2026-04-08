@@ -59,8 +59,11 @@ public class SyncCoordinator {
                     }
                 }
                 
-                let newRev = try await gDocs.updateDocContent(docId: docId, content: localContent, baseDocument: baseDoc, assetMappings: mappings)
+                let (newRev, mergedContent) = try await gDocs.updateDocContent(docId: docId, content: localContent, baseDocument: baseDoc, assetMappings: mappings)
                 note.lastSyncedRevision = newRev
+                if let merged = mergedContent {
+                    note.content = merged
+                }
                 try context.save()
             }
         } catch {

@@ -112,12 +112,24 @@ struct EditorView: NSViewRepresentable {
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSTextView.scrollableTextView()
+        scrollView.drawsBackground = true
+        scrollView.backgroundColor = .textBackgroundColor
+        scrollView.borderType = .noBorder
+        scrollView.hasVerticalScroller = true
+        scrollView.autoresizingMask = [.width, .height]
+        
         let textView = EditorTextView(frame: .zero)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
         textView.textContainer?.containerSize = NSSize(width: scrollView.contentSize.width, height: CGFloat.greatestFiniteMagnitude)
         textView.textContainer?.widthTracksTextView = true
+        textView.drawsBackground = true
+        textView.backgroundColor = .textBackgroundColor
+        textView.isRichText = false
+        
+        // Add some padding
+        textView.textContainerInset = NSSize(width: 20, height: 20)
         
         scrollView.documentView = textView
         context.coordinator.textView = textView
@@ -137,6 +149,7 @@ struct EditorView: NSViewRepresentable {
             }
         }
         textView.font = themeManager.font
+        textView.textColor = .labelColor
         textView.isEditable = true
         textView.isSelectable = true
         textView.isAutomaticQuoteSubstitutionEnabled = false
@@ -152,7 +165,10 @@ struct EditorView: NSViewRepresentable {
         textView.registerForDraggedTypes([.fileURL])
         
         // Use the theme's font as the base
-        textView.typingAttributes = [.font: themeManager.font]
+        textView.typingAttributes = [
+            .font: themeManager.font,
+            .foregroundColor: NSColor.labelColor
+        ]
         
         NotificationCenter.default.addObserver(forName: .focusEditor, object: nil, queue: .main) { _ in
             Task { @MainActor in
@@ -181,17 +197,28 @@ struct EditorView: NSViewRepresentable {
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         let textView = nsView.documentView as! NSTextView
         
+        // CRITICAL: Update coordinator's reference to parent to avoid stale bindings
+        // and "cross-document bleed" when switching notes.
+        context.coordinator.parent = self
+        
         // Ensure theme font is applied
         if textView.font != themeManager.font {
             textView.font = themeManager.font
-            textView.typingAttributes = [.font: themeManager.font]
+            textView.typingAttributes = [
+                .font: themeManager.font,
+                .foregroundColor: NSColor.labelColor
+            ]
             context.coordinator.applyStyles(to: textView)
         }
         
+        // Only update textView if the parent's text is DIFFERENT from the last version 
+        // the coordinator sent, AND different from the current textView content.
+        // This prevents "flapping" or "reverting" during rapid typing/syncs.
         let currentMarkdown = context.coordinator.convertToMarkdown(from: textView.textStorage ?? NSAttributedString())
-        if currentMarkdown != text {
+        if text != context.coordinator.lastSentText && currentMarkdown != text {
             textView.string = text
             context.coordinator.applyStyles(to: textView)
+            context.coordinator.lastSentText = text
         }
         
         if let range = selectionRange {
@@ -212,6 +239,7 @@ struct EditorView: NSViewRepresentable {
     @MainActor
     class Coordinator: NSObject, NSTextViewDelegate, @preconcurrency QLPreviewPanelDataSource, @preconcurrency QLPreviewPanelDelegate {
         var parent: EditorView
+        var lastSentText: String?
         private let autocompleteManager = AutocompleteManager()
         private var syncTask: Task<Void, Never>?
         var editingAttachment: RemoteImageAttachment?
@@ -219,6 +247,7 @@ struct EditorView: NSViewRepresentable {
 
         init(_ parent: EditorView) {
             self.parent = parent
+            self.lastSentText = parent.text
         }
 
         func openEditor(for attachment: RemoteImageAttachment) {
@@ -335,11 +364,16 @@ struct EditorView: NSViewRepresentable {
             // Handle √ shortcut
             checkForCheckmarkShortcut(in: textView)
             
+            let currentMarkdown: String
             if let textStorage = textView.textStorage {
-                self.parent.text = convertToMarkdown(from: textStorage)
+                currentMarkdown = convertToMarkdown(from: textStorage)
             } else {
-                self.parent.text = textView.string
+                currentMarkdown = textView.string
             }
+            
+            // Update lastSentText so updateNSView doesn't revert us
+            self.lastSentText = currentMarkdown
+            self.parent.text = currentMarkdown
             
             // Basic trigger check
             checkForAutocompleteTrigger(in: textView)
@@ -484,16 +518,11 @@ struct EditorView: NSViewRepresentable {
             let text = textView.string
             let ranges = parent.engine.parse(text)
             
-            // 1. Convert back to pure Markdown before restyling
-            // This ensures we have the correct source text for the engine
-            let markdown = convertToMarkdown(from: textStorage)
-            if markdown != text {
-                // If the textStorage had attachments, we might need to sync back
-                // but for now, let's assume 'text' is the source of truth
-            }
-            
-            // Reset styles using theme font
-            textStorage.setAttributes([.font: parent.themeManager.font], range: NSRange(text.startIndex..., in: text))
+            // Reset styles using theme font and label color
+            textStorage.setAttributes([
+                .font: parent.themeManager.font,
+                .foregroundColor: NSColor.labelColor
+            ], range: NSRange(text.startIndex..., in: text))
             
             // Apply Markdown styles in reverse to avoid shifting ranges when we replace text with attachments
             for markdownRange in ranges.reversed() {
@@ -528,19 +557,6 @@ struct EditorView: NSViewRepresentable {
             let attachmentString = NSAttributedString(attachment: attachment)
             
             // Replace the Markdown text with the attachment
-            // This will change the string, so we must be careful with ranges
-            // But since applyStyles is called at the end of textDidChange, it should be fine
-            // as long as we only do it once.
-            
-            // NOTE: Replacing text here will trigger another applyStyles if we are not careful.
-            // But EditorView.updateNSView only calls applyStyles if text changed.
-            
-            // For now, let's try just adding the attachment attribute without replacing?
-            // No, NSTextView only renders it for \u{FFFC}.
-            
-            // Let's use temporary attributes? No.
-            
-            // Okay, let's try replacing but we need to stop the loop.
             textStorage.replaceCharacters(in: range, with: attachmentString)
             
             // Load the image asynchronously
@@ -583,14 +599,20 @@ struct EditorView: NSViewRepresentable {
                 ]
             case .bold:
                 let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
-                return [.font: boldFont]
+                return [
+                    .font: boldFont,
+                    .foregroundColor: NSColor.labelColor
+                ]
             case .italic:
                 let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
-                return [.font: italicFont]
+                return [
+                    .font: italicFont,
+                    .foregroundColor: NSColor.labelColor
+                ]
             case .code:
                 return [
                     .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
-                    .backgroundColor: NSColor.quaternaryLabelColor
+                    .foregroundColor: NSColor.labelColor
                 ]
             case .checklist(let done):
                 if done {
@@ -607,7 +629,6 @@ struct EditorView: NSViewRepresentable {
                     .underlineStyle: NSUnderlineStyle.single.rawValue
                 ]
             case .image(let url, let title):
-                // For now, style as a link until we implement NSTextAttachment
                 return [
                     .foregroundColor: NSColor.systemGreen,
                     .underlineStyle: NSUnderlineStyle.single.rawValue,
