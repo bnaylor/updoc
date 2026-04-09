@@ -11,6 +11,11 @@ public struct GDriveFile: Codable {
     public let mimeType: String
 }
 
+public struct GDriveFileMetadata: Codable {
+    public let id: String
+    public let ownedByMe: Bool
+}
+
 public struct GDriveSearchResponse: Codable {
     public let files: [GDriveFile]
 }
@@ -159,5 +164,40 @@ public struct GDriveService: Sendable {
         
         let uploadedFile = try JSONDecoder().decode(GDriveFile.self, from: responseData)
         return uploadedFile.id
+    }
+
+    public func getFileMetadata(fileId: String) async throws -> GDriveFileMetadata {
+        let token = try await AuthManager.shared.getAccessToken()
+        let url = URL(string: "https://www.googleapis.com/drive/v3/files/\(fileId)?fields=id,ownedByMe")!
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GDriveService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch file metadata: \(errorBody)"])
+        }
+        
+        return try JSONDecoder().decode(GDriveFileMetadata.self, from: data)
+    }
+
+    public func trashFile(fileId: String) async throws {
+        let token = try await AuthManager.shared.getAccessToken()
+        let url = URL(string: "https://www.googleapis.com/drive/v3/files/\(fileId)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let body: [String: Any] = ["trashed": true]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let errorBody = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "GDriveService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to trash file: \(errorBody)"])
+        }
     }
 }

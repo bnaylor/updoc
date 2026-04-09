@@ -61,8 +61,7 @@ public final class AuthManager: NSObject, @unchecked Sendable {
                 "openid",
                 "email",
                 "https://www.googleapis.com/auth/documents",
-                "https://www.googleapis.com/auth/drive.metadata.readonly",
-                "https://www.googleapis.com/auth/drive.file",
+                "https://www.googleapis.com/auth/drive",
                 "https://www.googleapis.com/auth/calendar.events.readonly"
             ],
             redirectURL: redirectURL,
