@@ -60,6 +60,33 @@ public struct GDocsTextRun: Codable {
 public struct GDocsTextStyle: Codable {
     public let bold: Bool?
     public let italic: Bool?
+    public let weightedFontFamily: GDocsWeightedFontFamily?
+    public let link: GDocsLink?
+    
+    public init(bold: Bool? = nil, italic: Bool? = nil, weightedFontFamily: GDocsWeightedFontFamily? = nil, link: GDocsLink? = nil) {
+        self.bold = bold
+        self.italic = italic
+        self.weightedFontFamily = weightedFontFamily
+        self.link = link
+    }
+}
+
+public struct GDocsWeightedFontFamily: Codable {
+    public let fontFamily: String
+    public let weight: Int?
+    
+    public init(fontFamily: String, weight: Int? = nil) {
+        self.fontFamily = fontFamily
+        self.weight = weight
+    }
+}
+
+public struct GDocsLink: Codable {
+    public let url: String
+    
+    public init(url: String) {
+        self.url = url
+    }
 }
 
 public struct GDocsWriteControl: Codable {
@@ -86,6 +113,49 @@ public struct GDocsRequest: Codable {
     public let deleteContentRange: GDocsDeleteContentRangeRequest?
     public let insertInlineImage: GDocsInsertInlineImageRequest?
     public let updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest?
+    public let updateTextStyle: GDocsUpdateTextStyleRequest?
+    public let updateParagraphStyle: GDocsUpdateParagraphStyleRequest?
+    
+    public init(insertText: GDocsInsertTextRequest? = nil, deleteContentRange: GDocsDeleteContentRangeRequest? = nil, insertInlineImage: GDocsInsertInlineImageRequest? = nil, updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest? = nil, updateTextStyle: GDocsUpdateTextStyleRequest? = nil, updateParagraphStyle: GDocsUpdateParagraphStyleRequest? = nil) {
+        self.insertText = insertText
+        self.deleteContentRange = deleteContentRange
+        self.insertInlineImage = insertInlineImage
+        self.updateEmbeddedObjectProperties = updateEmbeddedObjectProperties
+        self.updateTextStyle = updateTextStyle
+        self.updateParagraphStyle = updateParagraphStyle
+    }
+}
+
+public struct GDocsUpdateTextStyleRequest: Codable {
+    public let range: GDocsRange
+    public let textStyle: GDocsTextStyle
+    public let fields: String
+    
+    public init(range: GDocsRange, textStyle: GDocsTextStyle, fields: String) {
+        self.range = range
+        self.textStyle = textStyle
+        self.fields = fields
+    }
+}
+
+public struct GDocsUpdateParagraphStyleRequest: Codable {
+    public let range: GDocsRange
+    public let paragraphStyle: GDocsParagraphStyle
+    public let fields: String
+    
+    public init(range: GDocsRange, paragraphStyle: GDocsParagraphStyle, fields: String) {
+        self.range = range
+        self.paragraphStyle = paragraphStyle
+        self.fields = fields
+    }
+}
+
+public struct GDocsParagraphStyle: Codable {
+    public let namedStyleType: String?
+    
+    public init(namedStyleType: String?) {
+        self.namedStyleType = namedStyleType
+    }
 }
 
 public struct GDocsInsertInlineImageRequest: Codable {
@@ -97,10 +167,20 @@ public struct GDocsUpdateEmbeddedObjectPropertiesRequest: Codable {
     public let objectId: String
     public let properties: GDocsEmbeddedObjectProperties
     public let fields: String
+    
+    public init(objectId: String, properties: GDocsEmbeddedObjectProperties, fields: String) {
+        self.objectId = objectId
+        self.properties = properties
+        self.fields = fields
+    }
 }
 
 public struct GDocsEmbeddedObjectProperties: Codable {
     public let description: String?
+    
+    public init(description: String?) {
+        self.description = description
+    }
 }
 
 public struct GDocsBatchUpdateResponse: Codable {
