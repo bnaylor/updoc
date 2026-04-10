@@ -150,29 +150,35 @@ public struct GDocsService: Sendable {
     }
 
     private func generateUpdateRequests(from oldContent: String, to newContent: String, doc: GDocsDocument, assetMappings: [String: String]) -> ([GDocsRequest], [ContentSegment]) {
-        let endIndex = doc.body.content.last?.endIndex ?? 2
+        let lastElement = doc.body.content.last
+        let endIndex = lastElement?.endIndex ?? 2
         let segments = parseSegments(content: newContent, assetMappings: assetMappings)
         
         var requests: [GDocsRequest] = []
         
-        // Delete all existing content except the very last character (Google Docs requires at least one character)
-        requests.append(GDocsRequest(
-            insertText: nil,
-            deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: max(1, endIndex - 1))),
-            insertInlineImage: nil,
-            updateEmbeddedObjectProperties: nil
-        ))
+        // Delete all existing content except the very last character (Google Docs requires at least one character, which is the final newline)
+        // A doc with only a newline has endIndex = 2.
+        if endIndex > 2 {
+            requests.append(GDocsRequest(
+                insertText: nil,
+                deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: endIndex - 1)),
+                insertInlineImage: nil,
+                updateEmbeddedObjectProperties: nil
+            ))
+        }
         
         // Insert new content segments at index 1 in reverse order so that indices remain correct
         for segment in segments.reversed() {
             switch segment {
             case .text(let text):
-                requests.append(GDocsRequest(
-                    insertText: GDocsInsertTextRequest(text: text, location: GDocsLocation(index: 1)),
-                    deleteContentRange: nil,
-                    insertInlineImage: nil,
-                    updateEmbeddedObjectProperties: nil
-                ))
+                if !text.isEmpty {
+                    requests.append(GDocsRequest(
+                        insertText: GDocsInsertTextRequest(text: text, location: GDocsLocation(index: 1)),
+                        deleteContentRange: nil,
+                        insertInlineImage: nil,
+                        updateEmbeddedObjectProperties: nil
+                    ))
+                }
             case .image(let uri, _):
                 requests.append(GDocsRequest(
                     insertText: nil,

@@ -32,6 +32,7 @@ public class SyncCoordinator {
         
         // Capture local state BEFORE any network calls
         let localContent = note.content
+        print("Syncing note \(docId): localContent length = \(localContent.count)")
         
         // Sync images to Drive first
         try await syncImages(note: note, in: context)
@@ -40,14 +41,17 @@ public class SyncCoordinator {
             // Fetch current document state
             let (remoteContent, baseDoc) = try await gDocs.fetchDocContent(docId: docId)
             let remoteRev = baseDoc.revisionId ?? ""
+            print("Syncing note \(docId): remoteContent length = \(remoteContent.count), revision = \(remoteRev)")
             
             if localContent == remoteContent {
+                print("Syncing note \(docId): Content identical, skipping update.")
                 // If content is identical, just update the revision tracking
                 if note.lastSyncedRevision != remoteRev {
                     note.lastSyncedRevision = remoteRev
                     try context.save()
                 }
             } else {
+                print("Syncing note \(docId): Content differs, updating doc...")
                 // If content differs, attempt a seamless push.
                 // GDocsService will handle the 3-way merge (rebase) internally
                 // using WriteControl to ensure safety.
@@ -60,8 +64,10 @@ public class SyncCoordinator {
                 }
                 
                 let (newRev, mergedContent) = try await gDocs.updateDocContent(docId: docId, content: localContent, baseDocument: baseDoc, assetMappings: mappings)
+                print("Syncing note \(docId): Update successful. New revision = \(newRev)")
                 note.lastSyncedRevision = newRev
                 if let merged = mergedContent {
+                    print("Syncing note \(docId): Content was merged during update.")
                     note.content = merged
                 }
                 try context.save()

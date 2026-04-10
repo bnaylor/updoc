@@ -50,6 +50,11 @@ struct updocApp: App {
             }
             
             CommandGroup(after: .newItem) {
+                Button("Delete Note") {
+                    NotificationCenter.default.post(name: .deleteSelectedNote, object: nil)
+                }
+                .keyboardShortcut(.delete, modifiers: .command)
+                
                 Button("Sync All Notes") {
                     NotificationCenter.default.post(name: .syncAllNotes, object: nil)
                 }
@@ -93,4 +98,8 @@ extension Notification.Name {
     static let openGlobalSearch = Notification.Name("openGlobalSearch")
     static let openCommandPalette = Notification.Name("openCommandPalette")
     static let focusEditor = Notification.Name("focusEditor")
+    static let deleteSelectedNote = Notification.Name("deleteSelectedNote")
+    static let syncNote = Notification.Name("syncNote")
+    static let openNoteInBrowser = Notification.Name("openNoteInBrowser")
+    static let publishNote = Notification.Name("publishNote")
 }

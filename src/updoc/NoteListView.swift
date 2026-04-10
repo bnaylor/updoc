@@ -38,6 +38,37 @@ struct NoteListView: View {
                 }
                 .padding(.vertical, 4)
             }
+            .contextMenu {
+                if let _ = note.googleDocId {
+                    Button {
+                        NotificationCenter.default.post(name: .syncNote, object: note)
+                    } label: {
+                        Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                    
+                    Button {
+                        NotificationCenter.default.post(name: .openNoteInBrowser, object: note)
+                    } label: {
+                        Label("Open in Google Docs", systemImage: "arrow.up.right.square")
+                    }
+                    
+                    Divider()
+                } else {
+                    Button {
+                        NotificationCenter.default.post(name: .publishNote, object: note)
+                    } label: {
+                        Label("Publish to Google Docs", systemImage: "arrow.up.doc.fill")
+                    }
+                    
+                    Divider()
+                }
+                
+                Button(role: .destructive) {
+                    NotificationCenter.default.post(name: .deleteSelectedNote, object: note)
+                } label: {
+                    Label("Delete Note", systemImage: "trash")
+                }
+            }
         }
         .navigationTitle("Note List")
     }

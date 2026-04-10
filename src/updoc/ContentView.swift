@@ -21,6 +21,7 @@ struct ContentView: View {
     @State private var selectionRange: NSRange?
     @State private var columnVisibility = NavigationSplitViewVisibility.all
     @State private var showingTaskSidebar = true
+    @State private var deletionManager = DeletionManager()
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -51,7 +52,7 @@ struct ContentView: View {
                         Spacer()
                         
                         if let _ = note.googleDocId {
-                            Button(action: openInBrowser) {
+                            Button(action: { openInBrowser() }) {
                                 Label("Open in Google Docs", systemImage: "arrow.up.right.square")
                             }
                             .help("Open linked Google Doc in browser")
@@ -138,6 +139,47 @@ struct ContentView: View {
                 activeConflict = nil
             }
         }
+        .confirmationDialog(
+            "Delete Note",
+            isPresented: $deletionManager.showDeleteConfirmation,
+            presenting: deletionManager.pendingNote
+        ) { note in
+            if note.googleDocId != nil && deletionManager.isOwnedByMe {
+                Button("Delete Note & Trash Google Doc", role: .destructive) {
+                    let isCurrentNote = (note == selectedNote)
+                    Task {
+                        await deletionManager.confirmDeletion(alsoTrashRemote: true, modelContext: modelContext)
+                        if isCurrentNote {
+                            selectedNote = nil
+                        }
+                    }
+                }
+            }
+            
+            Button("Delete Note Only", role: .destructive) {
+                let isCurrentNote = (note == selectedNote)
+                Task {
+                    await deletionManager.confirmDeletion(alsoTrashRemote: false, modelContext: modelContext)
+                    if isCurrentNote {
+                        selectedNote = nil
+                    }
+                }
+            }
+            
+            Button("Cancel", role: .cancel) {
+                deletionManager.pendingNote = nil
+            }
+        } message: { note in
+            if note.googleDocId != nil {
+                if deletionManager.isOwnedByMe {
+                    Text("This note is linked to a Google Doc you own. Do you want to move the Doc to Trash as well?")
+                } else {
+                    Text("This note is linked to a Google Doc you don't own. The Doc will not be affected.")
+                }
+            } else {
+                Text("Are you sure you want to delete '\(note.title)'?")
+            }
+        }
         .overlay {
             if showingCommandPalette {
                 CommandPaletteView(
@@ -180,6 +222,34 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .openCommandPalette)) { _ in
             showingCommandPalette = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .deleteSelectedNote)) { notification in
+            if let note = notification.object as? Note {
+                deletionManager.prepareDeletion(for: note)
+            } else if let note = selectedNote {
+                deletionManager.prepareDeletion(for: note)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .syncNote)) { notification in
+            if let note = notification.object as? Note {
+                triggerSync(for: note)
+            } else if let note = selectedNote {
+                triggerSync(for: note)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openNoteInBrowser)) { notification in
+            if let note = notification.object as? Note {
+                openInBrowser(note: note)
+            } else {
+                openInBrowser()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .publishNote)) { notification in
+            if let note = notification.object as? Note {
+                publishDraft(note)
+            } else if let note = selectedNote {
+                publishDraft(note)
+            }
         }
         .task {
             // Short delay to ensure view hierarchy is ready
@@ -316,8 +386,9 @@ struct ContentView: View {
         }
     }
     
-    private func openInBrowser() {
-        guard let docId = selectedNote?.googleDocId,
+    private func openInBrowser(note: Note? = nil) {
+        let noteToOpen = note ?? selectedNote
+        guard let docId = noteToOpen?.googleDocId,
               let url = URL(string: "https://docs.google.com/document/d/\(docId)") else { return }
         NSWorkspace.shared.open(url)
     }
@@ -388,6 +459,7 @@ struct ContentView: View {
                 // 3. Link and Initial Sync
                 await MainActor.run {
                     note.googleDocId = docId
+                    try? modelContext.save()
                 }
                 
                 try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
