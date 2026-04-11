@@ -80,6 +80,52 @@ struct GDocsMarkdownFormatterTests {
         #expect(req.range.endIndex == 13)
     }
     
+    @Test func formatsUnderlineText() {
+        let text = "Hello __World__"
+        let result = formatter.format(text)
+        
+        #expect(result.cleanText == "Hello World")
+        guard let req = result.requests.first?.updateTextStyle else {
+            Issue.record("Expected updateTextStyle request")
+            return
+        }
+        #expect(req.textStyle.underline == true)
+        #expect(req.range.startIndex == 7)
+        #expect(req.range.endIndex == 12)
+    }
+    
+    @Test func formatsBullets() {
+        let text = "* Item 1\n- Item 2"
+        let result = formatter.format(text)
+        
+        #expect(result.cleanText == "Item 1\nItem 2")
+        let bullets = result.requests.compactMap { $0.createBullet }
+        #expect(bullets.count == 2)
+        #expect(bullets[0].bulletPreset == "BULLET_DISC_CIRCLE_SQUARE")
+        #expect(bullets[0].range.startIndex == 1)
+        #expect(bullets[0].range.endIndex == 7)
+        
+        #expect(bullets[1].bulletPreset == "BULLET_DISC_CIRCLE_SQUARE")
+        #expect(bullets[1].range.startIndex == 8)
+        #expect(bullets[1].range.endIndex == 14)
+    }
+    
+    @Test func formatsChecklists() {
+        let text = "[ ] Todo\n[x] Done"
+        let result = formatter.format(text)
+        
+        #expect(result.cleanText == "Todo\nDone")
+        let bullets = result.requests.compactMap { $0.createBullet }
+        #expect(bullets.count == 2)
+        #expect(bullets.allSatisfy { $0.bulletPreset == "BULLET_CHECKBOX" })
+        
+        let styles = result.requests.compactMap { $0.updateTextStyle }
+        #expect(styles.count == 1)
+        #expect(styles[0].textStyle.strikethrough == true)
+        #expect(styles[0].range.startIndex == 6)
+        #expect(styles[0].range.endIndex == 10)
+    }
+    
     @Test func formatsBoldInHeading() {
         let text = "# This is **bold**"
         let result = formatter.format(text)

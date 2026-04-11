@@ -609,6 +609,12 @@ struct EditorView: NSViewRepresentable {
                     .font: italicFont,
                     .foregroundColor: NSColor.labelColor
                 ]
+            case .underline:
+                return [
+                    .font: baseFont,
+                    .foregroundColor: NSColor.labelColor,
+                    .underlineStyle: NSUnderlineStyle.single.rawValue
+                ]
             case .code:
                 return [
                     .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
@@ -623,6 +629,11 @@ struct EditorView: NSViewRepresentable {
                 } else {
                     return [.foregroundColor: NSColor.labelColor]
                 }
+            case .bullet:
+                return [
+                    .font: baseFont,
+                    .foregroundColor: NSColor.systemOrange
+                ]
             case .link(_):
                 return [
                     .foregroundColor: NSColor.systemBlue,

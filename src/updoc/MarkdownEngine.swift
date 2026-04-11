@@ -4,9 +4,11 @@ public enum MarkdownStyle: Equatable {
     case heading(level: Int)
     case bold
     case italic
+    case underline
     case code
     case link(url: String?)
     case checklist(done: Bool)
+    case bullet
     case image(url: String, title: String?)
 }
 
@@ -55,6 +57,14 @@ public struct MarkdownEngine {
             }
         }
         
+        // 4. Underline (e.g., __underline__)
+        let underlineRegex = try! NSRegularExpression(pattern: "__.*?__", options: [])
+        underlineRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
+            if let matchRange = match?.range {
+                ranges.append(MarkdownRange(range: matchRange, style: .underline))
+            }
+        }
+        
         // 4. Checklist (e.g., [ ], [x], or √)
         let checklistRegex = try! NSRegularExpression(pattern: "^(\\s*)(\\[[ x]\\]|√)\\s+(.*)$", options: [.anchorsMatchLines])
         checklistRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
@@ -85,6 +95,14 @@ public struct MarkdownEngine {
                 let idRange = match.range(at: 1)
                 let id = (text as NSString).substring(with: idRange)
                 ranges.append(MarkdownRange(range: match.range, style: .image(url: "asset://\(id)", title: nil)))
+            }
+        }
+        
+        // 7. Bullets (e.g., * Bullet)
+        let bulletRegex = try! NSRegularExpression(pattern: "^(\\s*)[*+-]\\s+(.*)$", options: [.anchorsMatchLines])
+        bulletRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
+            if let matchRange = match?.range {
+                ranges.append(MarkdownRange(range: matchRange, style: .bullet))
             }
         }
         

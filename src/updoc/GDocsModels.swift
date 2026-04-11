@@ -60,12 +60,16 @@ public struct GDocsTextRun: Codable {
 public struct GDocsTextStyle: Codable {
     public let bold: Bool?
     public let italic: Bool?
+    public let underline: Bool?
+    public let strikethrough: Bool?
     public let weightedFontFamily: GDocsWeightedFontFamily?
     public let link: GDocsLink?
     
-    public init(bold: Bool? = nil, italic: Bool? = nil, weightedFontFamily: GDocsWeightedFontFamily? = nil, link: GDocsLink? = nil) {
+    public init(bold: Bool? = nil, italic: Bool? = nil, underline: Bool? = nil, strikethrough: Bool? = nil, weightedFontFamily: GDocsWeightedFontFamily? = nil, link: GDocsLink? = nil) {
         self.bold = bold
         self.italic = italic
+        self.underline = underline
+        self.strikethrough = strikethrough
         self.weightedFontFamily = weightedFontFamily
         self.link = link
     }
@@ -115,14 +119,26 @@ public struct GDocsRequest: Codable {
     public let updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest?
     public let updateTextStyle: GDocsUpdateTextStyleRequest?
     public let updateParagraphStyle: GDocsUpdateParagraphStyleRequest?
+    public let createBullet: GDocsCreateBulletRequest?
     
-    public init(insertText: GDocsInsertTextRequest? = nil, deleteContentRange: GDocsDeleteContentRangeRequest? = nil, insertInlineImage: GDocsInsertInlineImageRequest? = nil, updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest? = nil, updateTextStyle: GDocsUpdateTextStyleRequest? = nil, updateParagraphStyle: GDocsUpdateParagraphStyleRequest? = nil) {
+    public init(insertText: GDocsInsertTextRequest? = nil, deleteContentRange: GDocsDeleteContentRangeRequest? = nil, insertInlineImage: GDocsInsertInlineImageRequest? = nil, updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest? = nil, updateTextStyle: GDocsUpdateTextStyleRequest? = nil, updateParagraphStyle: GDocsUpdateParagraphStyleRequest? = nil, createBullet: GDocsCreateBulletRequest? = nil) {
         self.insertText = insertText
         self.deleteContentRange = deleteContentRange
         self.insertInlineImage = insertInlineImage
         self.updateEmbeddedObjectProperties = updateEmbeddedObjectProperties
         self.updateTextStyle = updateTextStyle
         self.updateParagraphStyle = updateParagraphStyle
+        self.createBullet = createBullet
+    }
+}
+
+public struct GDocsCreateBulletRequest: Codable {
+    public let range: GDocsRange
+    public let bulletPreset: String
+    
+    public init(range: GDocsRange, bulletPreset: String) {
+        self.range = range
+        self.bulletPreset = bulletPreset
     }
 }
 

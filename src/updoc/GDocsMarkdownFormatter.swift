@@ -29,20 +29,36 @@ public struct GDocsMarkdownFormatter {
         for (idx, line) in lines.enumerated() {
             let isLastLine = idx == lines.count - 1
             
-            // 1. Heading check
-            var headingLevel: Int? = nil
+            // 1. List check
+            var bulletPreset: String? = nil
+            var isStrikethrough = false
             var lineContent = line
             
+            if line.hasPrefix("* ") || line.hasPrefix("- ") || line.hasPrefix("+ ") {
+                bulletPreset = "BULLET_DISC_CIRCLE_SQUARE"
+                lineContent = String(line.dropFirst(2))
+            } else if line.hasPrefix("[ ] ") {
+                bulletPreset = "BULLET_CHECKBOX"
+                lineContent = String(line.dropFirst(4))
+            } else if line.hasPrefix("[x] ") {
+                bulletPreset = "BULLET_CHECKBOX"
+                isStrikethrough = true
+                lineContent = String(line.dropFirst(4))
+            }
+            
+            // 2. Heading check (can be combined with bullet, but markdown rarely does that)
+            var headingLevel: Int? = nil
+            
             let headingRegex = try! NSRegularExpression(pattern: "^(#{1,6})\\s+(.*)$")
-            if let match = headingRegex.firstMatch(in: line, options: [], range: NSRange(line.startIndex..., in: line)) {
+            if let match = headingRegex.firstMatch(in: lineContent, options: [], range: NSRange(lineContent.startIndex..., in: lineContent)) {
                 headingLevel = match.range(at: 1).length
                 let contentRange = match.range(at: 2)
-                if let contentSwiftRange = Range(contentRange, in: line) {
-                    lineContent = String(line[contentSwiftRange])
+                if let contentSwiftRange = Range(contentRange, in: lineContent) {
+                    lineContent = String(lineContent[contentSwiftRange])
                 }
             }
             
-            // 2. Parse inline styles
+            // 3. Parse inline styles
             let (cleanedLine, lineRequests, lineImages) = parseInline(lineContent, baseOffset: currentOffset, assetMappings: assetMappings)
             
             let lineWithNewline = cleanedLine + (isLastLine ? "" : "\n")
@@ -50,11 +66,22 @@ public struct GDocsMarkdownFormatter {
             requests.append(contentsOf: lineRequests)
             imageSegments.append(contentsOf: lineImages)
             
-            // 3. Apply heading style if needed
+            let lineRange = GDocsRange(startIndex: currentOffset, endIndex: currentOffset + cleanedLine.utf16.count)
+            
+            // 4. Apply list formatting
+            if let preset = bulletPreset {
+                requests.append(GDocsRequest(createBullet: GDocsCreateBulletRequest(range: lineRange, bulletPreset: preset)))
+            }
+            
+            // 5. Apply strikethrough for completed tasks
+            if isStrikethrough {
+                requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: lineRange, textStyle: GDocsTextStyle(strikethrough: true), fields: "strikethrough")))
+            }
+            
+            // 6. Apply heading style if needed
             if let level = headingLevel {
-                let range = GDocsRange(startIndex: currentOffset, endIndex: currentOffset + cleanedLine.utf16.count)
                 let style = GDocsParagraphStyle(namedStyleType: "HEADING_\(level)")
-                requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: range, paragraphStyle: style, fields: "namedStyleType")))
+                requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: lineRange, paragraphStyle: style, fields: "namedStyleType")))
             }
             
             currentOffset += lineWithNewline.utf16.count
@@ -83,6 +110,14 @@ public struct GDocsMarkdownFormatter {
         italicRegex.enumerateMatches(in: text, options: [], range: fullRange) { m, _, _ in
             if let m = m {
                 matches.append(Match(range: m.range(at: 0), content: nsText.substring(with: m.range(at: 1)), style: .italic, isImage: false, assetId: nil))
+            }
+        }
+        
+        // Underline __text__
+        let underlineRegex = try! NSRegularExpression(pattern: "__(.*?)__")
+        underlineRegex.enumerateMatches(in: text, options: [], range: fullRange) { m, _, _ in
+            if let m = m {
+                matches.append(Match(range: m.range(at: 0), content: nsText.substring(with: m.range(at: 1)), style: .underline, isImage: false, assetId: nil))
             }
         }
         
@@ -149,6 +184,8 @@ public struct GDocsMarkdownFormatter {
                         requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(bold: true), fields: "bold")))
                     case .italic:
                         requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(italic: true), fields: "italic")))
+                    case .underline:
+                        requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(underline: true), fields: "underline")))
                     case .code:
                         requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(weightedFontFamily: GDocsWeightedFontFamily(fontFamily: "Courier New")), fields: "weightedFontFamily")))
                     case .link(let url):
