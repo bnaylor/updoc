@@ -34,21 +34,27 @@ public struct GDocsMarkdownFormatter {
             var isStrikethrough = false
             var lineContent = line
             
-            if line.hasPrefix("* ") || line.hasPrefix("- ") || line.hasPrefix("+ ") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("* ") || trimmed.hasPrefix("- ") || trimmed.hasPrefix("+ ") {
                 bulletPreset = "BULLET_DISC_CIRCLE_SQUARE"
-                lineContent = String(line.dropFirst(2))
-            } else if line.hasPrefix("[ ] ") {
+                if let range = line.range(of: trimmed.prefix(2)) {
+                    lineContent = String(line[range.upperBound...])
+                }
+            } else if trimmed.hasPrefix("[ ] ") {
                 bulletPreset = "BULLET_CHECKBOX"
-                lineContent = String(line.dropFirst(4))
-            } else if line.hasPrefix("[x] ") {
+                if let range = line.range(of: "[ ] ") {
+                    lineContent = String(line[range.upperBound...])
+                }
+            } else if trimmed.hasPrefix("[x] ") {
                 bulletPreset = "BULLET_CHECKBOX"
                 isStrikethrough = true
-                lineContent = String(line.dropFirst(4))
+                if let range = line.range(of: "[x] ") {
+                    lineContent = String(line[range.upperBound...])
+                }
             }
             
-            // 2. Heading check (can be combined with bullet, but markdown rarely does that)
+            // 2. Heading check
             var headingLevel: Int? = nil
-            
             let headingRegex = try! NSRegularExpression(pattern: "^(#{1,6})\\s+(.*)$")
             if let match = headingRegex.firstMatch(in: lineContent, options: [], range: NSRange(lineContent.startIndex..., in: lineContent)) {
                 headingLevel = match.range(at: 1).length
@@ -66,22 +72,26 @@ public struct GDocsMarkdownFormatter {
             requests.append(contentsOf: lineRequests)
             imageSegments.append(contentsOf: lineImages)
             
-            let lineRange = GDocsRange(startIndex: currentOffset, endIndex: currentOffset + cleanedLine.utf16.count)
+            // Paragraph-level ranges MUST include the newline. 
+            // For the last line, we must overlap the doc's final mandatory newline (at the index after our text).
+            let rangeLength = lineWithNewline.utf16.count + (isLastLine ? 1 : 0)
+            let lineRangeWithNewline = GDocsRange(startIndex: currentOffset, endIndex: currentOffset + rangeLength)
+            let lineRangeTextOnly = GDocsRange(startIndex: currentOffset, endIndex: currentOffset + cleanedLine.utf16.count)
             
             // 4. Apply list formatting
             if let preset = bulletPreset {
-                requests.append(GDocsRequest(createBullet: GDocsCreateBulletRequest(range: lineRange, bulletPreset: preset)))
+                requests.append(GDocsRequest(createBullet: GDocsCreateBulletRequest(range: lineRangeWithNewline, bulletPreset: preset)))
             }
             
-            // 5. Apply strikethrough for completed tasks
+            // 5. Apply strikethrough for completed tasks (to the text only)
             if isStrikethrough {
-                requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: lineRange, textStyle: GDocsTextStyle(strikethrough: true), fields: "strikethrough")))
+                requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: lineRangeTextOnly, textStyle: GDocsTextStyle(strikethrough: true), fields: "strikethrough")))
             }
             
             // 6. Apply heading style if needed
             if let level = headingLevel {
                 let style = GDocsParagraphStyle(namedStyleType: "HEADING_\(level)")
-                requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: lineRange, paragraphStyle: style, fields: "namedStyleType")))
+                requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: lineRangeWithNewline, paragraphStyle: style, fields: "namedStyleType")))
             }
             
             currentOffset += lineWithNewline.utf16.count

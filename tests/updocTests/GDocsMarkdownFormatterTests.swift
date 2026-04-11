@@ -103,11 +103,11 @@ struct GDocsMarkdownFormatterTests {
         #expect(bullets.count == 2)
         #expect(bullets[0].bulletPreset == "BULLET_DISC_CIRCLE_SQUARE")
         #expect(bullets[0].range.startIndex == 1)
-        #expect(bullets[0].range.endIndex == 7)
+        #expect(bullets[0].range.endIndex == 8) // "Item 1\n"
         
         #expect(bullets[1].bulletPreset == "BULLET_DISC_CIRCLE_SQUARE")
         #expect(bullets[1].range.startIndex == 8)
-        #expect(bullets[1].range.endIndex == 14)
+        #expect(bullets[1].range.endIndex == 14) // "Item 2" (no newline on last line)
     }
     
     @Test func formatsChecklists() {
@@ -118,6 +118,7 @@ struct GDocsMarkdownFormatterTests {
         let bullets = result.requests.compactMap { $0.createBullet }
         #expect(bullets.count == 2)
         #expect(bullets.allSatisfy { $0.bulletPreset == "BULLET_CHECKBOX" })
+        #expect(bullets[0].range.endIndex == 6) // "Todo\n"
         
         let styles = result.requests.compactMap { $0.updateTextStyle }
         #expect(styles.count == 1)
