@@ -108,23 +108,20 @@ public struct GDocsService: Sendable {
         let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: responseData)
         
         var tagRequests: [GDocsRequest] = []
-        var replyIdx = 0 // delete request is at index 0, insertions follow
         
-        for segment in segments.reversed() {
-            replyIdx += 1
-            if case .image(_, let assetId) = segment {
-                if let objectId = batchResponse.replies[replyIdx].insertInlineImage?.objectId {
-                    tagRequests.append(GDocsRequest(
-                        insertText: nil,
-                        deleteContentRange: nil,
-                        insertInlineImage: nil,
-                        updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest(
-                            objectId: objectId,
-                            properties: GDocsEmbeddedObjectProperties(description: "updoc_asset:\(assetId)"),
-                            fields: "description"
-                        )
-                    ))
-                }
+        // Find insertInlineImage replies. They correspond to the last 'segments.count' requests.
+        let imageReplyOffset = requests.count - segments.count
+        
+        for (idx, segment) in segments.reversed().enumerated() {
+            let replyIdx = imageReplyOffset + idx
+            if let objectId = batchResponse.replies[replyIdx].insertInlineImage?.objectId {
+                tagRequests.append(GDocsRequest(
+                    updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest(
+                        objectId: objectId,
+                        properties: GDocsEmbeddedObjectProperties(description: "updoc_asset:\(segment.assetId)"),
+                        fields: "description"
+                    )
+                ))
             }
         }
         
@@ -149,84 +146,48 @@ public struct GDocsService: Sendable {
         return local
     }
 
-    private func generateUpdateRequests(from oldContent: String, to newContent: String, doc: GDocsDocument, assetMappings: [String: String]) -> ([GDocsRequest], [ContentSegment]) {
+    private func generateUpdateRequests(from oldContent: String, to newContent: String, doc: GDocsDocument, assetMappings: [String: String]) -> ([GDocsRequest], [GDocsMarkdownFormatter.ImageSegment]) {
         let lastElement = doc.body.content.last
         let endIndex = lastElement?.endIndex ?? 2
-        let segments = parseSegments(content: newContent, assetMappings: assetMappings)
+        
+        let formatter = GDocsMarkdownFormatter()
+        let formatted = formatter.format(newContent, assetMappings: assetMappings)
         
         var requests: [GDocsRequest] = []
         
-        // Delete all existing content except the very last character (Google Docs requires at least one character, which is the final newline)
-        // A doc with only a newline has endIndex = 2.
+        // 1. Delete all existing content except the very last character
         if endIndex > 2 {
             requests.append(GDocsRequest(
-                insertText: nil,
-                deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: endIndex - 1)),
-                insertInlineImage: nil,
-                updateEmbeddedObjectProperties: nil
+                deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: endIndex - 1))
             ))
         }
         
-        // Insert new content segments at index 1 in reverse order so that indices remain correct
-        for segment in segments.reversed() {
-            switch segment {
-            case .text(let text):
-                if !text.isEmpty {
-                    requests.append(GDocsRequest(
-                        insertText: GDocsInsertTextRequest(text: text, location: GDocsLocation(index: 1)),
-                        deleteContentRange: nil,
-                        insertInlineImage: nil,
-                        updateEmbeddedObjectProperties: nil
-                    ))
-                }
-            case .image(let uri, _):
-                requests.append(GDocsRequest(
-                    insertText: nil,
-                    deleteContentRange: nil,
-                    insertInlineImage: GDocsInsertInlineImageRequest(uri: uri, location: GDocsLocation(index: 1)),
-                    updateEmbeddedObjectProperties: nil
-                ))
-            }
+        // 2. Insert clean text
+        if !formatted.cleanText.isEmpty {
+            requests.append(GDocsRequest(
+                insertText: GDocsInsertTextRequest(text: formatted.cleanText, location: GDocsLocation(index: 1))
+            ))
         }
         
-        return (requests, segments)
+        // 3. Add formatting requests (bold, italic, code, headings, etc.)
+        requests.append(contentsOf: formatted.requests)
+        
+        // 4. Handle images in reverse order to keep indices correct
+        // Note: The formatter already provided absolute indices, but since they are 
+        // inserted separately, we might need to handle the shift.
+        // Actually, if we insert them via batchUpdate in reverse, it works.
+        let imageRequests = formatted.imageSegments.reversed().map { (index, uri, assetId) in
+            GDocsRequest(
+                insertInlineImage: GDocsInsertInlineImageRequest(uri: uri, location: GDocsLocation(index: index))
+            )
+        }
+        
+        // We'll return the raw segments for tagging
+        return (requests + imageRequests, formatted.imageSegments)
     }
     
-    private enum ContentSegment {
-        case text(String)
-        case image(uri: String, assetId: String)
-    }
-    
-    private func parseSegments(content: String, assetMappings: [String: String]) -> [ContentSegment] {
-        var segments: [ContentSegment] = []
-        let regex = try! NSRegularExpression(pattern: "!\\[\\[(.*?)\\]\\]", options: [])
-        let nsString = content as NSString
-        let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsString.length))
-        
-        var lastEnd = 0
-        for match in matches {
-            let range = match.range
-            if range.location > lastEnd {
-                let text = nsString.substring(with: NSRange(location: lastEnd, length: range.location - lastEnd))
-                segments.append(.text(text))
-            }
-            
-            let assetId = nsString.substring(with: match.range(at: 1))
-            if let uri = assetMappings[assetId] {
-                segments.append(.image(uri: uri, assetId: assetId))
-            } else {
-                segments.append(.text(nsString.substring(with: range)))
-            }
-            lastEnd = range.location + range.length
-        }
-        
-        if lastEnd < nsString.length {
-            let text = nsString.substring(with: NSRange(location: lastEnd, length: nsString.length - lastEnd))
-            segments.append(.text(text))
-        }
-        
-        return segments
-    }
+    // Type alias for easier reading
+    private typealias ImageSegment = GDocsMarkdownFormatter.ImageSegment
     
     public func insertImage(docId: String, index: Int, uri: String, assetId: String) async throws {
         let token = try await getAccessToken()
