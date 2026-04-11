@@ -83,60 +83,93 @@ public struct GDocsService: Sendable {
 
     private func performUpdate(docId: String, content: String, baseDocument: GDocsDocument, assetMappings: [String: String]) async throws {
         let token = try await getAccessToken()
-        let (requests, segments) = generateUpdateRequests(from: "", to: content, doc: baseDocument, assetMappings: assetMappings)
-
-        if requests.isEmpty { return }
-
-        // COMBINE all delete and insert requests into a single batchUpdate to preserve atomicity and satisfy WriteControl
+        let formatter = GDocsMarkdownFormatter()
+        let formatted = formatter.format(content, assetMappings: assetMappings)
+        
         let writeControl = GDocsWriteControl(requiredRevisionId: baseDocument.revisionId)
-        let batchRequest = GDocsBatchUpdateRequest(requests: requests, writeControl: writeControl)
-        let batchData = try JSONEncoder().encode(batchRequest)
+        
+        // STAGE 1: Replacement (Delete + Insert Text)
+        var replaceRequests: [GDocsRequest] = []
+        let lastElement = baseDocument.body.content.last
+        let endIndex = lastElement?.endIndex ?? 2
+        
+        if endIndex > 2 {
+            replaceRequests.append(GDocsRequest(
+                deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: endIndex - 1))
+            ))
+        }
+        
+        if !formatted.cleanText.isEmpty {
+            replaceRequests.append(GDocsRequest(
+                insertText: GDocsInsertTextRequest(text: formatted.cleanText, location: GDocsLocation(index: 1))
+            ))
+        }
+        
+        if !replaceRequests.isEmpty {
+            let replaceBatch = GDocsBatchUpdateRequest(requests: replaceRequests, writeControl: writeControl)
+            let replaceData = try JSONEncoder().encode(replaceBatch)
+            try await sendBatchUpdate(docId: docId, data: replaceData, token: token)
+        }
+        
+        // Re-fetch document to get new revision ID for Stage 2
+        let (_, updatedDoc) = try await fetchDocContent(docId: docId)
+        let updatedWriteControl = GDocsWriteControl(requiredRevisionId: updatedDoc.revisionId)
+        
+        // STAGE 2: Formatting and Images
+        var formatRequests: [GDocsRequest] = formatted.requests
+        
+        let imageRequests = formatted.imageSegments.reversed().map { (index, uri, assetId) in
+            GDocsRequest(
+                insertInlineImage: GDocsInsertInlineImageRequest(uri: uri, location: GDocsLocation(index: index))
+            )
+        }
+        formatRequests.append(contentsOf: imageRequests)
+        
+        if !formatRequests.isEmpty {
+            let formatBatch = GDocsBatchUpdateRequest(requests: formatRequests, writeControl: updatedWriteControl)
+            let formatData = try JSONEncoder().encode(formatBatch)
+            let responseData = try await sendBatchUpdate(docId: docId, data: formatData, token: token)
+            
+            // Tag images
+            let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: responseData)
+            var tagRequests: [GDocsRequest] = []
+            let imageReplyOffset = formatted.requests.count
+            
+            for (idx, segment) in formatted.imageSegments.reversed().enumerated() {
+                let replyIdx = imageReplyOffset + idx
+                if let objectId = batchResponse.replies[replyIdx].insertInlineImage?.objectId {
+                    tagRequests.append(GDocsRequest(
+                        updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest(
+                            objectId: objectId,
+                            properties: GDocsEmbeddedObjectProperties(description: "updoc_asset:\(segment.assetId)"),
+                            fields: "description"
+                        )
+                    ))
+                }
+            }
+            
+            if !tagRequests.isEmpty {
+                let tagBatch = GDocsBatchUpdateRequest(requests: tagRequests)
+                let tagData = try JSONEncoder().encode(tagBatch)
+                _ = try? await sendBatchUpdate(docId: docId, data: tagData, token: token)
+            }
+        }
+    }
 
-        var updateRequest = URLRequest(url: URL(string: "https://docs.googleapis.com/v1/documents/\(docId):batchUpdate")!)
-        updateRequest.httpMethod = "POST"
-        updateRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        updateRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        updateRequest.httpBody = batchData
+    @discardableResult
+    private func sendBatchUpdate(docId: String, data: Data, token: String) async throws -> Data {
+        var request = URLRequest(url: URL(string: "https://docs.googleapis.com/v1/documents/\(docId):batchUpdate")!)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = data
 
-        let (responseData, response) = try await session.data(for: updateRequest)
+        let (responseData, response) = try await session.data(for: request)
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
             let errorBody = String(data: responseData, encoding: .utf8) ?? "Unknown error"
-            throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to update doc: \(errorBody)"])
+            throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "BatchUpdate failed: \(errorBody)"])
         }
-
-        // Tag images if we have them
-        let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: responseData)
-        
-        var tagRequests: [GDocsRequest] = []
-        
-        // Find insertInlineImage replies. They correspond to the last 'segments.count' requests.
-        let imageReplyOffset = requests.count - segments.count
-        
-        for (idx, segment) in segments.reversed().enumerated() {
-            let replyIdx = imageReplyOffset + idx
-            if let objectId = batchResponse.replies[replyIdx].insertInlineImage?.objectId {
-                tagRequests.append(GDocsRequest(
-                    updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest(
-                        objectId: objectId,
-                        properties: GDocsEmbeddedObjectProperties(description: "updoc_asset:\(segment.assetId)"),
-                        fields: "description"
-                    )
-                ))
-            }
-        }
-        
-        if !tagRequests.isEmpty {
-            // Re-perform batch update for tagging. Revision mismatch at this point is unlikely 
-            // since the main update just succeeded and we are immediate. 
-            let tagBatchRequest = GDocsBatchUpdateRequest(requests: tagRequests) 
-            let tagBatchData = try JSONEncoder().encode(tagBatchRequest)
-            updateRequest.httpBody = tagBatchData
-            let (tagData, tagResponse) = try await session.data(for: updateRequest)
-            if let httpResponse = tagResponse as? HTTPURLResponse, httpResponse.statusCode != 200 {
-                let errorBody = String(data: tagData, encoding: .utf8) ?? "Unknown error"
-                print("Failed to tag images: \(errorBody)")
-            }
-        }
+        return responseData
     }
 
     private func merge(base: String, local: String, remote: String) -> String {
@@ -144,46 +177,6 @@ public struct GDocsService: Sendable {
         if remote == base { return local }
         // Simple strategy: prefer local for conflicts for now
         return local
-    }
-
-    private func generateUpdateRequests(from oldContent: String, to newContent: String, doc: GDocsDocument, assetMappings: [String: String]) -> ([GDocsRequest], [GDocsMarkdownFormatter.ImageSegment]) {
-        let lastElement = doc.body.content.last
-        let endIndex = lastElement?.endIndex ?? 2
-        
-        let formatter = GDocsMarkdownFormatter()
-        let formatted = formatter.format(newContent, assetMappings: assetMappings)
-        
-        var requests: [GDocsRequest] = []
-        
-        // 1. Delete all existing content except the very last character
-        if endIndex > 2 {
-            requests.append(GDocsRequest(
-                deleteContentRange: GDocsDeleteContentRangeRequest(range: GDocsRange(startIndex: 1, endIndex: endIndex - 1))
-            ))
-        }
-        
-        // 2. Insert clean text
-        if !formatted.cleanText.isEmpty {
-            requests.append(GDocsRequest(
-                insertText: GDocsInsertTextRequest(text: formatted.cleanText, location: GDocsLocation(index: 1))
-            ))
-        }
-        
-        // 3. Add formatting requests (bold, italic, code, headings, etc.)
-        requests.append(contentsOf: formatted.requests)
-        
-        // 4. Handle images in reverse order to keep indices correct
-        // Note: The formatter already provided absolute indices, but since they are 
-        // inserted separately, we might need to handle the shift.
-        // Actually, if we insert them via batchUpdate in reverse, it works.
-        let imageRequests = formatted.imageSegments.reversed().map { (index, uri, assetId) in
-            GDocsRequest(
-                insertInlineImage: GDocsInsertInlineImageRequest(uri: uri, location: GDocsLocation(index: index))
-            )
-        }
-        
-        // We'll return the raw segments for tagging
-        return (requests + imageRequests, formatted.imageSegments)
     }
     
     // Type alias for easier reading
