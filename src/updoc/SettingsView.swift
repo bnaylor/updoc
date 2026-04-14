@@ -86,11 +86,7 @@ struct SettingsView: View {
     }
     
     private func save() {
-        do {
-            try Config.saveCredentials(clientID: clientID, clientSecret: clientSecret, redirectURI: redirectURI)
-        } catch {
-            print("Failed to save credentials to Keychain: \(error)")
-        }
+        Config.saveCredentials(clientID: clientID, clientSecret: clientSecret, redirectURI: redirectURI)
     }
     
     private func login() {
