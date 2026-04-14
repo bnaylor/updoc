@@ -59,12 +59,18 @@ struct ContentView: View {
                             .help("Open linked Google Doc in browser")
                             
                             Button(action: { triggerSync(for: note) }) {
-                                Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
+                                Label(
+                                    title: { Text(liveSyncManager.isFastPolling ? "Receiving Edits..." : "Sync Now") },
+                                    icon: {
+                                        Image(systemName: "arrow.triangle.2.circlepath")
+                                            .foregroundStyle(liveSyncManager.isFastPolling ? .green : .primary)
+                                            .symbolEffect(.pulse, options: .repeating, isActive: liveSyncManager.isFastPolling)
+                                    }
+                                )
                             }
                             .disabled(isSyncing || !AuthManager.shared.isAuthenticated())
                             .keyboardShortcut("s", modifiers: .command)
-                            .help("Sync changes with Google Docs (Cmd+S)")
-                        } else {
+                            .help("Sync changes with Google Docs (Cmd+S)")                        } else {
                             Button(action: { publishDraft(note) }) {
                                 Label("Publish to Google Docs", systemImage: "arrow.up.doc.fill")
                             }

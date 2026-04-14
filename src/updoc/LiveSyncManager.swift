@@ -9,6 +9,10 @@ public class LiveSyncManager {
     public var currentInterval: TimeInterval = 30.0
     public var isSyncing: Bool = false
     
+    public var isFastPolling: Bool {
+        return currentInterval < lazyInterval
+    }
+    
     private var timer: Timer?
     private let lazyInterval: TimeInterval = 30.0
     private let aggressiveInterval: TimeInterval = 2.0
