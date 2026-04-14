@@ -58,6 +58,7 @@ public class SyncCoordinator {
                 
                 // Notify the UI that an external sync just modified the note
                 NotificationCenter.default.post(name: .noteDidSyncRemotely, object: note)
+                NotificationCenter.default.post(name: .remoteEditDetected, object: nil)
                 
             } else if isLocalUnchanged {
                 print("Syncing note \(docId): Local content unchanged since last sync, skipping push.")
@@ -66,6 +67,7 @@ public class SyncCoordinator {
                     note.lastSyncedRevision = remoteRev
                     try context.save()
                 }
+                NotificationCenter.default.post(name: .noRemoteEditDetected, object: nil)
             } else if localContent == remoteContent {
                 print("Syncing note \(docId): Content identical to remote, skipping update.")
                 if note.lastSyncedRevision != remoteRev {
@@ -73,6 +75,7 @@ public class SyncCoordinator {
                     note.lastSyncedLocalContent = localContent
                     try context.save()
                 }
+                NotificationCenter.default.post(name: .noRemoteEditDetected, object: nil)
             } else {
                 print("Syncing note \(docId): Content differs, updating doc...")
                 // If content differs, attempt a seamless push.
