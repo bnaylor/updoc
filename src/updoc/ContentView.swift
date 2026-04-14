@@ -118,22 +118,24 @@ struct ContentView: View {
                     TaskSidebarView(selectedNote: $selectedNote)
                         .inspectorColumnWidth(min: 250, ideal: 280, max: 400)
                 }
-                .onChange(of: note) { oldNote, newNote in
+                .onAppear {
                     let manager = liveSyncManager
-                    if newNote.googleDocId != nil {
-                        manager.start(for: newNote)
-                    } else {
-                        manager.stop()
+                    if note.googleDocId != nil {
+                        manager.start(for: note)
                     }
                 }
             } else {
                 Text("Select a note to begin")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .foregroundColor(.secondary)
-                    .onChange(of: selectedNote) { oldVal, newVal in
-                        let manager = liveSyncManager
-                        manager.stop()
-                    }
+            }
+        }
+        .onChange(of: selectedNote) { oldVal, newVal in
+            let manager = liveSyncManager
+            if let n = newVal, n.googleDocId != nil {
+                manager.start(for: n)
+            } else {
+                manager.stop()
             }
         }
         .navigationSplitViewStyle(.balanced)
@@ -347,10 +349,13 @@ struct ContentView: View {
                             activeConflict = ConflictInfo(noteId: note.persistentModelID, local: local, remote: remote, remoteRevision: rev)
                         } else {
                             print("Background sync skipped due to conflict.")
+                            NotificationCenter.default.post(name: .noRemoteEditDetected, object: nil)
                         }
                     } else {
                         if !isBackground {
                             syncError = error.localizedDescription
+                        } else {
+                            NotificationCenter.default.post(name: .noRemoteEditDetected, object: nil)
                         }
                     }
                 }
@@ -358,6 +363,8 @@ struct ContentView: View {
                 await MainActor.run {
                     if !isBackground {
                         syncError = error.localizedDescription
+                    } else {
+                        NotificationCenter.default.post(name: .noRemoteEditDetected, object: nil)
                     }
                     isSyncing = false
                 }

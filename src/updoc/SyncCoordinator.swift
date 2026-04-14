@@ -97,6 +97,10 @@ public class SyncCoordinator {
                     print("Syncing note \(docId): Content was merged during update.")
                     note.content = merged
                     note.lastSyncedLocalContent = merged
+                    NotificationCenter.default.post(name: .noteDidSyncRemotely, object: note)
+                    NotificationCenter.default.post(name: .remoteEditDetected, object: nil)
+                } else {
+                    NotificationCenter.default.post(name: .noRemoteEditDetected, object: nil)
                 }
                 try context.save()
             }
