@@ -80,18 +80,26 @@ public struct GDocsMarkdownFormatter {
             
             // 4. Apply list formatting
             if let preset = bulletPreset {
-                requests.append(GDocsRequest(createBullet: GDocsCreateBulletRequest(range: lineRangeWithNewline, bulletPreset: preset)))
+                // Only apply if range is valid
+                if lineRangeWithNewline.startIndex < lineRangeWithNewline.endIndex {
+                    requests.append(GDocsRequest(createBullets: GDocsCreateBulletRequest(range: lineRangeWithNewline, bulletPreset: preset)))
+                }
             }
             
             // 5. Apply strikethrough for completed tasks (to the text only)
             if isStrikethrough {
-                requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: lineRangeTextOnly, textStyle: GDocsTextStyle(strikethrough: true), fields: "strikethrough")))
+                // CRITICAL: Google Docs API rejects ranges where startIndex == endIndex
+                if lineRangeTextOnly.startIndex < lineRangeTextOnly.endIndex {
+                    requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: lineRangeTextOnly, textStyle: GDocsTextStyle(strikethrough: true), fields: "strikethrough")))
+                }
             }
             
             // 6. Apply heading style if needed
             if let level = headingLevel {
-                let style = GDocsParagraphStyle(namedStyleType: "HEADING_\(level)")
-                requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: lineRangeWithNewline, paragraphStyle: style, fields: "namedStyleType")))
+                if lineRangeWithNewline.startIndex < lineRangeWithNewline.endIndex {
+                    let style = GDocsParagraphStyle(namedStyleType: "HEADING_\(level)")
+                    requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: lineRangeWithNewline, paragraphStyle: style, fields: "namedStyleType")))
+                }
             }
             
             currentOffset += lineWithNewline.utf16.count
@@ -189,20 +197,22 @@ public struct GDocsMarkdownFormatter {
                 
                 if let style = m.style {
                     let range = GDocsRange(startIndex: cleanStart, endIndex: cleanEnd)
-                    switch style {
-                    case .bold:
-                        requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(bold: true), fields: "bold")))
-                    case .italic:
-                        requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(italic: true), fields: "italic")))
-                    case .underline:
-                        requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(underline: true), fields: "underline")))
-                    case .code:
-                        requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(weightedFontFamily: GDocsWeightedFontFamily(fontFamily: "Courier New")), fields: "weightedFontFamily")))
-                    case .link(let url):
-                        if let url = url {
-                            requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(link: GDocsLink(url: url)), fields: "link")))
+                    if range.startIndex < range.endIndex {
+                        switch style {
+                        case .bold:
+                            requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(bold: true), fields: "bold")))
+                        case .italic:
+                            requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(italic: true), fields: "italic")))
+                        case .underline:
+                            requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(underline: true), fields: "underline")))
+                        case .code:
+                            requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(weightedFontFamily: GDocsWeightedFontFamily(fontFamily: "Courier New")), fields: "weightedFontFamily")))
+                        case .link(let url):
+                            if let url = url {
+                                requests.append(GDocsRequest(updateTextStyle: GDocsUpdateTextStyleRequest(range: range, textStyle: GDocsTextStyle(link: GDocsLink(url: url)), fields: "link")))
+                            }
+                        default: break
                         }
-                    default: break
                     }
                 }
             }

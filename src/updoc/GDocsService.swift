@@ -86,9 +86,7 @@ public struct GDocsService: Sendable {
         let formatter = GDocsMarkdownFormatter()
         let formatted = formatter.format(content, assetMappings: assetMappings)
         
-        let writeControl = GDocsWriteControl(requiredRevisionId: baseDocument.revisionId)
-        
-        // STAGE 1: Replacement (Delete + Insert Text)
+        // STAGE 1: Replacement (Establish stable baseline)
         var replaceRequests: [GDocsRequest] = []
         let lastElement = baseDocument.body.content.last
         let endIndex = lastElement?.endIndex ?? 2
@@ -106,34 +104,43 @@ public struct GDocsService: Sendable {
         }
         
         if !replaceRequests.isEmpty {
-            let replaceBatch = GDocsBatchUpdateRequest(requests: replaceRequests, writeControl: writeControl)
+            let replaceBatch = GDocsBatchUpdateRequest(requests: replaceRequests, writeControl: GDocsWriteControl(requiredRevisionId: baseDocument.revisionId))
             let replaceData = try JSONEncoder().encode(replaceBatch)
             try await sendBatchUpdate(docId: docId, data: replaceData, token: token)
         }
         
-        // Re-fetch document to get new revision ID for Stage 2
-        let (_, updatedDoc) = try await fetchDocContent(docId: docId)
-        let updatedWriteControl = GDocsWriteControl(requiredRevisionId: updatedDoc.revisionId)
+        // Re-fetch to get fresh indices and revision ID
+        let (_, structureDoc) = try await fetchDocContent(docId: docId)
         
-        // STAGE 2: Formatting and Images
-        var formatRequests: [GDocsRequest] = formatted.requests
+        // STAGE 2: Structure (Paragraph Styles & Bullets)
+        let structureRequests = formatted.requests.filter { $0.updateParagraphStyle != nil || $0.createBullets != nil }
+        if !structureRequests.isEmpty {
+            let structureBatch = GDocsBatchUpdateRequest(requests: structureRequests, writeControl: GDocsWriteControl(requiredRevisionId: structureDoc.revisionId))
+            let structureData = try JSONEncoder().encode(structureBatch)
+            try await sendBatchUpdate(docId: docId, data: structureData, token: token)
+        }
         
+        // Re-fetch again for the final stage
+        let (_, styleDoc) = try await fetchDocContent(docId: docId)
+        
+        // STAGE 3: Inline Styles & Images
+        var styleRequests = formatted.requests.filter { $0.updateTextStyle != nil }
         let imageRequests = formatted.imageSegments.reversed().map { (index, uri, assetId) in
             GDocsRequest(
                 insertInlineImage: GDocsInsertInlineImageRequest(uri: uri, location: GDocsLocation(index: index))
             )
         }
-        formatRequests.append(contentsOf: imageRequests)
+        styleRequests.append(contentsOf: imageRequests)
         
-        if !formatRequests.isEmpty {
-            let formatBatch = GDocsBatchUpdateRequest(requests: formatRequests, writeControl: updatedWriteControl)
-            let formatData = try JSONEncoder().encode(formatBatch)
-            let responseData = try await sendBatchUpdate(docId: docId, data: formatData, token: token)
+        if !styleRequests.isEmpty {
+            let styleBatch = GDocsBatchUpdateRequest(requests: styleRequests, writeControl: GDocsWriteControl(requiredRevisionId: styleDoc.revisionId))
+            let styleData = try JSONEncoder().encode(styleBatch)
+            let responseData = try await sendBatchUpdate(docId: docId, data: styleData, token: token)
             
             // Tag images
             let batchResponse = try JSONDecoder().decode(GDocsBatchUpdateResponse.self, from: responseData)
             var tagRequests: [GDocsRequest] = []
-            let imageReplyOffset = formatted.requests.count
+            let imageReplyOffset = styleRequests.count - formatted.imageSegments.count
             
             for (idx, segment) in formatted.imageSegments.reversed().enumerated() {
                 let replyIdx = imageReplyOffset + idx
@@ -167,6 +174,10 @@ public struct GDocsService: Sendable {
         let (responseData, response) = try await session.data(for: request)
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
             let errorBody = String(data: responseData, encoding: .utf8) ?? "Unknown error"
+            let payloadString = String(data: data, encoding: .utf8) ?? "Could not decode payload"
+            print("GDocs BatchUpdate failed. Status: \(httpResponse.statusCode)")
+            print("Error: \(errorBody)")
+            print("Payload: \(payloadString)")
             throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "BatchUpdate failed: \(errorBody)"])
         }
         return responseData

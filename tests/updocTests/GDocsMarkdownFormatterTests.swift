@@ -17,7 +17,7 @@ struct GDocsMarkdownFormatterTests {
         }
         #expect(req.paragraphStyle.namedStyleType == "HEADING_1")
         #expect(req.range.startIndex == 1)
-        #expect(req.range.endIndex == 8)
+        #expect(req.range.endIndex == 9) // "Meeting" + mandatory doc newline
     }
     
     @Test func formatsBoldText() {
@@ -99,7 +99,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Item 1\nItem 2")
-        let bullets = result.requests.compactMap { $0.createBullet }
+        let bullets = result.requests.compactMap { $0.createBullets }
         #expect(bullets.count == 2)
         #expect(bullets[0].bulletPreset == "BULLET_DISC_CIRCLE_SQUARE")
         #expect(bullets[0].range.startIndex == 1)
@@ -107,7 +107,7 @@ struct GDocsMarkdownFormatterTests {
         
         #expect(bullets[1].bulletPreset == "BULLET_DISC_CIRCLE_SQUARE")
         #expect(bullets[1].range.startIndex == 8)
-        #expect(bullets[1].range.endIndex == 14) // "Item 2" (no newline on last line)
+        #expect(bullets[1].range.endIndex == 15) // "Item 2" + mandatory doc newline
     }
     
     @Test func formatsChecklists() {
@@ -115,7 +115,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Todo\nDone")
-        let bullets = result.requests.compactMap { $0.createBullet }
+        let bullets = result.requests.compactMap { $0.createBullets }
         #expect(bullets.count == 2)
         #expect(bullets.allSatisfy { $0.bulletPreset == "BULLET_CHECKBOX" })
         #expect(bullets[0].range.endIndex == 6) // "Todo\n"
@@ -137,7 +137,7 @@ struct GDocsMarkdownFormatterTests {
         let headingReq = result.requests.compactMap { $0.updateParagraphStyle }.first
         #expect(headingReq?.paragraphStyle.namedStyleType == "HEADING_1")
         #expect(headingReq?.range.startIndex == 1)
-        #expect(headingReq?.range.endIndex == 13)
+        #expect(headingReq?.range.endIndex == 14) // "This is bold" + mandatory doc newline
         
         // Bold request
         let boldReq = result.requests.compactMap { $0.updateTextStyle }.first

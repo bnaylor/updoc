@@ -119,16 +119,16 @@ public struct GDocsRequest: Codable {
     public let updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest?
     public let updateTextStyle: GDocsUpdateTextStyleRequest?
     public let updateParagraphStyle: GDocsUpdateParagraphStyleRequest?
-    public let createBullet: GDocsCreateBulletRequest?
+    public let createBullets: GDocsCreateBulletRequest?
     
-    public init(insertText: GDocsInsertTextRequest? = nil, deleteContentRange: GDocsDeleteContentRangeRequest? = nil, insertInlineImage: GDocsInsertInlineImageRequest? = nil, updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest? = nil, updateTextStyle: GDocsUpdateTextStyleRequest? = nil, updateParagraphStyle: GDocsUpdateParagraphStyleRequest? = nil, createBullet: GDocsCreateBulletRequest? = nil) {
+    public init(insertText: GDocsInsertTextRequest? = nil, deleteContentRange: GDocsDeleteContentRangeRequest? = nil, insertInlineImage: GDocsInsertInlineImageRequest? = nil, updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest? = nil, updateTextStyle: GDocsUpdateTextStyleRequest? = nil, updateParagraphStyle: GDocsUpdateParagraphStyleRequest? = nil, createBullets: GDocsCreateBulletRequest? = nil) {
         self.insertText = insertText
         self.deleteContentRange = deleteContentRange
         self.insertInlineImage = insertInlineImage
         self.updateEmbeddedObjectProperties = updateEmbeddedObjectProperties
         self.updateTextStyle = updateTextStyle
         self.updateParagraphStyle = updateParagraphStyle
-        self.createBullet = createBullet
+        self.createBullets = createBullets
     }
 }
 
