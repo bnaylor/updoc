@@ -15,10 +15,12 @@ public enum MarkdownStyle: Equatable {
 public struct MarkdownRange: Equatable {
     public let range: NSRange
     public let style: MarkdownStyle
+    public let syntaxRanges: [NSRange]
     
-    public init(range: NSRange, style: MarkdownStyle) {
+    public init(range: NSRange, style: MarkdownStyle, syntaxRanges: [NSRange] = []) {
         self.range = range
         self.style = style
+        self.syntaxRanges = syntaxRanges
     }
 }
 
@@ -44,7 +46,9 @@ public struct MarkdownEngine {
         let boldRegex = try! NSRegularExpression(pattern: "\\*\\*.*?\\*\\*", options: [])
         boldRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
             if let matchRange = match?.range {
-                ranges.append(MarkdownRange(range: matchRange, style: .bold))
+                let startSyntax = NSRange(location: matchRange.location, length: 2)
+                let endSyntax = NSRange(location: matchRange.location + matchRange.length - 2, length: 2)
+                ranges.append(MarkdownRange(range: matchRange, style: .bold, syntaxRanges: [startSyntax, endSyntax]))
             }
         }
         

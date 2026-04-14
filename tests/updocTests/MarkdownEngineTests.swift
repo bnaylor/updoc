@@ -18,9 +18,11 @@ struct MarkdownEngineTests {
         let text = "This is **bold** text"
         let ranges = engine.parse(text)
         
-        // Should find "**bold**"
         let boldRange = try #require(ranges.first { $0.style == .bold })
-        #expect(boldRange.range.length == 8) // length of "**bold**"
+        #expect(boldRange.range.length == 8)
+        #expect(boldRange.syntaxRanges.count == 2)
+        #expect(boldRange.syntaxRanges[0] == NSRange(location: 8, length: 2))
+        #expect(boldRange.syntaxRanges[1] == NSRange(location: 14, length: 2))
     }
     
     @Test func detectsItalicText() throws {
