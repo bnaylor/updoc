@@ -39,6 +39,19 @@ public struct GDocsStructuralElement: Codable {
 
 public struct GDocsParagraph: Codable {
     public let elements: [GDocsParagraphElement]
+    public let bullet: GDocsBullet?
+    public let paragraphStyle: GDocsParagraphStyle?
+    
+    public init(elements: [GDocsParagraphElement], bullet: GDocsBullet? = nil, paragraphStyle: GDocsParagraphStyle? = nil) {
+        self.elements = elements
+        self.bullet = bullet
+        self.paragraphStyle = paragraphStyle
+    }
+}
+
+public struct GDocsBullet: Codable {
+    public let listId: String?
+    public let textStyle: GDocsTextStyle?
 }
 
 public struct GDocsParagraphElement: Codable {

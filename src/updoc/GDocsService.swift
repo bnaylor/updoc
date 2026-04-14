@@ -109,21 +109,16 @@ public struct GDocsService: Sendable {
             try await sendBatchUpdate(docId: docId, data: replaceData, token: token)
         }
         
-        // Re-fetch to get fresh indices and revision ID
-        let (_, structureDoc) = try await fetchDocContent(docId: docId)
+        let structureRequests = formatted.requests.filter { $0.updateParagraphStyle != nil || $0.createParagraphBullets != nil }
         
         // STAGE 2: Structure (Paragraph Styles & Bullets)
-        let structureRequests = formatted.requests.filter { $0.updateParagraphStyle != nil || $0.createParagraphBullets != nil }
         if !structureRequests.isEmpty {
+            let (_, structureDoc) = try await fetchDocContent(docId: docId)
             let structureBatch = GDocsBatchUpdateRequest(requests: structureRequests, writeControl: GDocsWriteControl(requiredRevisionId: structureDoc.revisionId))
             let structureData = try JSONEncoder().encode(structureBatch)
             try await sendBatchUpdate(docId: docId, data: structureData, token: token)
         }
         
-        // Re-fetch again for the final stage
-        let (_, styleDoc) = try await fetchDocContent(docId: docId)
-        
-        // STAGE 3: Inline Styles & Images
         var styleRequests = formatted.requests.filter { $0.updateTextStyle != nil }
         let imageRequests = formatted.imageSegments.reversed().map { (index, uri, assetId) in
             GDocsRequest(
@@ -132,7 +127,9 @@ public struct GDocsService: Sendable {
         }
         styleRequests.append(contentsOf: imageRequests)
         
+        // STAGE 3: Inline Styles & Images
         if !styleRequests.isEmpty {
+            let (_, styleDoc) = try await fetchDocContent(docId: docId)
             let styleBatch = GDocsBatchUpdateRequest(requests: styleRequests, writeControl: GDocsWriteControl(requiredRevisionId: styleDoc.revisionId))
             let styleData = try JSONEncoder().encode(styleBatch)
             let responseData = try await sendBatchUpdate(docId: docId, data: styleData, token: token)

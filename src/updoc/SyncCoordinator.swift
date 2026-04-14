@@ -43,11 +43,23 @@ public class SyncCoordinator {
             let remoteRev = baseDoc.revisionId ?? ""
             print("Syncing note \(docId): remoteContent length = \(remoteContent.count), revision = \(remoteRev)")
             
-            if localContent == remoteContent {
-                print("Syncing note \(docId): Content identical, skipping update.")
-                // If content is identical, just update the revision tracking
+            let isLocalUnchanged = (note.lastSyncedLocalContent == localContent)
+            let isRemoteUnchanged = (note.lastSyncedRevision == remoteRev)
+            
+            if isLocalUnchanged {
+                print("Syncing note \(docId): Local content unchanged since last sync, skipping push.")
+                if note.lastSyncedRevision != remoteRev {
+                    // Update revision tracking if we see a new revision (or ignore if it's an eventually consistent older one)
+                    // In a perfect world, we would pull remote changes here if it's truly a newer revision.
+                    // For now, we avoid destructive pulls and infinite push loops.
+                    note.lastSyncedRevision = remoteRev
+                    try context.save()
+                }
+            } else if localContent == remoteContent {
+                print("Syncing note \(docId): Content identical to remote, skipping update.")
                 if note.lastSyncedRevision != remoteRev {
                     note.lastSyncedRevision = remoteRev
+                    note.lastSyncedLocalContent = localContent
                     try context.save()
                 }
             } else {
@@ -66,9 +78,11 @@ public class SyncCoordinator {
                 let (newRev, mergedContent) = try await gDocs.updateDocContent(docId: docId, content: localContent, baseDocument: baseDoc, assetMappings: mappings)
                 print("Syncing note \(docId): Update successful. New revision = \(newRev)")
                 note.lastSyncedRevision = newRev
+                note.lastSyncedLocalContent = localContent
                 if let merged = mergedContent {
                     print("Syncing note \(docId): Content was merged during update.")
                     note.content = merged
+                    note.lastSyncedLocalContent = merged
                 }
                 try context.save()
             }
