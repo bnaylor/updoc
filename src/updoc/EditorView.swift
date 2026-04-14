@@ -247,7 +247,7 @@ struct EditorView: NSViewRepresentable {
 
         init(_ parent: EditorView) {
             self.parent = parent
-            self.lastSentText = parent.text
+            self.lastSentText = nil
         }
 
         func openEditor(for attachment: RemoteImageAttachment) {
