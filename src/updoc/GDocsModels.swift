@@ -6,6 +6,20 @@ public struct GDocsDocument: Codable {
     public let title: String
     public let body: GDocsBody
     public let inlineObjects: [String: GDocsInlineObject]?
+    public let lists: [String: GDocsList]?
+}
+
+public struct GDocsList: Codable {
+    public let listProperties: GDocsListProperties?
+}
+
+public struct GDocsListProperties: Codable {
+    public let nestingLevels: [GDocsNestingLevel]?
+}
+
+public struct GDocsNestingLevel: Codable {
+    public let glyphFormat: String?
+    public let glyphType: String?
 }
 
 public struct GDocsInlineObject: Codable {
@@ -52,6 +66,7 @@ public struct GDocsParagraph: Codable {
 public struct GDocsBullet: Codable {
     public let listId: String?
     public let textStyle: GDocsTextStyle?
+    public let nestingLevel: Int?
 }
 
 public struct GDocsParagraphElement: Codable {
