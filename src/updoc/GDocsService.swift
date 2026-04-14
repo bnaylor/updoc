@@ -255,9 +255,73 @@ public struct GDocsService: Sendable {
         var markdown = ""
         for element in doc.body.content {
             if let paragraph = element.paragraph {
+                var paragraphPrefix = ""
+                let paragraphSuffix = ""
+                
+                // Handle Headings
+                if let namedStyleType = paragraph.paragraphStyle?.namedStyleType, namedStyleType.hasPrefix("HEADING_") {
+                    if let level = Int(namedStyleType.replacingOccurrences(of: "HEADING_", with: "")) {
+                        paragraphPrefix = String(repeating: "#", count: level) + " "
+                    }
+                }
+                
+                // Handle Bullets and Checklists
+                if let bullet = paragraph.bullet, let listId = bullet.listId, let list = doc.lists?[listId] {
+                    let nestingLevel = bullet.nestingLevel ?? 0
+                    let indentation = String(repeating: "  ", count: nestingLevel)
+                    
+                    var isCheckbox = false
+                    if let nestingLevels = list.listProperties?.nestingLevels, nestingLevel < nestingLevels.count {
+                        let levelInfo = nestingLevels[nestingLevel]
+                        if levelInfo.glyphType == nil && levelInfo.glyphFormat == "[%0]" { // Simplistic checkbox check, Google Docs can be weird
+                            isCheckbox = true
+                        } else if let textStyle = bullet.textStyle, textStyle.strikethrough == true { // Completed checklist item is often struck through
+                            isCheckbox = true
+                        }
+                    }
+                    
+                    // Also check for explicit checkboxes if available in a future API, but for now rely on bullet presets
+                    if isCheckbox {
+                        let isDone = bullet.textStyle?.strikethrough == true
+                        paragraphPrefix = indentation + (isDone ? "[x] " : "[ ] ")
+                    } else {
+                        paragraphPrefix = indentation + "* "
+                    }
+                }
+                
+                markdown += paragraphPrefix
+                
                 for element in paragraph.elements {
                     if let textRun = element.textRun, let content = textRun.content {
-                        markdown += content
+                        var styledContent = content
+                        
+                        // Apply inline styles (only to non-whitespace to avoid breaking markdown formatting)
+                        let trimmedContent = styledContent.trimmingCharacters(in: .newlines)
+                        if !trimmedContent.isEmpty {
+                            if textRun.textStyle?.weightedFontFamily?.fontFamily == "Courier New" {
+                                styledContent = styledContent.replacingOccurrences(of: trimmedContent, with: "`\(trimmedContent)`")
+                            } else {
+                                if textRun.textStyle?.bold == true {
+                                    styledContent = styledContent.replacingOccurrences(of: trimmedContent, with: "**\(trimmedContent)**")
+                                }
+                                if textRun.textStyle?.italic == true {
+                                    // Extract the actual word/phrase to format if there are leading/trailing spaces
+                                    let range = styledContent.range(of: trimmedContent)!
+                                    styledContent = styledContent.replacingCharacters(in: range, with: "*\(trimmedContent)*")
+                                }
+                                if textRun.textStyle?.underline == true && textRun.textStyle?.link == nil {
+                                    let range = styledContent.range(of: trimmedContent)!
+                                    styledContent = styledContent.replacingCharacters(in: range, with: "__\(trimmedContent)__")
+                                }
+                            }
+                            
+                            if let link = textRun.textStyle?.link?.url {
+                                let range = styledContent.range(of: trimmedContent)!
+                                styledContent = styledContent.replacingCharacters(in: range, with: "[\(trimmedContent)](\(link))")
+                            }
+                        }
+                        
+                        markdown += styledContent
                     } else if let inlineObjectElement = element.inlineObjectElement {
                         let objectId = inlineObjectElement.inlineObjectId
                         if let object = doc.inlineObjects?[objectId] {
@@ -272,6 +336,7 @@ public struct GDocsService: Sendable {
                         }
                     }
                 }
+                markdown += paragraphSuffix
             }
         }
         return markdown
