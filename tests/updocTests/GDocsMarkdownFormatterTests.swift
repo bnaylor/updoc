@@ -99,7 +99,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Item 1\nItem 2")
-        let bullets = result.requests.compactMap { $0.createBullets }
+        let bullets = result.requests.compactMap { $0.createParagraphBullets }
         #expect(bullets.count == 2)
         #expect(bullets[0].bulletPreset == "BULLET_DISC_CIRCLE_SQUARE")
         #expect(bullets[0].range.startIndex == 1)
@@ -115,7 +115,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Todo\nDone")
-        let bullets = result.requests.compactMap { $0.createBullets }
+        let bullets = result.requests.compactMap { $0.createParagraphBullets }
         #expect(bullets.count == 2)
         #expect(bullets.allSatisfy { $0.bulletPreset == "BULLET_CHECKBOX" })
         #expect(bullets[0].range.endIndex == 6) // "Todo\n"

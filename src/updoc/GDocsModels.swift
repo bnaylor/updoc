@@ -119,20 +119,20 @@ public struct GDocsRequest: Codable {
     public let updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest?
     public let updateTextStyle: GDocsUpdateTextStyleRequest?
     public let updateParagraphStyle: GDocsUpdateParagraphStyleRequest?
-    public let createBullets: GDocsCreateBulletRequest?
+    public let createParagraphBullets: GDocsCreateParagraphBulletsRequest?
     
-    public init(insertText: GDocsInsertTextRequest? = nil, deleteContentRange: GDocsDeleteContentRangeRequest? = nil, insertInlineImage: GDocsInsertInlineImageRequest? = nil, updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest? = nil, updateTextStyle: GDocsUpdateTextStyleRequest? = nil, updateParagraphStyle: GDocsUpdateParagraphStyleRequest? = nil, createBullets: GDocsCreateBulletRequest? = nil) {
+    public init(insertText: GDocsInsertTextRequest? = nil, deleteContentRange: GDocsDeleteContentRangeRequest? = nil, insertInlineImage: GDocsInsertInlineImageRequest? = nil, updateEmbeddedObjectProperties: GDocsUpdateEmbeddedObjectPropertiesRequest? = nil, updateTextStyle: GDocsUpdateTextStyleRequest? = nil, updateParagraphStyle: GDocsUpdateParagraphStyleRequest? = nil, createParagraphBullets: GDocsCreateParagraphBulletsRequest? = nil) {
         self.insertText = insertText
         self.deleteContentRange = deleteContentRange
         self.insertInlineImage = insertInlineImage
         self.updateEmbeddedObjectProperties = updateEmbeddedObjectProperties
         self.updateTextStyle = updateTextStyle
         self.updateParagraphStyle = updateParagraphStyle
-        self.createBullets = createBullets
+        self.createParagraphBullets = createParagraphBullets
     }
 }
 
-public struct GDocsCreateBulletRequest: Codable {
+public struct GDocsCreateParagraphBulletsRequest: Codable {
     public let range: GDocsRange
     public let bulletPreset: String
     

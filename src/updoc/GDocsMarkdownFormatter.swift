@@ -82,7 +82,7 @@ public struct GDocsMarkdownFormatter {
             if let preset = bulletPreset {
                 // Only apply if range is valid
                 if lineRangeWithNewline.startIndex < lineRangeWithNewline.endIndex {
-                    requests.append(GDocsRequest(createBullets: GDocsCreateBulletRequest(range: lineRangeWithNewline, bulletPreset: preset)))
+                    requests.append(GDocsRequest(createParagraphBullets: GDocsCreateParagraphBulletsRequest(range: lineRangeWithNewline, bulletPreset: preset)))
                 }
             }
             

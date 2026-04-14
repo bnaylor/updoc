@@ -113,7 +113,7 @@ public struct GDocsService: Sendable {
         let (_, structureDoc) = try await fetchDocContent(docId: docId)
         
         // STAGE 2: Structure (Paragraph Styles & Bullets)
-        let structureRequests = formatted.requests.filter { $0.updateParagraphStyle != nil || $0.createBullets != nil }
+        let structureRequests = formatted.requests.filter { $0.updateParagraphStyle != nil || $0.createParagraphBullets != nil }
         if !structureRequests.isEmpty {
             let structureBatch = GDocsBatchUpdateRequest(requests: structureRequests, writeControl: GDocsWriteControl(requiredRevisionId: structureDoc.revisionId))
             let structureData = try JSONEncoder().encode(structureBatch)
