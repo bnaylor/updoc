@@ -50,7 +50,7 @@ public struct MarkdownEngine {
         
         // 3. Italic (e.g., *italic*)
         // Note: We use a lookbehind/lookahead to avoid matching bold delimiters
-        let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*[^\\*]+?\\*(?!\\*)", options: [])
+        let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*[^\\*\\n]+?\\*(?!\\*)", options: [])
         italicRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
             if let matchRange = match?.range {
                 ranges.append(MarkdownRange(range: matchRange, style: .italic))

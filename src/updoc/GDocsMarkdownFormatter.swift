@@ -124,7 +124,7 @@ public struct GDocsMarkdownFormatter {
         }
         
         // Italic *text* (try to avoid bold markers by checking around)
-        let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*([^\\*]+?)\\*(?!\\*)")
+        let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*([^\\*\\n]+?)\\*(?!\\*)")
         italicRegex.enumerateMatches(in: text, options: [], range: fullRange) { m, _, _ in
             if let m = m {
                 matches.append(Match(range: m.range(at: 0), content: nsText.substring(with: m.range(at: 1)), style: .italic, isImage: false, assetId: nil))
