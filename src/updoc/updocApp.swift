@@ -102,4 +102,5 @@ extension Notification.Name {
     static let syncNote = Notification.Name("syncNote")
     static let openNoteInBrowser = Notification.Name("openNoteInBrowser")
     static let publishNote = Notification.Name("publishNote")
+    static let noteDidSyncRemotely = Notification.Name("noteDidSyncRemotely")
 }

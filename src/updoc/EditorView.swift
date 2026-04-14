@@ -216,9 +216,17 @@ struct EditorView: NSViewRepresentable {
         // This prevents "flapping" or "reverting" during rapid typing/syncs.
         let currentMarkdown = context.coordinator.convertToMarkdown(from: textView.textStorage ?? NSAttributedString())
         if text != context.coordinator.lastSentText && currentMarkdown != text {
+            // Check if this is a remote update (where we didn't just type this text)
+            let isRemoteUpdate = currentMarkdown != context.coordinator.lastSentText
+            
             textView.string = text
             context.coordinator.applyStyles(to: textView)
             context.coordinator.lastSentText = text
+            
+            // If it was a remote update, ensure we scroll to keep the cursor visible
+            if isRemoteUpdate, let range = selectionRange {
+                textView.scrollRangeToVisible(range)
+            }
         }
         
         if let range = selectionRange {

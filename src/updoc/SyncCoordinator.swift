@@ -46,12 +46,23 @@ public class SyncCoordinator {
             let isLocalUnchanged = (note.lastSyncedLocalContent == localContent)
             let isRemoteUnchanged = (note.lastSyncedRevision == remoteRev)
             
-            if isLocalUnchanged {
+            if isLocalUnchanged && !isRemoteUnchanged {
+                print("Syncing note \(docId): Remote content has changed and local is unmodified. Pulling updates.")
+                
+                await MainActor.run {
+                    note.content = remoteContent
+                    note.lastSyncedRevision = remoteRev
+                    note.lastSyncedLocalContent = remoteContent
+                }
+                try context.save()
+                
+                // Notify the UI that an external sync just modified the note
+                NotificationCenter.default.post(name: .noteDidSyncRemotely, object: note)
+                
+            } else if isLocalUnchanged {
                 print("Syncing note \(docId): Local content unchanged since last sync, skipping push.")
                 if note.lastSyncedRevision != remoteRev {
                     // Update revision tracking if we see a new revision (or ignore if it's an eventually consistent older one)
-                    // In a perfect world, we would pull remote changes here if it's truly a newer revision.
-                    // For now, we avoid destructive pulls and infinite push loops.
                     note.lastSyncedRevision = remoteRev
                     try context.save()
                 }
