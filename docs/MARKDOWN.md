@@ -18,10 +18,23 @@ Standard Markdown markers for emphasis and code.
 | :--- | :--- | :--- |
 | **Bold** | `**text**` | |
 | **Italic** | `*text*` | |
+| **Underline** | `__text__` | |
 | **Code** | `` `text` `` | Rendered as monospaced text |
 | **Link** | `[label](url)` | |
 
-## Task Management
+## Lists & Tasks
+`updoc` supports standard markdown bullets and task lists.
+
+### Bullets
+Use `*`, `-`, or `+` followed by a space.
+
+```markdown
+* Item 1
+- Item 2
++ Item 3
+```
+
+### Checklists
 `updoc` includes built-in support for checklists and task promotion.
 
 | Syntax | Description |
@@ -41,5 +54,7 @@ Standard Markdown markers for emphasis and code.
 ## Google Docs Integration
 When syncing to Google Docs:
 - Markdown markers (`**`, `#`, etc.) are stripped.
-- Native Google Docs styles (e.g., `HEADING_1`, `Bold`) are applied.
+- Native Google Docs styles (e.g., `HEADING_1`, `Bold`, `Underline`) are applied.
+- Bullets and checklists are converted to native Google Docs lists.
+- Completed checklists (`[x]`) receive a native strikethrough.
 - Links and images are embedded natively.
