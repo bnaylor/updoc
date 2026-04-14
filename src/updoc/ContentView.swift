@@ -22,6 +22,7 @@ struct ContentView: View {
     @State private var columnVisibility = NavigationSplitViewVisibility.all
     @State private var showingTaskSidebar = true
     @State private var deletionManager = DeletionManager()
+    @State private var liveSyncManager = LiveSyncManager()
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -117,69 +118,27 @@ struct ContentView: View {
                     TaskSidebarView(selectedNote: $selectedNote)
                         .inspectorColumnWidth(min: 250, ideal: 280, max: 400)
                 }
+                .onChange(of: note) { oldNote, newNote in
+                    let manager = liveSyncManager
+                    if newNote.googleDocId != nil {
+                        manager.start(for: newNote)
+                    } else {
+                        manager.stop()
+                    }
+                }
             } else {
                 Text("Select a note to begin")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .foregroundColor(.secondary)
+                    .onChange(of: selectedNote) { oldVal, newVal in
+                        let manager = liveSyncManager
+                        manager.stop()
+                    }
             }
         }
         .navigationSplitViewStyle(.balanced)
-        .sheet(isPresented: $showingRuleManager) {
-            RuleManagerView()
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView {
-                showingSettings = false
-            }
-        }
-        .sheet(item: $activeConflict) { info in
-            ConflictResolutionView(local: info.local, remote: info.remote) { resolvedContent in
-                resolveConflict(info, with: resolvedContent)
-            } onCancel: {
-                activeConflict = nil
-            }
-        }
-        .confirmationDialog(
-            "Delete Note",
-            isPresented: $deletionManager.showDeleteConfirmation,
-            presenting: deletionManager.pendingNote
-        ) { note in
-            if note.googleDocId != nil && deletionManager.isOwnedByMe {
-                Button("Delete Note & Trash Google Doc", role: .destructive) {
-                    let isCurrentNote = (note == selectedNote)
-                    Task {
-                        await deletionManager.confirmDeletion(alsoTrashRemote: true, modelContext: modelContext)
-                        if isCurrentNote {
-                            selectedNote = nil
-                        }
-                    }
-                }
-            }
-            
-            Button("Delete Note Only", role: .destructive) {
-                let isCurrentNote = (note == selectedNote)
-                Task {
-                    await deletionManager.confirmDeletion(alsoTrashRemote: false, modelContext: modelContext)
-                    if isCurrentNote {
-                        selectedNote = nil
-                    }
-                }
-            }
-            
-            Button("Cancel", role: .cancel) {
-                deletionManager.pendingNote = nil
-            }
-        } message: { note in
-            if note.googleDocId != nil {
-                if deletionManager.isOwnedByMe {
-                    Text("This note is linked to a Google Doc you own. Do you want to move the Doc to Trash as well?")
-                } else {
-                    Text("This note is linked to a Google Doc you don't own. The Doc will not be affected.")
-                }
-            } else {
-                Text("Are you sure you want to delete '\(note.title)'?")
-            }
-        }
+        .modifier(ContentViewSheets(showingRuleManager: $showingRuleManager, showingSettings: $showingSettings, activeConflict: $activeConflict, modelContext: modelContext, triggerSyncForNote: { triggerSync(for: $0) }))
+        .modifier(DeletionConfirmationModifier(deletionManager: $deletionManager, selectedNote: $selectedNote, modelContext: modelContext))
         .overlay {
             if showingCommandPalette {
                 CommandPaletteView(
@@ -211,46 +170,19 @@ struct ContentView: View {
                 .transition(.opacity)
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .syncAllNotes)) { _ in
-            syncAllNotes()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .openRules)) { _ in
-            showingRuleManager = true
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .openGlobalSearch)) { _ in
-            showingGlobalSearch = true
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .openCommandPalette)) { _ in
-            showingCommandPalette = true
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .deleteSelectedNote)) { notification in
-            if let note = notification.object as? Note {
-                deletionManager.prepareDeletion(for: note)
-            } else if let note = selectedNote {
-                deletionManager.prepareDeletion(for: note)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .syncNote)) { notification in
-            if let note = notification.object as? Note {
-                triggerSync(for: note)
-            } else if let note = selectedNote {
-                triggerSync(for: note)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .openNoteInBrowser)) { notification in
-            if let note = notification.object as? Note {
-                openInBrowser(note: note)
-            } else {
-                openInBrowser()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .publishNote)) { notification in
-            if let note = notification.object as? Note {
-                publishDraft(note)
-            } else if let note = selectedNote {
-                publishDraft(note)
-            }
-        }
+        .modifier(ContentViewReceivers(
+            showingRuleManager: $showingRuleManager,
+            showingGlobalSearch: $showingGlobalSearch,
+            showingCommandPalette: $showingCommandPalette,
+            selectedNote: $selectedNote,
+            deletionManager: $deletionManager,
+            liveSyncManager: liveSyncManager,
+            notes: notes,
+            triggerSyncForNote: { note, bg in triggerSync(for: note, isBackground: bg) },
+            publishDraftForNote: { note in publishDraft(note) },
+            openInBrowserForNote: { note in openInBrowser(note: note) },
+            syncAllNotes: { syncAllNotes() }
+        ))
         .task {
             // Short delay to ensure view hierarchy is ready
             try? await Task.sleep(nanoseconds: 500_000_000)
@@ -393,11 +325,13 @@ struct ContentView: View {
         NSWorkspace.shared.open(url)
     }
     
-    private func triggerSync(for note: Note) {
+    private func triggerSync(for note: Note, isBackground: Bool = false) {
         guard !isSyncing else { return }
         
         isSyncing = true
-        syncError = nil
+        if !isBackground {
+            syncError = nil
+        }
         
         Task {
             do {
@@ -409,36 +343,29 @@ struct ContentView: View {
                 await MainActor.run {
                     isSyncing = false
                     if case let .conflict(local, remote, rev) = error {
-                        activeConflict = ConflictInfo(noteId: note.persistentModelID, local: local, remote: remote, remoteRevision: rev)
+                        if !isBackground {
+                            activeConflict = ConflictInfo(noteId: note.persistentModelID, local: local, remote: remote, remoteRevision: rev)
+                        } else {
+                            print("Background sync skipped due to conflict.")
+                        }
                     } else {
-                        syncError = error.localizedDescription
+                        if !isBackground {
+                            syncError = error.localizedDescription
+                        }
                     }
                 }
             } catch {
                 await MainActor.run {
-                    syncError = error.localizedDescription
+                    if !isBackground {
+                        syncError = error.localizedDescription
+                    }
                     isSyncing = false
                 }
             }
         }
     }
 
-    private func resolveConflict(_ info: ConflictInfo, with content: String) {
-        guard let note = modelContext.model(for: info.noteId) as? Note else { return }
-        
-        note.content = content
-        note.lastSyncedRevision = info.remoteRevision
-        
-        do {
-            try modelContext.save()
-            activeConflict = nil
-            // Trigger sync again to push the resolved version
-            triggerSync(for: note)
-        } catch {
-            syncError = "Failed to resolve conflict: \(error.localizedDescription)"
-            activeConflict = nil
-        }
-    }
+
 
     private func publishDraft(_ note: Note) {
         guard !isSyncing else { return }
@@ -473,6 +400,168 @@ struct ContentView: View {
                     isSyncing = false
                 }
             }
+        }
+    }
+}
+
+struct DeletionConfirmationModifier: ViewModifier {
+    @Binding var deletionManager: DeletionManager
+    @Binding var selectedNote: Note?
+    var modelContext: ModelContext
+    
+    func body(content: Content) -> some View {
+        content.confirmationDialog(
+            "Delete Note",
+            isPresented: $deletionManager.showDeleteConfirmation,
+            presenting: deletionManager.pendingNote
+        ) { note in
+            if note.googleDocId != nil && deletionManager.isOwnedByMe {
+                Button("Delete Note & Trash Google Doc", role: .destructive) {
+                    let isCurrentNote = (note == selectedNote)
+                    Task {
+                        await deletionManager.confirmDeletion(alsoTrashRemote: true, modelContext: modelContext)
+                        if isCurrentNote {
+                            selectedNote = nil
+                        }
+                    }
+                }
+            }
+            
+            Button("Delete Note Only", role: .destructive) {
+                let isCurrentNote = (note == selectedNote)
+                Task {
+                    await deletionManager.confirmDeletion(alsoTrashRemote: false, modelContext: modelContext)
+                    if isCurrentNote {
+                        selectedNote = nil
+                    }
+                }
+            }
+            
+            Button("Cancel", role: .cancel) {
+                deletionManager.pendingNote = nil
+            }
+        } message: { note in
+            if note.googleDocId != nil {
+                if deletionManager.isOwnedByMe {
+                    Text("This note is linked to a Google Doc you own. Do you want to move the Doc to Trash as well?")
+                } else {
+                    Text("This note is linked to a Google Doc you don't own. The Doc will not be affected.")
+                }
+            } else {
+                Text("Are you sure you want to delete '\(note.title)'?")
+            }
+        }
+    }
+}
+
+struct ContentViewReceivers: ViewModifier {
+    @Binding var showingRuleManager: Bool
+    @Binding var showingGlobalSearch: Bool
+    @Binding var showingCommandPalette: Bool
+    @Binding var selectedNote: Note?
+    @Binding var deletionManager: DeletionManager
+    var liveSyncManager: LiveSyncManager
+    var notes: [Note]
+    var triggerSyncForNote: (Note, Bool) -> Void
+    var publishDraftForNote: (Note) -> Void
+    var openInBrowserForNote: (Note?) -> Void
+    var syncAllNotes: () -> Void
+    
+    func body(content: Content) -> some View {
+        content
+            .onReceive(NotificationCenter.default.publisher(for: .syncAllNotes)) { _ in
+                syncAllNotes()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openRules)) { _ in
+                showingRuleManager = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openGlobalSearch)) { _ in
+                showingGlobalSearch = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openCommandPalette)) { _ in
+                showingCommandPalette = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .deleteSelectedNote)) { notification in
+                if let n = notification.object as? Note {
+                    deletionManager.prepareDeletion(for: n)
+                } else if let n = selectedNote {
+                    deletionManager.prepareDeletion(for: n)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .syncNote)) { notification in
+                if let n = notification.object as? Note {
+                    triggerSyncForNote(n, false)
+                } else if let n = selectedNote {
+                    triggerSyncForNote(n, false)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openNoteInBrowser)) { notification in
+                if let n = notification.object as? Note {
+                    openInBrowserForNote(n)
+                } else {
+                    openInBrowserForNote(nil)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .publishNote)) { notification in
+                if let n = notification.object as? Note {
+                    publishDraftForNote(n)
+                } else if let n = selectedNote {
+                    publishDraftForNote(n)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .backgroundSyncRequested)) { notification in
+                if let n = notification.object as? Note {
+                    triggerSyncForNote(n, true)
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .remoteEditDetected)) { _ in
+                liveSyncManager.remoteEditDetected()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .noRemoteEditDetected)) { _ in
+                liveSyncManager.noRemoteEditDetected()
+            }
+    }
+}
+
+struct ContentViewSheets: ViewModifier {
+    @Binding var showingRuleManager: Bool
+    @Binding var showingSettings: Bool
+    @Binding var activeConflict: ContentView.ConflictInfo?
+    var modelContext: ModelContext
+    var triggerSyncForNote: (Note) -> Void
+    
+    func body(content: Content) -> some View {
+        content
+            .sheet(isPresented: $showingRuleManager) {
+                RuleManagerView()
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView {
+                    showingSettings = false
+                }
+            }
+            .sheet(item: $activeConflict) { info in
+                ConflictResolutionView(local: info.local, remote: info.remote) { resolvedContent in
+                    resolveConflict(info, with: resolvedContent)
+                } onCancel: {
+                    activeConflict = nil
+                }
+            }
+    }
+    
+    private func resolveConflict(_ info: ContentView.ConflictInfo, with content: String) {
+        guard let note = modelContext.model(for: info.noteId) as? Note else { return }
+        
+        note.content = content
+        note.lastSyncedRevision = info.remoteRevision
+        
+        do {
+            try modelContext.save()
+            activeConflict = nil
+            triggerSyncForNote(note)
+        } catch {
+            print("Failed to resolve conflict: \(error.localizedDescription)")
+            activeConflict = nil
         }
     }
 }

@@ -103,4 +103,7 @@ extension Notification.Name {
     static let openNoteInBrowser = Notification.Name("openNoteInBrowser")
     static let publishNote = Notification.Name("publishNote")
     static let noteDidSyncRemotely = Notification.Name("noteDidSyncRemotely")
+    static let backgroundSyncRequested = Notification.Name("backgroundSyncRequested")
+    static let remoteEditDetected = Notification.Name("remoteEditDetected")
+    static let noRemoteEditDetected = Notification.Name("noRemoteEditDetected")
 }
