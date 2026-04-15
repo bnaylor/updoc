@@ -581,11 +581,25 @@ struct EditorView: NSViewRepresentable {
                                            selectedRange.location == markdownRange.range.location + markdownRange.range.length // cursor right after element
 
                     if !cursorIntersects {
-                        for syntaxRange in markdownRange.syntaxRanges {
-                            textStorage.addAttributes([
+                        for (index, syntaxRange) in markdownRange.syntaxRanges.enumerated() {
+                            var hiddenAttributes: [NSAttributedString.Key: Any] = [
                                 .font: NSFont.systemFont(ofSize: 0.1),
                                 .foregroundColor: NSColor.clear
-                            ], range: syntaxRange)
+                            ]
+                            
+                            // Apply replacement symbol only to the first syntax range of list items
+                            if index == 0 {
+                                switch markdownRange.style {
+                                case .bullet:
+                                    hiddenAttributes[.listMarkerReplacement] = "•"
+                                case .checklist(let done):
+                                    hiddenAttributes[.listMarkerReplacement] = done ? "☑" : "☐"
+                                default:
+                                    break
+                                }
+                            }
+                            
+                            textStorage.addAttributes(hiddenAttributes, range: syntaxRange)
                         }
                     }
                 }
