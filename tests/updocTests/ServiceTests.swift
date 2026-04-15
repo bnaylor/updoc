@@ -24,7 +24,8 @@ struct ServiceTests {
             revisionId: "rev-1",
             title: "Test",
             body: GDocsBody(content: []),
-            inlineObjects: nil
+            inlineObjects: nil,
+            lists: nil
         )
         await #expect(throws: Error.self) {
             try await service.updateDocContent(docId: "test-id", content: "# New Content", baseDocument: dummyDoc)

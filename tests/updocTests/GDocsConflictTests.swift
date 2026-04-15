@@ -58,7 +58,8 @@ struct GDocsConflictTests {
             revisionId: "rev-1",
             title: "Test",
             body: GDocsBody(content: []),
-            inlineObjects: nil
+            inlineObjects: nil,
+            lists: nil
         )
         
         let updatedDoc = GDocsDocument(
@@ -70,7 +71,8 @@ struct GDocsConflictTests {
                     GDocsParagraphElement(startIndex: 1, endIndex: 13, textRun: GDocsTextRun(content: "Remote Change\n", textStyle: nil), inlineObjectElement: nil)
                 ]))
             ]),
-            inlineObjects: nil
+            inlineObjects: nil,
+            lists: nil
         )
         
         var requestCount = 0
