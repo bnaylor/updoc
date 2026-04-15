@@ -582,8 +582,8 @@ struct EditorView: NSViewRepresentable {
 
                     if !cursorIntersects {
                         for (index, syntaxRange) in markdownRange.syntaxRanges.enumerated() {
+                            var isListMarker = false
                             var hiddenAttributes: [NSAttributedString.Key: Any] = [
-                                .font: NSFont.systemFont(ofSize: 0.1),
                                 .foregroundColor: NSColor.clear
                             ]
                             
@@ -591,12 +591,19 @@ struct EditorView: NSViewRepresentable {
                             if index == 0 {
                                 switch markdownRange.style {
                                 case .bullet:
-                                    hiddenAttributes[.listMarkerReplacement] = "•"
+                                    isListMarker = true
+                                    hiddenAttributes[.listMarkerReplacement] = "circle.fill"
                                 case .checklist(let done):
-                                    hiddenAttributes[.listMarkerReplacement] = done ? "☑" : "☐"
+                                    isListMarker = true
+                                    hiddenAttributes[.listMarkerReplacement] = done ? "checkmark.square" : "square"
                                 default:
                                     break
                                 }
+                            }
+                            
+                            // Only shrink font for non-list markers so list markers preserve indentation
+                            if !isListMarker {
+                                hiddenAttributes[.font] = NSFont.systemFont(ofSize: 0.1)
                             }
                             
                             textStorage.addAttributes(hiddenAttributes, range: syntaxRange)
