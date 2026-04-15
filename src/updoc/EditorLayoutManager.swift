@@ -11,18 +11,22 @@ class EditorLayoutManager: NSLayoutManager {
         
         textStorage.enumerateAttribute(.listMarkerReplacement, in: charRange, options: []) { value, range, _ in
             if let symbolName = value as? String {
-                // 1. Get the dynamic color from the text attribute (fallback to labelColor)
-                let color = textStorage.attribute(.foregroundColor, at: range.location, effectiveRange: nil) as? NSColor ?? .labelColor
+                let glyphRange = self.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
                 
-                // 2. Get the bounding rect for just the FIRST character of the syntax (e.g. the '*' or '[')
-                // This ensures horizontal alignment matches the start of the list item perfectly.
-                let firstCharRange = NSRange(location: range.location, length: 1)
-                let firstCharGlyphRange = self.glyphRange(forCharacterRange: firstCharRange, actualCharacterRange: nil)
-                var firstCharRect = self.boundingRect(forGlyphRange: firstCharGlyphRange, in: textContainer)
+                // GHOST FIX: Only draw if the current pass actually contains the first glyph of the marker.
+                // TextKit calls drawBackground multiple times per line (selection, extra space, etc.)
+                guard glyphsToShow.contains(glyphRange.location) else { return }
+                
+                // 1. Get the dynamic color from our dedicated attribute
+                let color = textStorage.attribute(.listMarkerColor, at: range.location, effectiveRange: nil) as? NSColor ?? .labelColor
+                
+                // 2. Get precise character position using the line baseline
+                var lineRect = self.lineFragmentRect(forGlyphAt: glyphRange.location, effectiveRange: nil)
+                let glyphLocation = self.location(forGlyphAt: glyphRange.location)
                 
                 // Adjust for origin
-                firstCharRect.origin.x += origin.x
-                firstCharRect.origin.y += origin.y
+                lineRect.origin.x += origin.x
+                lineRect.origin.y += origin.y
                 
                 // For bullets, we want a slightly smaller font size than checkboxes
                 let isBullet = symbolName == "circle.fill"
@@ -40,17 +44,18 @@ class EditorLayoutManager: NSLayoutManager {
                     tintedImage.unlockFocus()
                     tintedImage.isTemplate = true
                     
-                    // 3. Vertical Cap-Height Alignment
-                    // The bounding rect's minY is usually the top of the line fragment.
-                    // We want to center the symbol around the middle of the cap-height of the font.
-                    // In TextKit 1 macOS, `firstCharRect.minY + baseFont.ascender` gives the baseline.
-                    let baselineY = firstCharRect.minY + baseFont.ascender
+                    // 3. Vertical Baseline Alignment
+                    // The baseline is at lineRect.minY + baseFont.ascender.
+                    // We center the symbol around the middle of the cap height of the font.
+                    let baselineY = lineRect.minY + baseFont.ascender
                     let capHeightCenterY = baselineY - (baseFont.capHeight / 2.0)
                     let yOffset = capHeightCenterY - (image.size.height / 2.0)
                     
                     // 4. Horizontal Alignment
                     // Center the symbol exactly in the middle of the first character's bounding box.
-                    let xOffset = firstCharRect.midX - (image.size.width / 2.0)
+                    let firstCharGlyphRange = NSRange(location: glyphRange.location, length: 1)
+                    let firstCharRect = self.boundingRect(forGlyphRange: firstCharGlyphRange, in: textContainer)
+                    let xOffset = lineRect.minX + glyphLocation.x + (firstCharRect.width / 2.0) - (image.size.width / 2.0)
                     
                     let drawRect = NSRect(x: xOffset, y: yOffset, width: image.size.width, height: image.size.height)
                     

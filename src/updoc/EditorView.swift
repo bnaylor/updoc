@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 
 extension NSAttributedString.Key {
     static let listMarkerReplacement = NSAttributedString.Key("listMarkerReplacement")
+    static let listMarkerColor = NSAttributedString.Key("listMarkerColor")
 }
 
 @MainActor
@@ -593,9 +594,12 @@ struct EditorView: NSViewRepresentable {
                                 case .bullet:
                                     isListMarker = true
                                     hiddenAttributes[.listMarkerReplacement] = "circle.fill"
+                                    hiddenAttributes[.listMarkerColor] = NSColor.systemOrange
                                 case .checklist(let done):
                                     isListMarker = true
                                     hiddenAttributes[.listMarkerReplacement] = done ? "checkmark.square" : "square"
+                                    let checklistAttributes = self.attributes(for: markdownRange.style)
+                                    hiddenAttributes[.listMarkerColor] = checklistAttributes[.foregroundColor] as? NSColor ?? NSColor.labelColor
                                 default:
                                     break
                                 }
