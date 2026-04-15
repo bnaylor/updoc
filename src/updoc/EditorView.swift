@@ -539,6 +539,7 @@ struct EditorView: NSViewRepresentable {
             guard let textStorage = textView.textStorage else { return }
             let text = textView.string
             let ranges = parent.engine.parse(text)
+            let selectedRange = textView.selectedRange()
             
             // Reset styles using theme font and label color
             textStorage.setAttributes([
@@ -554,6 +555,20 @@ struct EditorView: NSViewRepresentable {
                 } else {
                     let attributes = attributes(for: markdownRange.style)
                     textStorage.addAttributes(attributes, range: markdownRange.range)
+                    
+                    // Hide syntax if the cursor does NOT intersect the full markdownRange
+                    let cursorIntersects = NSIntersectionRange(selectedRange, markdownRange.range).length > 0 || 
+                                           (selectedRange.length == 0 && NSLocationInRange(selectedRange.location, markdownRange.range)) ||
+                                           selectedRange.location == markdownRange.range.location + markdownRange.range.length // cursor right after element
+
+                    if !cursorIntersects {
+                        for syntaxRange in markdownRange.syntaxRanges {
+                            textStorage.addAttributes([
+                                .font: NSFont.systemFont(ofSize: 0.1),
+                                .foregroundColor: NSColor.clear
+                            ], range: syntaxRange)
+                        }
+                    }
                 }
             }
         }
