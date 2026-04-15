@@ -15,7 +15,7 @@ public final class AuthManager: NSObject, @unchecked Sendable {
     private var isAuthorizing = false
     private var activeFlow: OIDExternalUserAgentSession?
     
-    private static let keychainService = "com.example.updoc.auth"
+    private static let keychainService = NSClassFromString("XCTest") != nil ? "com.example.updoc.auth.test" : "com.example.updoc.auth"
     private static let keychainAccount = "authState"
 
     private override init() {
