@@ -115,19 +115,29 @@ struct EditorView: NSViewRepresentable {
     private let engine = MarkdownEngine()
 
     func makeNSView(context: Context) -> NSScrollView {
-        let scrollView = NSTextView.scrollableTextView()
+        let scrollView = NSScrollView()
         scrollView.drawsBackground = true
         scrollView.backgroundColor = .textBackgroundColor
         scrollView.borderType = .noBorder
         scrollView.hasVerticalScroller = true
         scrollView.autoresizingMask = [.width, .height]
         
-        let textView = EditorTextView(frame: .zero)
+        let textStorage = NSTextStorage()
+        let layoutManager = EditorLayoutManager()
+        layoutManager.baseFont = themeManager.font
+        textStorage.addLayoutManager(layoutManager)
+        
+        let contentSize = scrollView.contentSize
+        let textContainer = NSTextContainer(containerSize: NSSize(width: contentSize.width, height: CGFloat.greatestFiniteMagnitude))
+        textContainer.widthTracksTextView = true
+        layoutManager.addTextContainer(textContainer)
+        
+        let textView = EditorTextView(frame: CGRect(origin: .zero, size: contentSize), textContainer: textContainer)
+        textView.minSize = NSSize(width: 0, height: 0)
+        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
-        textView.textContainer?.containerSize = NSSize(width: scrollView.contentSize.width, height: CGFloat.greatestFiniteMagnitude)
-        textView.textContainer?.widthTracksTextView = true
         textView.drawsBackground = true
         textView.backgroundColor = .textBackgroundColor
         textView.isRichText = false
@@ -200,6 +210,11 @@ struct EditorView: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         let textView = nsView.documentView as! NSTextView
+        
+        // Update layout manager's base font
+        if let layoutManager = textView.layoutManager as? EditorLayoutManager {
+            layoutManager.baseFont = themeManager.font
+        }
         
         // CRITICAL: Update coordinator's reference to parent to avoid stale bindings
         // and "cross-document bleed" when switching notes.
