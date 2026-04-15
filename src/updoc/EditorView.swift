@@ -3,6 +3,10 @@ import AppKit
 import UniformTypeIdentifiers
 @preconcurrency import QuickLookUI
 
+extension NSAttributedString.Key {
+    static let listMarkerReplacement = NSAttributedString.Key("listMarkerReplacement")
+}
+
 @MainActor
 class EditorTextView: NSTextView {
     var onFileDropped: ((URL, NSTextView) -> Void)?
