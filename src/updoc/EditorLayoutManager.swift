@@ -11,12 +11,18 @@ class EditorLayoutManager: NSLayoutManager {
         
         textStorage.enumerateAttribute(.listMarkerReplacement, in: charRange, options: []) { value, range, _ in
             if let symbolName = value as? String {
-                let glyphRange = self.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
-                var boundingRect = self.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+                // 1. Get the dynamic color from the text attribute (fallback to labelColor)
+                let color = textStorage.attribute(.foregroundColor, at: range.location, effectiveRange: nil) as? NSColor ?? .labelColor
+                
+                // 2. Get the bounding rect for just the FIRST character of the syntax (e.g. the '*' or '[')
+                // This ensures horizontal alignment matches the start of the list item perfectly.
+                let firstCharRange = NSRange(location: range.location, length: 1)
+                let firstCharGlyphRange = self.glyphRange(forCharacterRange: firstCharRange, actualCharacterRange: nil)
+                var firstCharRect = self.boundingRect(forGlyphRange: firstCharGlyphRange, in: textContainer)
                 
                 // Adjust for origin
-                boundingRect.origin.x += origin.x
-                boundingRect.origin.y += origin.y
+                firstCharRect.origin.x += origin.x
+                firstCharRect.origin.y += origin.y
                 
                 // For bullets, we want a slightly smaller font size than checkboxes
                 let isBullet = symbolName == "circle.fill"
@@ -25,24 +31,26 @@ class EditorLayoutManager: NSLayoutManager {
                 // Create the SF Symbol image
                 let config = NSImage.SymbolConfiguration(pointSize: fontSize, weight: .regular)
                 if let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config) {
-                    // Tint the image with the label color
+                    // Tint the image with the dynamic color
                     let tintedImage = NSImage(size: image.size)
                     tintedImage.lockFocus()
-                    NSColor.labelColor.set()
+                    color.set()
                     let imageRect = NSRect(origin: .zero, size: image.size)
                     image.draw(in: imageRect, from: .zero, operation: .sourceOut, fraction: 1.0)
                     tintedImage.unlockFocus()
                     tintedImage.isTemplate = true
                     
-                    // Center the symbol in the bounding rect vertically.
-                    // For horizontal alignment, we put it slightly in from the left edge of the bounding rect.
-                    let yOffset = boundingRect.midY - (image.size.height / 2.0)
+                    // 3. Vertical Cap-Height Alignment
+                    // The bounding rect's minY is usually the top of the line fragment.
+                    // We want to center the symbol around the middle of the cap-height of the font.
+                    // In TextKit 1 macOS, `firstCharRect.minY + baseFont.ascender` gives the baseline.
+                    let baselineY = firstCharRect.minY + baseFont.ascender
+                    let capHeightCenterY = baselineY - (baseFont.capHeight / 2.0)
+                    let yOffset = capHeightCenterY - (image.size.height / 2.0)
                     
-                    // If it's a bullet, center it horizontally in the space of a typical bullet, otherwise align left.
-                    // Bullet syntax is `* `, so we center it. Checkbox syntax is `[ ] `, so left alignment looks ok.
-                    // But actually, just aligning slightly right of the minX is very consistent.
-                    let paddingX: CGFloat = isBullet ? 4.0 : 2.0
-                    let xOffset = boundingRect.minX + paddingX
+                    // 4. Horizontal Alignment
+                    // Center the symbol exactly in the middle of the first character's bounding box.
+                    let xOffset = firstCharRect.midX - (image.size.width / 2.0)
                     
                     let drawRect = NSRect(x: xOffset, y: yOffset, width: image.size.width, height: image.size.height)
                     
