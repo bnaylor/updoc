@@ -396,6 +396,20 @@ struct EditorView: NSViewRepresentable {
             }
         }
         
+        func textViewDidChangeSelection(_ notification: Notification) {
+            guard let textView = notification.object as? NSTextView else { return }
+            
+            // Trigger a restyle so we can hide/show syntax based on the new cursor position.
+            // Using a very short debounce (50ms) to ensure smooth cursor movement.
+            syncTask?.cancel()
+            syncTask = Task {
+                try? await Task.sleep(for: .milliseconds(50))
+                if !Task.isCancelled {
+                    applyStyles(to: textView)
+                }
+            }
+        }
+        
         private func checkForCheckmarkShortcut(in textView: NSTextView) {
             let selectedRange = textView.selectedRange()
             guard selectedRange.location > 0 else { return }
