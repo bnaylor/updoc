@@ -38,7 +38,9 @@ public struct MarkdownEngine {
                 // Determine level by counting # symbols
                 let line = (text as NSString).substring(with: matchRange)
                 let level = line.prefix { $0 == "#" }.count
-                ranges.append(MarkdownRange(range: matchRange, style: .heading(level: level)))
+                // Syntax is the '#'s plus the following space
+                let syntaxRange = NSRange(location: matchRange.location, length: level + 1)
+                ranges.append(MarkdownRange(range: matchRange, style: .heading(level: level), syntaxRanges: [syntaxRange]))
             }
         }
         
@@ -57,7 +59,9 @@ public struct MarkdownEngine {
         let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*[^\\*\\n]+?\\*(?!\\*)", options: [])
         italicRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
             if let matchRange = match?.range {
-                ranges.append(MarkdownRange(range: matchRange, style: .italic))
+                let startSyntax = NSRange(location: matchRange.location, length: 1)
+                let endSyntax = NSRange(location: matchRange.location + matchRange.length - 1, length: 1)
+                ranges.append(MarkdownRange(range: matchRange, style: .italic, syntaxRanges: [startSyntax, endSyntax]))
             }
         }
         
@@ -65,7 +69,9 @@ public struct MarkdownEngine {
         let underlineRegex = try! NSRegularExpression(pattern: "__.*?__", options: [])
         underlineRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
             if let matchRange = match?.range {
-                ranges.append(MarkdownRange(range: matchRange, style: .underline))
+                let startSyntax = NSRange(location: matchRange.location, length: 2)
+                let endSyntax = NSRange(location: matchRange.location + matchRange.length - 2, length: 2)
+                ranges.append(MarkdownRange(range: matchRange, style: .underline, syntaxRanges: [startSyntax, endSyntax]))
             }
         }
         
@@ -76,7 +82,10 @@ public struct MarkdownEngine {
                 let markerRange = match.range(at: 2)
                 let marker = (text as NSString).substring(with: markerRange)
                 let done = marker == "[x]" || marker == "√"
-                ranges.append(MarkdownRange(range: match.range, style: .checklist(done: done)))
+                // Hide up to the space after the marker
+                let syntaxLen = (markerRange.location - match.range.location) + markerRange.length + 1
+                let syntaxRange = NSRange(location: match.range.location, length: syntaxLen)
+                ranges.append(MarkdownRange(range: match.range, style: .checklist(done: done), syntaxRanges: [syntaxRange]))
             }
         }
         
@@ -88,6 +97,8 @@ public struct MarkdownEngine {
                 let urlRange = match.range(at: 2)
                 let title = (text as NSString).substring(with: titleRange)
                 let url = (text as NSString).substring(with: urlRange)
+                // Images usually stay visible, but we can hide the ![]() syntax if we want.
+                // For now, let's just leave images as they were since they are rendered as attachments.
                 ranges.append(MarkdownRange(range: match.range, style: .image(url: url, title: title.isEmpty ? nil : title)))
             }
         }
@@ -105,8 +116,11 @@ public struct MarkdownEngine {
         // 7. Bullets (e.g., * Bullet)
         let bulletRegex = try! NSRegularExpression(pattern: "^(\\s*)[*+-]\\s+(.*)$", options: [.anchorsMatchLines])
         bulletRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
-            if let matchRange = match?.range {
-                ranges.append(MarkdownRange(range: matchRange, style: .bullet))
+            if let matchRange = match?.range, match!.numberOfRanges >= 3 {
+                let spaceRange = match!.range(at: 1)
+                // Syntax is leading space + bullet character + trailing space
+                let syntaxRange = NSRange(location: matchRange.location, length: spaceRange.length + 2)
+                ranges.append(MarkdownRange(range: matchRange, style: .bullet, syntaxRanges: [syntaxRange]))
             }
         }
         
