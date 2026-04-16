@@ -27,8 +27,10 @@ struct SidebarView: View {
             toolbarItems
         }
         .onAppear {
-            if AuthManager.shared.isAuthenticated() {
-                refreshMeetings()
+            DispatchQueue.main.async {
+                if AuthManager.shared.isAuthenticated() {
+                    refreshMeetings()
+                }
             }
         }
         .onChange(of: AuthManager.shared.userEmail) {

@@ -41,18 +41,24 @@ struct NoteListView: View {
             .help("Create new top-level folder")
         }
         .onReceive(NotificationCenter.default.publisher(for: .treeNeedsRefresh)) { _ in
-            updateTick += 1
+            DispatchQueue.main.async {
+                updateTick += 1
+            }
         }
         .onAppear {
-            if let data = expandedFoldersJSON.data(using: .utf8),
-               let uuids = try? JSONDecoder().decode([UUID].self, from: data) {
-                expandedFolders = Set(uuids)
+            DispatchQueue.main.async {
+                if let data = expandedFoldersJSON.data(using: .utf8),
+                   let uuids = try? JSONDecoder().decode([UUID].self, from: data) {
+                    expandedFolders = Set(uuids)
+                }
             }
         }
         .onChange(of: expandedFolders) { oldVal, newVal in
-            if let data = try? JSONEncoder().encode(Array(newVal)),
-               let str = String(data: data, encoding: .utf8) {
-                expandedFoldersJSON = str
+            DispatchQueue.main.async {
+                if let data = try? JSONEncoder().encode(Array(newVal)),
+                   let str = String(data: data, encoding: .utf8) {
+                    expandedFoldersJSON = str
+                }
             }
         }
     }
