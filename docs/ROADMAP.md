@@ -17,7 +17,7 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
   - Full drag-and-drop file/folder nesting for General notes mirroring the UI to the filesystem and Google Drive.
   - Self-organizing `YYYY-MM-DD` tree structure for Meeting Notes.
 - [ ] **Smart Templates**: First-class UI for managing and automatically applying structure (e.g. distinct 1:1 meeting formats).
-- [ ] **Category Tags**: Interactive tagging to cleanly slice documents.
+- [x] **Category Tags**: Interactive tagging to cleanly slice documents.
 - [ ] **Sharpei Linkage**: Right click integration to instantly pipe actionable items to a Sharpei task.
 
 ## P2: Polish & Scaling
