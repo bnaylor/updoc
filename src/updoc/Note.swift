@@ -13,8 +13,10 @@ public class Note {
     public var meetingID: String?
     public var isWeeklyLog: Bool = false
     public var weeklyLogId: String?
+    @Relationship(deleteRule: .nullify, inverse: \Folder.notes)
+    public var folder: Folder?
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
@@ -25,6 +27,7 @@ public class Note {
         self.meetingID = meetingID
         self.isWeeklyLog = isWeeklyLog
         self.weeklyLogId = weeklyLogId
+        self.folder = folder
     }
 }
 
