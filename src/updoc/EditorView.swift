@@ -93,6 +93,7 @@ struct EditorView: NSViewRepresentable {
     @Binding var text: String
     @Binding var assetIds: [String]
     @Binding var selectionRange: NSRange?
+    var theme: AppTheme
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
@@ -100,7 +101,7 @@ struct EditorView: NSViewRepresentable {
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSScrollView()
         scrollView.drawsBackground = true
-        scrollView.backgroundColor = .textBackgroundColor
+        scrollView.backgroundColor = themeManager.backgroundColor(for: theme)
         scrollView.borderType = .noBorder
         scrollView.hasVerticalScroller = true
         scrollView.autoresizingMask = [.width, .height]
@@ -122,7 +123,7 @@ struct EditorView: NSViewRepresentable {
         textView.isHorizontallyResizable = false
         textView.autoresizingMask = [.width]
         textView.drawsBackground = true
-        textView.backgroundColor = .textBackgroundColor
+        textView.backgroundColor = themeManager.backgroundColor(for: theme)
         textView.isRichText = false
         
         // Add some padding
@@ -142,8 +143,8 @@ struct EditorView: NSViewRepresentable {
                 coordinator?.openEditor(for: attachment)
             }
         }
-        textView.font = themeManager.font
-        textView.textColor = .labelColor
+        textView.font = themeManager.font(for: theme)
+        textView.textColor = themeManager.textColor(for: theme)
         textView.isEditable = true
         textView.isSelectable = true
         textView.isAutomaticQuoteSubstitutionEnabled = false
@@ -193,19 +194,31 @@ struct EditorView: NSViewRepresentable {
         
         // Update layout manager's base font
         if let layoutManager = textView.layoutManager as? EditorLayoutManager {
-            layoutManager.baseFont = themeManager.font
+            layoutManager.baseFont = themeManager.font(for: theme)
         }
         
         // CRITICAL: Update coordinator's reference to parent to avoid stale bindings
         // and "cross-document bleed" when switching notes.
         context.coordinator.parent = self
         
+        // Update colors if needed
+        let newBgColor = themeManager.backgroundColor(for: theme)
+        if textView.backgroundColor != newBgColor {
+            textView.backgroundColor = newBgColor
+            nsView.backgroundColor = newBgColor
+        }
+        
+        let newTextColor = themeManager.textColor(for: theme)
+        if textView.textColor != newTextColor {
+            textView.textColor = newTextColor
+        }
+        
         // Ensure theme font is applied
-        if textView.font != themeManager.font {
-            textView.font = themeManager.font
+        if textView.font != themeManager.font(for: theme) {
+            textView.font = themeManager.font(for: theme)
             textView.typingAttributes = [
-                .font: themeManager.font,
-                .foregroundColor: NSColor.labelColor
+                .font: themeManager.font(for: theme),
+                .foregroundColor: themeManager.textColor(for: theme)
             ]
             context.coordinator.applyStyles(to: textView)
         }

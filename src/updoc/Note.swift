@@ -16,9 +16,10 @@ public class Note {
     public var weeklyLogId: String?
     @Relationship(deleteRule: .nullify, inverse: \Folder.notes)
     public var folder: Folder?
+    public var themeName: String?
     public var dragId: String = UUID().uuidString
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], categories: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil, dragId: String = UUID().uuidString) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], categories: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil, dragId: String = UUID().uuidString, themeName: String? = nil) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
@@ -32,6 +33,7 @@ public class Note {
         self.weeklyLogId = weeklyLogId
         self.folder = folder
         self.dragId = dragId
+        self.themeName = themeName
     }
     
     public var stableDragId: String {

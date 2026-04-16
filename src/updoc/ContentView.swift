@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var showingGlobalSearch = false
     @State private var showingRuleManager = false
     @State private var showingSettings = false
+    @State private var showingThemeSettings = false
     @State private var selectionRange: NSRange?
     @State private var columnVisibility = NavigationSplitViewVisibility.all
     @State private var showingInspector = false
@@ -174,7 +175,7 @@ struct ContentView: View {
                     ), assetIds: Binding(
                         get: { note.assetIds },
                         set: { note.assetIds = $0 }
-                    ), selectionRange: $selectionRange)
+                    ), selectionRange: $selectionRange, theme: themeManager.theme(for: note))
                     .onAppear {
                         if note.title == "New Note" && note.content.isEmpty {
                             isTitleFocused = true
@@ -193,6 +194,7 @@ struct ContentView: View {
                         NotificationCenter.default.post(name: .focusEditor, object: nil)
                     }
                 }
+                .background(themeManager.swiftUIBackgroundColor(for: note))
                 .navigationTitle(note.title)
                 .inspector(isPresented: $showingInspector) {
                     Text("Inspector (Future Extensions)")
@@ -229,7 +231,7 @@ struct ContentView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
-        .modifier(ContentViewSheets(showingRuleManager: $showingRuleManager, showingSettings: $showingSettings, activeConflict: $activeConflict, modelContext: modelContext, triggerSyncForNote: { triggerSync(for: $0) }))
+        .modifier(ContentViewSheets(showingRuleManager: $showingRuleManager, showingSettings: $showingSettings, showingThemeSettings: $showingThemeSettings, activeConflict: $activeConflict, modelContext: modelContext, triggerSyncForNote: { triggerSync(for: $0) }))
         .modifier(DeletionConfirmationModifier(deletionManager: $deletionManager, selectedNote: $selectedNote, modelContext: modelContext))
         .overlay {
             if showingCommandPalette {
@@ -286,6 +288,13 @@ struct ContentView: View {
                     Label("Settings", systemImage: "gear")
                 }
                 .help("Open App Settings")
+            }
+            
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { showingThemeSettings = true }) {
+                    Label("Themes", systemImage: "paintbrush")
+                }
+                .help("Open Theme Settings")
             }
         }
         .background {
@@ -599,6 +608,7 @@ struct ContentViewReceivers: ViewModifier {
 struct ContentViewSheets: ViewModifier {
     @Binding var showingRuleManager: Bool
     @Binding var showingSettings: Bool
+    @Binding var showingThemeSettings: Bool
     @Binding var activeConflict: ContentView.ConflictInfo?
     var modelContext: ModelContext
     var triggerSyncForNote: (Note) -> Void
@@ -607,6 +617,9 @@ struct ContentViewSheets: ViewModifier {
         content
             .sheet(isPresented: $showingRuleManager) {
                 RuleManagerView()
+            }
+            .sheet(isPresented: $showingThemeSettings) {
+                ThemeSettingsView()
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView {

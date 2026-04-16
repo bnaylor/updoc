@@ -18,6 +18,7 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
   - Self-organizing `YYYY-MM-DD` tree structure for Meeting Notes.
 - [ ] **Smart Templates**: First-class UI for managing and automatically applying structure (e.g. distinct 1:1 meeting formats).
 - [x] **Category Tags**: Interactive tagging to cleanly slice documents.
+- [ ] **Code Syntax Highlighting**: Advanced color rules for code blocks in the editor.
 - [ ] **Sharpei Linkage**: Right click integration to instantly pipe actionable items to a Sharpei task.
 
 ## P2: Polish & Scaling
