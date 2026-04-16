@@ -17,11 +17,7 @@ class EditorTextView: NSTextView {
     override func menu(for event: NSEvent) -> NSMenu? {
         let menu = super.menu(for: event) ?? NSMenu()
         
-        let range = self.selectedRange()
-        if range.length > 0 {
-            let selectedText = (self.string as NSString).substring(with: range)
-            // Context menu items for images can go here.
-        }
+        // Context menu items for images can go here.
         
         // Find if there's an image at the click location
         let point = self.convert(event.locationInWindow, from: nil)

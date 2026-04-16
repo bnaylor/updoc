@@ -23,6 +23,7 @@ struct ContentView: View {
     @State private var showingInspector = false
     @State private var deletionManager = DeletionManager()
     @State private var liveSyncManager = LiveSyncManager()
+    @FocusState private var isTitleFocused: Bool
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -41,8 +42,16 @@ struct ContentView: View {
             if let note = selectedNote {
                 VStack(spacing: 0) {
                     HStack {
-                        Text(note.title)
-                            .font(.headline)
+                        TextField("Note Title", text: Binding(
+                            get: { note.title },
+                            set: { note.title = $0 }
+                        ))
+                        .font(.headline)
+                        .textFieldStyle(.plain)
+                        .focused($isTitleFocused)
+                        .onSubmit {
+                            NotificationCenter.default.post(name: .focusEditor, object: nil)
+                        }
                         
                         if isSyncing {
                             ProgressView()
@@ -107,10 +116,18 @@ struct ContentView: View {
                         set: { note.assetIds = $0 }
                     ), selectionRange: $selectionRange)
                     .onAppear {
-                        NotificationCenter.default.post(name: .focusEditor, object: nil)
+                        if note.title == "New Note" && note.content.isEmpty {
+                            isTitleFocused = true
+                        } else {
+                            NotificationCenter.default.post(name: .focusEditor, object: nil)
+                        }
                     }
                     .onChange(of: note.id) {
-                        NotificationCenter.default.post(name: .focusEditor, object: nil)
+                        if note.title == "New Note" && note.content.isEmpty {
+                            isTitleFocused = true
+                        } else {
+                            NotificationCenter.default.post(name: .focusEditor, object: nil)
+                        }
                     }
                     .onTapGesture {
                         NotificationCenter.default.post(name: .focusEditor, object: nil)
