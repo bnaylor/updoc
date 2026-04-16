@@ -1,7 +1,13 @@
 import SwiftUI
 import SwiftData
 
+public enum NavigationMode: Equatable {
+    case allNotes
+    case weeklyLog
+}
+
 struct SidebarView: View {
+    @Binding var navigationMode: NavigationMode
     @Query private var templateRules: [TemplateRule]
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedNote: Note?
@@ -16,6 +22,7 @@ struct SidebarView: View {
             meetingsSection
         }
         .listStyle(.sidebar)
+        .navigationTitle("updoc")
         .toolbar {
             toolbarItems
         }
@@ -44,8 +51,21 @@ struct SidebarView: View {
     
     private var categoriesSection: some View {
         Section("CATEGORIES") {
-            Label("All Notes", systemImage: "note.text")
-                .foregroundColor(.accentColor)
+            Button {
+                navigationMode = .allNotes
+            } label: {
+                Label("All Notes", systemImage: "note.text")
+                    .foregroundColor(navigationMode == .allNotes ? .accentColor : .primary)
+            }
+            .buttonStyle(.plain)
+            
+            Button {
+                navigationMode = .weeklyLog
+            } label: {
+                Label("Weekly Snippets", systemImage: "calendar.day.timeline.left")
+                    .foregroundColor(navigationMode == .weeklyLog ? .accentColor : .primary)
+            }
+            .buttonStyle(.plain)
         }
     }
     

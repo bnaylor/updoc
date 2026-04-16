@@ -11,8 +11,10 @@ public class Note {
     public var lastSyncedLocalContent: String?
     public var assetIds: [String] = []
     public var meetingID: String?
+    public var isWeeklyLog: Bool = false
+    public var weeklyLogId: String?
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], meetingID: String? = nil) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
@@ -21,6 +23,8 @@ public class Note {
         self.lastSyncedLocalContent = lastSyncedLocalContent
         self.assetIds = assetIds
         self.meetingID = meetingID
+        self.isWeeklyLog = isWeeklyLog
+        self.weeklyLogId = weeklyLogId
     }
 }
 

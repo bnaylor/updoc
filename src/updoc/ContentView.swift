@@ -24,6 +24,7 @@ struct ContentView: View {
     @State private var deletionManager = DeletionManager()
     @State private var liveSyncManager = LiveSyncManager()
     @FocusState private var isTitleFocused: Bool
+    @State private var navigationMode: NavigationMode = .allNotes
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -32,12 +33,15 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
-            SidebarView(selectedNote: $selectedNote)
-                .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
-        } content: {
-            NoteListView(selectedNote: $selectedNote)
-                .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
+        Group {
+            if navigationMode == .allNotes {
+                NavigationSplitView(columnVisibility: $columnVisibility) {
+                    SidebarView(navigationMode: $navigationMode, selectedNote: $selectedNote)
+                        .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
+                } content: {
+                    NoteListView(selectedNote: $selectedNote)
+                        .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
+        
         } detail: {
             if let note = selectedNote {
                 VStack(spacing: 0) {
@@ -149,6 +153,15 @@ struct ContentView: View {
                 Text("Select a note to begin")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .foregroundColor(.secondary)
+            }
+                }
+            } else {
+                NavigationSplitView(columnVisibility: $columnVisibility) {
+                    SidebarView(navigationMode: $navigationMode, selectedNote: $selectedNote)
+                        .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
+                } detail: {
+                    WeeklyLogDashboardView(selectedNote: $selectedNote)
+                }
             }
         }
         .onChange(of: selectedNote) { oldVal, newVal in
