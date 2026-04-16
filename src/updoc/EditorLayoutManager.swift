@@ -33,17 +33,11 @@ class EditorLayoutManager: NSLayoutManager {
                 let fontSize = isBullet ? baseFont.pointSize * 0.4 : baseFont.pointSize
                 
                 // Create the SF Symbol image
-                let config = NSImage.SymbolConfiguration(pointSize: fontSize, weight: .regular)
+                let fontConfig = NSImage.SymbolConfiguration(pointSize: fontSize, weight: .regular)
+                let colorConfig = NSImage.SymbolConfiguration(paletteColors: [color])
+                let config = fontConfig.applying(colorConfig)
+                
                 if let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil)?.withSymbolConfiguration(config) {
-                    // Tint the image with the dynamic color
-                    let tintedImage = NSImage(size: image.size)
-                    tintedImage.lockFocus()
-                    color.set()
-                    let imageRect = NSRect(origin: .zero, size: image.size)
-                    image.draw(in: imageRect, from: .zero, operation: .sourceOut, fraction: 1.0)
-                    tintedImage.unlockFocus()
-                    tintedImage.isTemplate = true
-                    
                     // 3. Vertical Baseline Alignment
                     // The baseline is at lineRect.minY + baseFont.ascender.
                     // We center the symbol around the middle of the cap height of the font.
@@ -59,7 +53,7 @@ class EditorLayoutManager: NSLayoutManager {
                     
                     let drawRect = NSRect(x: xOffset, y: yOffset, width: image.size.width, height: image.size.height)
                     
-                    tintedImage.draw(in: drawRect)
+                    image.draw(in: drawRect)
                 }
             }
         }

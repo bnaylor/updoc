@@ -82,9 +82,8 @@ public struct MarkdownEngine {
                 let markerRange = match.range(at: 2)
                 let marker = (text as NSString).substring(with: markerRange)
                 let done = marker == "[x]" || marker == "√"
-                // Hide up to the space after the marker
-                let syntaxLen = (markerRange.location - match.range.location) + markerRange.length + 1
-                let syntaxRange = NSRange(location: match.range.location, length: syntaxLen)
+                // Hide the marker plus the trailing space
+                let syntaxRange = NSRange(location: markerRange.location, length: markerRange.length + 1)
                 ranges.append(MarkdownRange(range: match.range, style: .checklist(done: done), syntaxRanges: [syntaxRange]))
             }
         }
@@ -118,8 +117,9 @@ public struct MarkdownEngine {
         bulletRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
             if let matchRange = match?.range, match!.numberOfRanges >= 3 {
                 let spaceRange = match!.range(at: 1)
-                // Syntax is leading space + bullet character + trailing space
-                let syntaxRange = NSRange(location: matchRange.location, length: spaceRange.length + 2)
+                let markerStart = matchRange.location + spaceRange.length
+                // Syntax is just bullet character + trailing space
+                let syntaxRange = NSRange(location: markerStart, length: 2)
                 ranges.append(MarkdownRange(range: matchRange, style: .bullet, syntaxRanges: [syntaxRange]))
             }
         }
