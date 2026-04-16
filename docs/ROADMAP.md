@@ -11,10 +11,7 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
 - [x] **Note Naming**: Support setting custom titles for newly created, non-meeting general notes.
 
 ## P1: Nice to Have / Future Enhancements
-- [ ] **Apple Ecosystem Integration (AppIntents)**:
-  - Enable deep integration with Siri, Spotlight, and Widgets.
-  - Allow users to "Sync all notes" or "Create new note" via Siri Shortcuts.
-  - Expose note metadata to Spotlight for system-wide search.
+
 - [ ] **Weekly Journal / Snippets**: A top-level or pinned quick-access view for a rotating weekly log to track team snippets.
 - [ ] **Hierarchical Organization**: 
   - Full drag-and-drop file/folder nesting for General notes mirroring the UI to the filesystem and Google Drive.
@@ -24,6 +21,10 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
 - [ ] **Sharpei Linkage**: Right click integration to instantly pipe actionable items to a Sharpei task.
 
 ## P2: Polish & Scaling
+- [ ] **Apple Ecosystem Integration (AppIntents)**:
+  - Enable deep integration with Siri, Spotlight, and Widgets.
+  - Allow users to "Sync all notes" or "Create new note" via Siri Shortcuts.
+  - Expose note metadata to Spotlight for system-wide search.
 - [ ] **Smart Filtering for Calendar Events**:
   - Automatically filter out non-meeting events (e.g., "Lunch", "Exercise", "Work Location") to reduce sidebar clutter.
   - Allow users to define custom "Ignore" keywords.
