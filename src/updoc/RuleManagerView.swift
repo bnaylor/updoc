@@ -10,13 +10,43 @@ struct RuleManagerView: View {
         NavigationStack {
             List {
                 ForEach(rules) { rule in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("IF \(rule.attribute.rawValue) contains \"\(rule.pattern)\"")
-                            .font(.headline)
-                        Text("THEN apply template")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Picker("IF", selection: Binding(
+                                get: { rule.attribute },
+                                set: { rule.attribute = $0 }
+                            )) {
+                                ForEach(RuleAttribute.allCases, id: \.self) { attr in
+                                    Text(attr.rawValue).tag(attr)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(width: 140)
+                            
+                            Text("contains")
+                                .foregroundColor(.secondary)
+                            
+                            TextField("Pattern (e.g., 1:1)", text: Binding(
+                                get: { rule.pattern },
+                                set: { rule.pattern = $0 }
+                            ))
+                            .textFieldStyle(.roundedBorder)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("THEN apply markdown template:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            TextEditor(text: Binding(
+                                get: { rule.templateContent },
+                                set: { rule.templateContent = $0 }
+                            ))
+                            .font(.system(.caption, design: .monospaced))
+                            .frame(height: 80)
+                            .border(Color.secondary.opacity(0.2))
+                        }
                     }
+                    .padding(.vertical, 4)
                 }
                 .onDelete(perform: deleteRules)
             }
