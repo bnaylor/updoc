@@ -6,8 +6,8 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
 - [x] **WriteControl & Conflict Resolution**: Atomic updates with revision tracking and 3-way merge.
 - [x] **Vision-Based Feedback Loop**: Autonomous UI verification using `screencapture` and vision analysis.
 - [ ] **Robust Offline Support**: Better handling of sync when connectivity is intermittent.
-- [ ] **Remove Action Items Code**: Eliminate the concept of special "Action Items" in the code, treating all lists as standard markdown lists.
-- [ ] **Clean Default Inspector**: Hide the inspector pane by default, preserving it for future extensions (templates, categories, Gemini).
+- [x] **Remove Action Items Code**: Eliminate the concept of special "Action Items" in the code, treating all lists as standard markdown lists.
+- [x] **Clean Default Inspector**: Hide the inspector pane by default, preserving it for future extensions (templates, categories, Gemini).
 - [ ] **Note Naming**: Support setting custom titles for newly created, non-meeting general notes.
 
 ## P1: Nice to Have / Future Enhancements
