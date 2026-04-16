@@ -10,6 +10,7 @@ struct NoteListView: View {
     @State private var isGeneralExpanded = true
     @State private var isMeetingsExpanded = true
     @State private var expandedFolders: Set<UUID> = []
+    @AppStorage("expandedFoldersJSON") private var expandedFoldersJSON = "[]"
     @State private var updateTick = 0
     
     var body: some View {
@@ -41,6 +42,18 @@ struct NoteListView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .treeNeedsRefresh)) { _ in
             updateTick += 1
+        }
+        .onAppear {
+            if let data = expandedFoldersJSON.data(using: .utf8),
+               let uuids = try? JSONDecoder().decode([UUID].self, from: data) {
+                expandedFolders = Set(uuids)
+            }
+        }
+        .onChange(of: expandedFolders) { oldVal, newVal in
+            if let data = try? JSONEncoder().encode(Array(newVal)),
+               let str = String(data: data, encoding: .utf8) {
+                expandedFoldersJSON = str
+            }
         }
     }
     
