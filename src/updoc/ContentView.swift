@@ -20,7 +20,7 @@ struct ContentView: View {
     @State private var showingSettings = false
     @State private var selectionRange: NSRange?
     @State private var columnVisibility = NavigationSplitViewVisibility.all
-    @State private var showingTaskSidebar = true
+    @State private var showingInspector = false
     @State private var deletionManager = DeletionManager()
     @State private var liveSyncManager = LiveSyncManager()
     
@@ -79,12 +79,12 @@ struct ContentView: View {
                         }
                         
                         Button {
-                            showingTaskSidebar.toggle()
+                            showingInspector.toggle()
                         } label: {
                             Image(systemName: "sidebar.right")
                         }
                         .buttonStyle(.plain)
-                        .help("Toggle Action Items")
+                        .help("Toggle Inspector")
                         .padding(.leading, 8)
                     }
                     .padding()
@@ -105,10 +105,7 @@ struct ContentView: View {
                     ), assetIds: Binding(
                         get: { note.assetIds },
                         set: { note.assetIds = $0 }
-                    ), selectionRange: $selectionRange,
-                    onPromoteAction: { selectedText in
-                        promoteToActionItem(selectedText, for: note)
-                    })
+                    ), selectionRange: $selectionRange)
                     .onAppear {
                         NotificationCenter.default.post(name: .focusEditor, object: nil)
                     }
@@ -120,8 +117,9 @@ struct ContentView: View {
                     }
                 }
                 .navigationTitle(note.title)
-                .inspector(isPresented: $showingTaskSidebar) {
-                    TaskSidebarView(selectedNote: $selectedNote)
+                .inspector(isPresented: $showingInspector) {
+                    Text("Inspector (Future Extensions)")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .inspectorColumnWidth(min: 250, ideal: 280, max: 400)
                 }
                 .onAppear {
@@ -244,30 +242,6 @@ struct ContentView: View {
         }
     }
 
-    private func promoteToActionItem(_ text: String, for note: Note) {
-        // Clean up text: remove checklist markers and whitespace
-        var title = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        let markers = ["[ ]", "[x]", "√"]
-        for marker in markers {
-            if title.hasPrefix(marker) {
-                title = String(title.dropFirst(marker.count)).trimmingCharacters(in: .whitespaces)
-                break
-            }
-        }
-        
-        guard !title.isEmpty else { return }
-        
-        let actionItem = ActionItem(title: title)
-        actionItem.note = note
-        note.actionItems.append(actionItem)
-        modelContext.insert(actionItem)
-        
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed to save promoted action item: \(error)")
-        }
-    }
     
     private var appCommands: [Command] {
         var commands = [

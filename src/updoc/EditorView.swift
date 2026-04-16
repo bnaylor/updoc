@@ -20,15 +20,7 @@ class EditorTextView: NSTextView {
         let range = self.selectedRange()
         if range.length > 0 {
             let selectedText = (self.string as NSString).substring(with: range)
-            let trimmed = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            // Check if it's a checklist item
-            if trimmed.hasPrefix("[ ]") || trimmed.hasPrefix("[x]") || trimmed.hasPrefix("√") {
-                menu.addItem(NSMenuItem.separator())
-                let promoteItem = NSMenuItem(title: "⚡ Promote to Action Item", action: #selector(promoteToTask(_:)), keyEquivalent: "")
-                promoteItem.target = self
-                menu.addItem(promoteItem)
-            }
+            // Context menu items for images can go here.
         }
         
         // Find if there's an image at the click location
@@ -69,11 +61,6 @@ class EditorTextView: NSTextView {
         super.mouseDown(with: event)
     }
     
-    @objc func promoteToTask(_ sender: Any) {
-        let range = self.selectedRange()
-        let selectedText = (self.string as NSString).substring(with: range)
-        onPromoteAction?(selectedText)
-    }
     
     // QuickLook support
     nonisolated override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
@@ -110,7 +97,6 @@ struct EditorView: NSViewRepresentable {
     @Binding var text: String
     @Binding var assetIds: [String]
     @Binding var selectionRange: NSRange?
-    var onPromoteAction: ((String) -> Void)?
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
@@ -152,9 +138,6 @@ struct EditorView: NSViewRepresentable {
         textView.delegate = context.coordinator
         textView.onFileDropped = { url, targetTextView in
             context.coordinator.handleFileDrop(url: url, in: targetTextView)
-        }
-        textView.onPromoteAction = { selectedText in
-            self.onPromoteAction?(selectedText)
         }
         textView.onEditRequested = { [weak coordinator = context.coordinator] attachment in
             if let onEditRequested = self.onEditRequested {

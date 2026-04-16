@@ -14,7 +14,7 @@ struct updocApp: App {
                 }
                 .environment(themeManager)
         }
-        .modelContainer(for: [Note.self, TemplateRule.self, ActionItem.self, ImageMap.self])
+        .modelContainer(for: [Note.self, TemplateRule.self, ImageMap.self])
         .commands {
             CommandGroup(replacing: .appTermination) {
                 Button("Quit updoc") {
