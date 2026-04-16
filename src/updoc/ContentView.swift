@@ -30,6 +30,8 @@ struct ContentView: View {
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
+    @Query private var templateRules: [TemplateRule]
+    private let templateEngine = SmartTemplateEngine()
     
     private static let syncCoordinator = SyncCoordinator()
     @Environment(\.modelContext) private var modelContext
@@ -194,12 +196,56 @@ struct ContentView: View {
                         NotificationCenter.default.post(name: .focusEditor, object: nil)
                     }
                 }
-                .background(themeManager.swiftUIBackgroundColor(for: note))
                 .navigationTitle(note.title)
                 .inspector(isPresented: $showingInspector) {
-                    Text("Inspector (Future Extensions)")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .inspectorColumnWidth(min: 250, ideal: 280, max: 400)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Note Settings")
+                            .font(.headline)
+                            .padding(.bottom, 8)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Theme")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Picker("", selection: Binding(
+                                get: { note.themeName ?? "Default" },
+                                set: { note.themeName = $0 == "Default" ? nil : $0 }
+                            )) {
+                                Text("Default").tag("Default")
+                                ForEach(AppTheme.allCases) { theme in
+                                    Text(theme.rawValue).tag(theme.rawValue)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                        }
+                        
+                        Button("Apply Rules") {
+                            let input = TemplateInput(
+                                title: note.title,
+                                attendees: [],
+                                date: note.createdAt,
+                                location: nil,
+                                description: nil
+                            )
+                            let resolved = templateEngine.resolveTemplate(for: input, rules: templateRules)
+                            
+                            if let themeName = resolved.themeName {
+                                note.themeName = themeName
+                            }
+                            
+                            if note.content.isEmpty || note.content == "# \(note.title)\n\nDate: \(note.createdAt.formatted())\n\n## Notes\n- " {
+                                note.content = resolved.content
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .help("Apply template rules based on current title")
+                        
+                        Spacer()
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .inspectorColumnWidth(min: 250, ideal: 280, max: 400)
                 }
                 .onAppear {
                     let manager = liveSyncManager

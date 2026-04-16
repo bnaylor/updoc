@@ -199,15 +199,23 @@ struct SidebarView: View {
     }
     
     private func startNote(for meeting: CalendarEvent) {
-        let content = templateEngine.resolveTemplate(for: meeting, rules: templateRules)
+        let input = TemplateInput(
+            title: meeting.summary,
+            attendees: meeting.attendees,
+            date: meeting.start,
+            location: meeting.location,
+            description: meeting.description
+        )
+        let resolved = templateEngine.resolveTemplate(for: input, rules: templateRules)
         
         let docId = extractDocId(from: meeting.location)
         
         let newNote = Note(
             title: meeting.summary,
-            content: content,
+            content: resolved.content,
             googleDocId: docId,
-            meetingID: meeting.id
+            meetingID: meeting.id,
+            themeName: resolved.themeName
         )
         
         modelContext.insert(newNote)

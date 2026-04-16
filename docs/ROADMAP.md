@@ -33,3 +33,6 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
 - [ ] **Advanced Markdown Support**: Tables, footnotes, and advanced formatting.
 - [ ] **External Doc Aliasing**: Link external complex web docs inline, potentially rendering as a simple pointer or iframe.
 - [ ] **Embedded Gemini Assist**: Integrate direct AI summarization tools.
+
+## Tech Debt & Refactoring
+- [ ] **Rule Editor UX**: Rethink what happens when you click "Add Rule" in the rule editor to make it more intuitive.

@@ -313,6 +313,22 @@ struct NoteRowView: View {
                     Label("Publish to Google Docs", systemImage: "arrow.up.doc.fill")
                 }
             }
+            Menu {
+                Button {
+                    note.themeName = nil
+                } label: {
+                    Text("Default")
+                }
+                ForEach(AppTheme.allCases) { theme in
+                    Button {
+                        note.themeName = theme.rawValue
+                    } label: {
+                        Text(theme.rawValue)
+                    }
+                }
+            } label: {
+                Label("Theme", systemImage: "paintbrush")
+            }
             Divider()
             Button(role: .destructive) {
                 NotificationCenter.default.post(name: .deleteSelectedNote, object: note)

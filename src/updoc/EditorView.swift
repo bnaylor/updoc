@@ -555,8 +555,8 @@ struct EditorView: NSViewRepresentable {
             
             // Reset styles using theme font and label color
             textStorage.setAttributes([
-                .font: parent.themeManager.font,
-                .foregroundColor: NSColor.labelColor
+                .font: parent.themeManager.font(for: parent.theme),
+                .foregroundColor: parent.themeManager.textColor(for: parent.theme)
             ], range: NSRange(text.startIndex..., in: text))
             
             // Apply Markdown styles in reverse to avoid shifting ranges when we replace text with attachments
@@ -659,8 +659,10 @@ struct EditorView: NSViewRepresentable {
         }
         
         private func attributes(for style: MarkdownStyle) -> [NSAttributedString.Key: Any] {
-            let baseFont = parent.themeManager.font
+            let theme = parent.theme
+            let baseFont = parent.themeManager.font(for: theme)
             let baseSize = parent.themeManager.bodyFontSize
+            let textColor = parent.themeManager.textColor(for: theme)
             
             switch style {
             case .heading(let level):
@@ -668,30 +670,30 @@ struct EditorView: NSViewRepresentable {
                 let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
                 return [
                     .font: boldFont.withSize(size),
-                    .foregroundColor: NSColor.labelColor
+                    .foregroundColor: textColor
                 ]
             case .bold:
                 let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
                 return [
                     .font: boldFont,
-                    .foregroundColor: NSColor.labelColor
+                    .foregroundColor: textColor
                 ]
             case .italic:
                 let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
                 return [
                     .font: italicFont,
-                    .foregroundColor: NSColor.labelColor
+                    .foregroundColor: textColor
                 ]
             case .underline:
                 return [
                     .font: baseFont,
-                    .foregroundColor: NSColor.labelColor,
+                    .foregroundColor: textColor,
                     .underlineStyle: NSUnderlineStyle.single.rawValue
                 ]
             case .code:
                 return [
                     .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
-                    .foregroundColor: NSColor.labelColor
+                    .foregroundColor: textColor
                 ]
             case .checklist(let done):
                 if done {

@@ -33,6 +33,23 @@ struct RuleManagerView: View {
                             .textFieldStyle(.roundedBorder)
                         }
                         
+                        HStack {
+                            Text("Theme:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Picker("", selection: Binding(
+                                get: { rule.themeName ?? "Default" },
+                                set: { rule.themeName = $0 == "Default" ? nil : $0 }
+                            )) {
+                                Text("Default").tag("Default")
+                                ForEach(AppTheme.allCases) { theme in
+                                    Text(theme.rawValue).tag(theme.rawValue)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(width: 150)
+                        }
                         VStack(alignment: .leading, spacing: 4) {
                             Text("THEN apply markdown template:")
                                 .font(.caption)
