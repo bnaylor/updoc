@@ -44,6 +44,9 @@ struct SidebarView: View {
                 refreshMeetings()
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .clearMeetingSelection)) { _ in
+            selectedMeetingID = nil
+        }
         .onReceive(NotificationCenter.default.publisher(for: .addNewNote)) { _ in
             addNote()
         }

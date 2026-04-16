@@ -13,7 +13,7 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
 ## P1: Nice to Have / Future Enhancements
 
 - [x] **Weekly Journal / Snippets**: A top-level or pinned quick-access view for a rotating weekly log to track team snippets.
-- [ ] **Hierarchical Organization**: 
+- [x] **Hierarchical Organization**: 
   - Full drag-and-drop file/folder nesting for General notes mirroring the UI to the filesystem and Google Drive.
   - Self-organizing `YYYY-MM-DD` tree structure for Meeting Notes.
 - [ ] **Smart Templates**: First-class UI for managing and automatically applying structure (e.g. distinct 1:1 meeting formats).

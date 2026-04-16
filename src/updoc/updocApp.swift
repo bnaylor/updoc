@@ -106,4 +106,6 @@ extension Notification.Name {
     static let backgroundSyncRequested = Notification.Name("backgroundSyncRequested")
     static let remoteEditDetected = Notification.Name("remoteEditDetected")
     static let noRemoteEditDetected = Notification.Name("noRemoteEditDetected")
+    static let clearMeetingSelection = Notification.Name("clearMeetingSelection")
+    static let treeNeedsRefresh = Notification.Name("treeNeedsRefresh")
 }
