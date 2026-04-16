@@ -10,6 +10,7 @@ struct NoteListView: View {
     @State private var isGeneralExpanded = true
     @State private var isMeetingsExpanded = true
     @State private var expandedFolders: Set<UUID> = []
+    @State private var updateTick = 0
     
     var body: some View {
         List(selection: $selectedNote) {
@@ -38,6 +39,9 @@ struct NoteListView: View {
             }
             .help("Create new top-level folder")
         }
+        .onReceive(NotificationCenter.default.publisher(for: .treeNeedsRefresh)) { _ in
+            updateTick += 1
+        }
     }
     
     // MARK: - General Notes Section
@@ -47,7 +51,7 @@ struct NoteListView: View {
         let rootNotes = notes.filter { $0.meetingID == nil && !$0.isWeeklyLog && $0.folder == nil }
         
         ForEach(rootFolders) { folder in
-            FolderTreeItem(folder: folder, selectedNote: $selectedNote, expandedFolders: $expandedFolders)
+            FolderTreeItem(folder: folder, selectedNote: $selectedNote, expandedFolders: $expandedFolders, updateTick: $updateTick)
         }
         
         ForEach(rootNotes) { note in
@@ -69,6 +73,27 @@ struct NoteListView: View {
                                     NoteRowView(note: note)
                                         .tag(note)
                                 }
+                            }
+                            .dropDestination(for: String.self) { items, _ in
+                                guard let stableId = items.first else { return false }
+                                let descriptor = FetchDescriptor<Note>()
+                                if let allNotes = try? modelContext.fetch(descriptor),
+                                   let draggedNote = allNotes.first(where: { $0.stableDragId == stableId }) {
+                                    var comps = DateComponents()
+                                    comps.year = yearGroup.year
+                                    comps.month = monthGroup.month
+                                    comps.day = dayGroup.day
+                                    comps.hour = 12
+                                    if let newDate = Calendar.current.date(from: comps) {
+                                        draggedNote.createdAt = newDate
+                                        draggedNote.meetingID = draggedNote.meetingID ?? "manual-meeting-\(UUID().uuidString)"
+                                        draggedNote.folder = nil
+                                        try? modelContext.save()
+                                        NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
+                                        return true
+                                    }
+                                }
+                                return false
                             }
                         }
                     }
@@ -130,6 +155,7 @@ struct FolderTreeItem: View {
     let folder: Folder
     @Binding var selectedNote: Note?
     @Binding var expandedFolders: Set<UUID>
+    @Binding var updateTick: Int
     @Environment(\.modelContext) private var modelContext
     @State private var showingRenameAlert = false
     @State private var pendingName = ""
@@ -147,16 +173,29 @@ struct FolderTreeItem: View {
     var body: some View {
         DisclosureGroup(isExpanded: isExpanded) {
             ForEach(folder.children.sorted { $0.name < $1.name }) { childFolder in
-                FolderTreeItem(folder: childFolder, selectedNote: $selectedNote, expandedFolders: $expandedFolders)
+                FolderTreeItem(folder: childFolder, selectedNote: $selectedNote, expandedFolders: $expandedFolders, updateTick: $updateTick)
             }
             
             ForEach(folder.notes.sorted { $0.createdAt > $1.createdAt }) { note in
                 NoteRowView(note: note)
                     .tag(note)
+                    .onTapGesture {
+                        selectedNote = note
+                        NotificationCenter.default.post(name: .clearMeetingSelection, object: nil)
+                    }
             }
         } label: {
             Label(folder.name, systemImage: "folder")
                 .contextMenu {
+                    Button {
+                        let newNote = Note(title: "New Note", content: "", folder: folder)
+                        modelContext.insert(newNote)
+                        selectedNote = newNote
+                        expandedFolders.insert(folder.id)
+                    } label: {
+                        Label("New Note", systemImage: "square.and.pencil")
+                    }
+                    
                     Button {
                         let child = Folder(name: "New Subfolder", parent: folder)
                         modelContext.insert(child)
@@ -187,6 +226,22 @@ struct FolderTreeItem: View {
                         folder.name = pendingName.trimmingCharacters(in: .whitespacesAndNewlines)
                     }
                 }
+        }
+        .onTapGesture {
+            NotificationCenter.default.post(name: .clearMeetingSelection, object: nil)
+        }
+        .dropDestination(for: String.self) { items, location in
+            guard let stableId = items.first else { return false }
+            let descriptor = FetchDescriptor<Note>()
+            if let allNotes = try? modelContext.fetch(descriptor),
+               let draggedNote = allNotes.first(where: { $0.stableDragId == stableId }) {
+                draggedNote.folder = folder
+                draggedNote.meetingID = nil
+                try? modelContext.save()
+                NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
+                return true
+            }
+            return false
         }
     }
 }
@@ -246,5 +301,6 @@ struct NoteRowView: View {
                 Label("Delete Note", systemImage: "trash")
             }
         }
+        .draggable(note.stableDragId)
     }
 }

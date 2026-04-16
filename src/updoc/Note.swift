@@ -15,8 +15,9 @@ public class Note {
     public var weeklyLogId: String?
     @Relationship(deleteRule: .nullify, inverse: \Folder.notes)
     public var folder: Folder?
+    public var dragId: String = UUID().uuidString
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil, dragId: String = UUID().uuidString) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
@@ -28,6 +29,11 @@ public class Note {
         self.isWeeklyLog = isWeeklyLog
         self.weeklyLogId = weeklyLogId
         self.folder = folder
+        self.dragId = dragId
+    }
+    
+    public var stableDragId: String {
+        "\(createdAt.timeIntervalSince1970)-\(title)"
     }
 }
 
@@ -38,5 +44,13 @@ extension Note: Hashable, @unchecked Sendable {
     }
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+}
+
+import CoreTransferable
+
+extension Note: Transferable {
+    public static var transferRepresentation: some TransferRepresentation {
+        ProxyRepresentation(exporting: \.stableDragId)
     }
 }
