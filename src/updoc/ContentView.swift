@@ -25,6 +25,7 @@ struct ContentView: View {
     @State private var liveSyncManager = LiveSyncManager()
     @FocusState private var isTitleFocused: Bool
     @State private var navigationMode: NavigationMode = .allNotes
+    @State private var newTagText = ""
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -34,13 +35,18 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            if navigationMode == .allNotes {
+            if navigationMode != .weeklyLog {
                 NavigationSplitView(columnVisibility: $columnVisibility) {
                     SidebarView(navigationMode: $navigationMode, selectedNote: $selectedNote)
                         .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
                 } content: {
-                    NoteListView(selectedNote: $selectedNote)
-                        .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
+                    if case .category(let category) = navigationMode {
+                        CategoryNoteListView(category: category, selectedNote: $selectedNote)
+                            .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
+                    } else {
+                        NoteListView(selectedNote: $selectedNote)
+                            .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
+                    }
         
         } detail: {
             if let note = selectedNote {
@@ -100,7 +106,57 @@ struct ContentView: View {
                         .help("Toggle Inspector")
                         .padding(.leading, 8)
                     }
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.top)
+                    
+                    // Tagging row
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(note.categories, id: \.self) { cat in
+                                HStack(spacing: 4) {
+                                    Text("#\(cat)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.secondary)
+                                    Button {
+                                        note.categories.removeAll { $0 == cat }
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                            .font(.system(size: 9, weight: .bold))
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.secondary.opacity(0.15))
+                                .cornerRadius(12)
+                            }
+                            
+                            HStack {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.secondary)
+                                TextField("Add Tag...", text: $newTagText)
+                                    .textFieldStyle(.plain)
+                                    .font(.caption)
+                                    .frame(width: 80)
+                                    .onSubmit {
+                                        let cleaned = newTagText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                                        if !cleaned.isEmpty && !note.categories.contains(cleaned) {
+                                            note.categories.append(cleaned)
+                                        }
+                                        newTagText = ""
+                                    }
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.secondary.opacity(0.05))
+                            .cornerRadius(12)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 12)
                     .background(Color(NSColor.windowBackgroundColor))
                     
                     if let error = syncError {

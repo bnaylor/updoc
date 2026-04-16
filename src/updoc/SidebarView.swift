@@ -1,14 +1,16 @@
 import SwiftUI
 import SwiftData
 
-public enum NavigationMode: Equatable {
+public enum NavigationMode: Equatable, Hashable {
     case allNotes
     case weeklyLog
+    case category(String)
 }
 
 struct SidebarView: View {
     @Binding var navigationMode: NavigationMode
     @Query private var templateRules: [TemplateRule]
+    @Query private var allNotes: [Note]
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedNote: Note?
     
@@ -54,6 +56,10 @@ struct SidebarView: View {
         }
     }
     
+    private var uniqueCategories: [String] {
+        Array(Set(allNotes.flatMap { $0.categories })).sorted()
+    }
+    
     private var categoriesSection: some View {
         Section("CATEGORIES") {
             Button {
@@ -71,6 +77,19 @@ struct SidebarView: View {
                     .foregroundColor(navigationMode == .weeklyLog ? .accentColor : .primary)
             }
             .buttonStyle(.plain)
+            
+            if !uniqueCategories.isEmpty {
+                Divider()
+                ForEach(uniqueCategories, id: \.self) { category in
+                    Button {
+                        navigationMode = .category(category)
+                    } label: {
+                        Label(category, systemImage: "number")
+                            .foregroundColor(navigationMode == .category(category) ? .accentColor : .primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
     }
     

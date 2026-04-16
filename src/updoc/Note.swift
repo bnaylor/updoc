@@ -10,6 +10,7 @@ public class Note {
     public var lastSyncedRevision: String?
     public var lastSyncedLocalContent: String?
     public var assetIds: [String] = []
+    public var categories: [String] = []
     public var meetingID: String?
     public var isWeeklyLog: Bool = false
     public var weeklyLogId: String?
@@ -17,7 +18,7 @@ public class Note {
     public var folder: Folder?
     public var dragId: String = UUID().uuidString
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil, dragId: String = UUID().uuidString) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], categories: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil, dragId: String = UUID().uuidString) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
@@ -25,6 +26,7 @@ public class Note {
         self.lastSyncedRevision = lastSyncedRevision
         self.lastSyncedLocalContent = lastSyncedLocalContent
         self.assetIds = assetIds
+        self.categories = categories
         self.meetingID = meetingID
         self.isWeeklyLog = isWeeklyLog
         self.weeklyLogId = weeklyLogId
