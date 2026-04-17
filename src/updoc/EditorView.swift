@@ -378,6 +378,20 @@ struct EditorView: NSViewRepresentable {
             }
         }
 
+        func convertToMarkdown(from attributedString: NSAttributedString) -> String {
+            let result = NSMutableAttributedString(attributedString: attributedString)
+            var offset = 0
+            
+            attributedString.enumerateAttribute(.attachment, in: NSRange(location: 0, length: attributedString.length), options: []) { value, range, _ in
+                if let attachment = value as? RemoteImageAttachment {
+                    let replacementRange = NSRange(location: range.location + offset, length: range.length)
+                    result.replaceCharacters(in: replacementRange, with: attachment.originalMarkdown)
+                    offset += attachment.originalMarkdown.count - range.length
+                }
+            }
+            return result.string
+        }
+
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else { return }
             
@@ -559,103 +573,55 @@ struct EditorView: NSViewRepresentable {
                 .foregroundColor: parent.themeManager.textColor(for: parent.theme)
             ], range: NSRange(text.startIndex..., in: text))
             
-            // Apply Markdown styles in reverse to avoid shifting ranges when we replace text with attachments
-            for markdownRange in ranges.reversed() {
-                if case .image(let urlString, let title) = markdownRange.style, 
-                   let url = URL(string: urlString) {
-                    renderImage(url: url, title: title, range: markdownRange.range, in: textView)
-                } else {
-                    let attributes = attributes(for: markdownRange.style)
-                    textStorage.addAttributes(attributes, range: markdownRange.range)
-                    
-                    // Hide syntax if the cursor does NOT intersect the full markdownRange
-                    let cursorIntersects = NSIntersectionRange(selectedRange, markdownRange.range).length > 0 || 
-                                           (selectedRange.length == 0 && NSLocationInRange(selectedRange.location, markdownRange.range)) ||
-                                           selectedRange.location == markdownRange.range.location + markdownRange.range.length // cursor right after element
+            // Apply Markdown styles sorted by location descending to avoid shifting ranges when we replace text with attachments
+            let sortedRanges = ranges.sorted {
+                if $0.range.location != $1.range.location {
+                    return $0.range.location > $1.range.location
+                }
+                return $0.range.length < $1.range.length
+            }
+            for markdownRange in sortedRanges {
+                let styleAttributes = attributes(for: markdownRange.style)
+                textStorage.addAttributes(styleAttributes, range: markdownRange.range)
+                
+                // Hide syntax if the cursor does NOT intersect the full markdownRange
+                let cursorIntersects = NSIntersectionRange(selectedRange, markdownRange.range).length > 0 || 
+                                       (selectedRange.length == 0 && NSLocationInRange(selectedRange.location, markdownRange.range)) ||
+                                       selectedRange.location == markdownRange.range.location + markdownRange.range.length // cursor right after element
 
-                    if !cursorIntersects {
-                        for (index, syntaxRange) in markdownRange.syntaxRanges.enumerated() {
-                            var isListMarker = false
-                            var hiddenAttributes: [NSAttributedString.Key: Any] = [
-                                .foregroundColor: NSColor.clear
-                            ]
-                            
-                            // Apply replacement symbol only to the first syntax range of list items
-                            if index == 0 {
-                                switch markdownRange.style {
-                                case .bullet:
-                                    isListMarker = true
-                                    hiddenAttributes[.listMarkerReplacement] = "circle.fill"
-                                    hiddenAttributes[.listMarkerColor] = NSColor.systemOrange
-                                case .checklist(let done):
-                                    isListMarker = true
-                                    hiddenAttributes[.listMarkerReplacement] = done ? "checkmark.square" : "square"
-                                    let checklistAttributes = self.attributes(for: markdownRange.style)
-                                    hiddenAttributes[.listMarkerColor] = checklistAttributes[.foregroundColor] as? NSColor ?? NSColor.labelColor
-                                default:
-                                    break
-                                }
+                if !cursorIntersects {
+                    for (index, syntaxRange) in markdownRange.syntaxRanges.enumerated() {
+                        var isListMarker = false
+                        var hiddenAttributes: [NSAttributedString.Key: Any] = [
+                            .foregroundColor: NSColor.clear
+                        ]
+                        
+                        // Apply replacement symbol only to the first syntax range of list items
+                        if index == 0 {
+                            switch markdownRange.style {
+                            case .bullet:
+                                isListMarker = true
+                                hiddenAttributes[.listMarkerReplacement] = "circle.fill"
+                                hiddenAttributes[.listMarkerColor] = NSColor.systemOrange
+                            case .checklist(let done):
+                                isListMarker = true
+                                hiddenAttributes[.listMarkerReplacement] = done ? "checkmark.square" : "square"
+                                let checklistAttributes = attributes(for: markdownRange.style)
+                                hiddenAttributes[.listMarkerColor] = checklistAttributes[NSAttributedString.Key.foregroundColor] as? NSColor ?? NSColor.labelColor
+                            default:
+                                break
                             }
-                            
-                            // Only shrink font for non-list markers so list markers preserve indentation
-                            if !isListMarker {
-                                hiddenAttributes[.font] = NSFont.systemFont(ofSize: 0.1)
-                            }
-                            
-                            textStorage.addAttributes(hiddenAttributes, range: syntaxRange)
                         }
+                        
+                        // Only shrink font for non-list markers so list markers preserve indentation
+                        if !isListMarker {
+                            hiddenAttributes[.font] = NSFont.systemFont(ofSize: 0.1)
+                        }
+                        
+                        textStorage.addAttributes(hiddenAttributes, range: syntaxRange)
                     }
                 }
             }
-        }
-        
-        private func renderImage(url: URL, title: String?, range: NSRange, in textView: NSTextView) {
-            guard let textStorage = textView.textStorage else { return }
-            
-            // Check if this range already has a RemoteImageAttachment
-            var alreadyRendered = false
-            textStorage.enumerateAttribute(.attachment, in: range, options: []) { value, _, stop in
-                if value is RemoteImageAttachment {
-                    alreadyRendered = true
-                    stop.pointee = true
-                }
-            }
-            if alreadyRendered { return }
-            
-            let originalMarkdown = (textView.string as NSString).substring(with: range)
-            let attachment = RemoteImageAttachment(url: url, title: title, originalMarkdown: originalMarkdown)
-            attachment.image = NSImage(systemSymbolName: "photo", accessibilityDescription: "Loading image...")
-            
-            // Use a specific character for the attachment
-            let attachmentString = NSAttributedString(attachment: attachment)
-            
-            // Replace the Markdown text with the attachment
-            textStorage.replaceCharacters(in: range, with: attachmentString)
-            
-            // Load the image asynchronously
-            Task {
-                if let image = await RemoteImageCache.shared.image(for: url) {
-                    attachment.image = image
-                    // Invalidate layout to show the new image
-                    await MainActor.run {
-                        textView.layoutManager?.invalidateDisplay(forCharacterRange: NSRange(location: range.location, length: 1))
-                    }
-                }
-            }
-        }
-        
-        func convertToMarkdown(from attributedString: NSAttributedString) -> String {
-            let result = NSMutableAttributedString(attributedString: attributedString)
-            var offset = 0
-            
-            attributedString.enumerateAttribute(.attachment, in: NSRange(location: 0, length: attributedString.length), options: []) { value, range, _ in
-                if let attachment = value as? RemoteImageAttachment {
-                    let replacementRange = NSRange(location: range.location + offset, length: range.length)
-                    result.replaceCharacters(in: replacementRange, with: attachment.originalMarkdown)
-                    offset += attachment.originalMarkdown.count - range.length
-                }
-            }
-            return result.string
         }
         
         private func attributes(for style: MarkdownStyle) -> [NSAttributedString.Key: Any] {
@@ -666,7 +632,7 @@ struct EditorView: NSViewRepresentable {
             
             switch style {
             case .heading(let level):
-                let size: CGFloat = level == 1 ? baseSize + 10 : (level == 2 ? baseSize + 6 : baseSize + 4)
+                let size: CGFloat = level == 1 ? baseSize + 10 : (level == 2 ? baseSize + 6 : (level == 3 ? baseSize + 4 : (level == 4 ? baseSize + 2 : baseSize)))
                 let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
                 return [
                     .font: boldFont.withSize(size),
@@ -693,7 +659,14 @@ struct EditorView: NSViewRepresentable {
             case .code:
                 return [
                     .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
-                    .foregroundColor: textColor
+                    .foregroundColor: textColor,
+                    .backgroundColor: NSColor.quaternaryLabelColor
+                ]
+            case .codeBlock:
+                return [
+                    .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
+                    .foregroundColor: textColor,
+                    .backgroundColor: NSColor.quaternaryLabelColor
                 ]
             case .checklist(let done):
                 if done {
@@ -707,18 +680,50 @@ struct EditorView: NSViewRepresentable {
             case .bullet:
                 return [
                     .font: baseFont,
-                    .foregroundColor: NSColor.systemOrange
+                    .foregroundColor: textColor
                 ]
-            case .link(_):
-                return [
+            case .link(let urlString):
+                var attrs: [NSAttributedString.Key: Any] = [
                     .foregroundColor: NSColor.systemBlue,
                     .underlineStyle: NSUnderlineStyle.single.rawValue
                 ]
+                if let urlString = urlString, let url = URL(string: urlString) {
+                    attrs[.link] = url
+                }
+                return attrs
             case .image(let url, let title):
                 return [
                     .foregroundColor: NSColor.systemGreen,
                     .underlineStyle: NSUnderlineStyle.single.rawValue,
                     .toolTip: title ?? url
+                ]
+            case .strikethrough:
+                return [
+                    .foregroundColor: textColor,
+                    .strikethroughStyle: NSUnderlineStyle.single.rawValue
+                ]
+            case .blockquote:
+                let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
+                return [
+                    .font: italicFont,
+                    .foregroundColor: NSColor.secondaryLabelColor
+                ]
+            case .horizontalRule:
+                return [
+                    .foregroundColor: textColor,
+                    .strikethroughStyle: NSUnderlineStyle.single.rawValue
+                ]
+            case .highlight:
+                return [
+                    .backgroundColor: NSColor.systemYellow.withAlphaComponent(0.3),
+                    .foregroundColor: textColor
+                ]
+            case .boldItalic:
+                let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
+                let boldItalicFont = NSFontManager.shared.convert(boldFont, toHaveTrait: .italicFontMask)
+                return [
+                    .font: boldItalicFont,
+                    .foregroundColor: textColor
                 ]
             }
         }
