@@ -177,7 +177,7 @@ struct ContentView: View {
                     ), assetIds: Binding(
                         get: { note.assetIds },
                         set: { note.assetIds = $0 }
-                    ), selectionRange: $selectionRange, theme: themeManager.theme(for: note))
+                    ), selectionRange: $selectionRange, theme: themeManager.themeName(for: note))
                     .onAppear {
                         if note.title == "New Note" && note.content.isEmpty {
                             isTitleFocused = true
@@ -213,8 +213,8 @@ struct ContentView: View {
                                 set: { note.themeName = $0 == "Default" ? nil : $0 }
                             )) {
                                 Text("Default").tag("Default")
-                                ForEach(AppTheme.allCases) { theme in
-                                    Text(theme.rawValue).tag(theme.rawValue)
+                                ForEach(themeManager.allThemeNames, id: \.self) { themeName in
+                                    Text(themeName).tag(themeName)
                                 }
                             }
                             .pickerStyle(.menu)
@@ -401,10 +401,10 @@ struct ContentView: View {
             }
         ]
         
-        for theme in AppTheme.allCases {
-            commands.append(Command(title: "Switch to \(theme.rawValue) Theme", subtitle: "Theme") {
+        for themeName in themeManager.allThemeNames {
+            commands.append(Command(title: "Switch to \(themeName) Theme", subtitle: "Theme") {
                 Task { @MainActor in
-                    themeManager.currentTheme = theme
+                    themeManager.currentThemeName = themeName
                 }
             })
         }

@@ -6,6 +6,7 @@ struct NoteListView: View {
     @Query(sort: \Folder.name) private var folders: [Folder]
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedNote: Note?
+    @Environment(ThemeManager.self) private var themeManager
     
     @State private var isGeneralExpanded = true
     @State private var isMeetingsExpanded = true
@@ -267,6 +268,7 @@ struct FolderTreeItem: View {
 
 struct NoteRowView: View {
     let note: Note
+    @Environment(ThemeManager.self) private var themeManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -319,11 +321,11 @@ struct NoteRowView: View {
                 } label: {
                     Text("Default")
                 }
-                ForEach(AppTheme.allCases) { theme in
+                ForEach(themeManager.allThemeNames, id: \.self) { themeName in
                     Button {
-                        note.themeName = theme.rawValue
+                        note.themeName = themeName
                     } label: {
-                        Text(theme.rawValue)
+                        Text(themeName)
                     }
                 }
             } label: {

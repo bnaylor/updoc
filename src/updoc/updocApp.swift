@@ -42,9 +42,9 @@ struct updocApp: App {
             }
             
             CommandMenu("Theme") {
-                ForEach(AppTheme.allCases) { theme in
-                    Button(theme.rawValue) {
-                        themeManager.currentTheme = theme
+                ForEach(themeManager.allThemeNames, id: \.self) { themeName in
+                    Button(themeName) {
+                        themeManager.currentThemeName = themeName
                     }
                 }
             }
