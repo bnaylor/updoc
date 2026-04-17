@@ -6,6 +6,8 @@ import UniformTypeIdentifiers
 extension NSAttributedString.Key {
     static let listMarkerReplacement = NSAttributedString.Key("listMarkerReplacement")
     static let listMarkerColor = NSAttributedString.Key("listMarkerColor")
+    static let horizontalRule = NSAttributedString.Key("horizontalRule")
+    static let horizontalRuleColor = NSAttributedString.Key("horizontalRuleColor")
 }
 
 @MainActor
@@ -13,6 +15,15 @@ class EditorTextView: NSTextView {
     var onFileDropped: ((URL, NSTextView) -> Void)?
     var onPromoteAction: ((String) -> Void)?
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
+    
+    override func keyDown(with event: NSEvent) {
+        if let coordinator = delegate as? EditorView.Coordinator {
+            if coordinator.handleKeyDown(with: event) {
+                return // Handled!
+            }
+        }
+        super.keyDown(with: event)
+    }
     
     override func menu(for event: NSEvent) -> NSMenu? {
         let menu = super.menu(for: event) ?? NSMenu()
@@ -93,7 +104,7 @@ struct EditorView: NSViewRepresentable {
     @Binding var text: String
     @Binding var assetIds: [String]
     @Binding var selectionRange: NSRange?
-    var theme: AppTheme
+    var theme: String
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
@@ -125,6 +136,7 @@ struct EditorView: NSViewRepresentable {
         textView.drawsBackground = true
         textView.backgroundColor = themeManager.backgroundColor(for: theme)
         textView.isRichText = false
+        textView.isAutomaticDashSubstitutionEnabled = false
         
         // Add some padding
         textView.textContainerInset = NSSize(width: 20, height: 20)
@@ -398,6 +410,24 @@ struct EditorView: NSViewRepresentable {
             // Handle √ shortcut
             checkForCheckmarkShortcut(in: textView)
             
+            // Handle Emoji shortcodes
+            checkForEmojiShortcodes(in: textView)
+            
+            // Live Emoji Search
+            if let query = detectEmojiQuery(in: textView) {
+                let matches = EmojiService.findMatches(for: query)
+                if !matches.isEmpty {
+                    if query != currentEmojiQuery {
+                        emojiSelectedIndex = 0
+                    }
+                    showEmojiWindow(matches: matches, in: textView, for: query)
+                } else {
+                    closeEmojiWindow()
+                }
+            } else {
+                closeEmojiWindow()
+            }
+            
             let currentMarkdown: String
             if let textStorage = textView.textStorage {
                 currentMarkdown = convertToMarkdown(from: textStorage)
@@ -459,6 +489,170 @@ struct EditorView: NSViewRepresentable {
                         // After insertText, the cursor should be at the correct position.
                     }
                 }
+            }
+        }
+        
+        private var emojiWindow: NSWindow?
+        private var emojiSelectedIndex: Int = 0
+        private var currentEmojiMatches: [EmojiMatch] = []
+        private var currentEmojiQuery: String = ""
+        
+        private func checkForEmojiShortcodes(in textView: NSTextView) {
+            let selectedRange = textView.selectedRange()
+            guard selectedRange.location > 0 else { return }
+            
+            let text = textView.string as NSString
+            let lineRange = text.lineRange(for: NSRange(location: selectedRange.location - 1, length: 1))
+            let line = text.substring(with: lineRange)
+            
+            let regex = try! NSRegularExpression(pattern: ":([a-zA-Z0-9_+-]+):", options: [])
+            let matches = regex.matches(in: line, options: [], range: NSRange(location: 0, length: line.count))
+            
+            for match in matches.reversed() {
+                let fullRange = match.range(at: 0)
+                let codeRange = match.range(at: 1)
+                let shortcode = ":" + (line as NSString).substring(with: codeRange) + ":"
+                
+                if let emoji = EmojiService.mapping[shortcode] {
+                    let absoluteRange = NSRange(location: lineRange.location + fullRange.location, length: fullRange.length)
+                    
+                    if textView.shouldChangeText(in: absoluteRange, replacementString: emoji) {
+                        textView.insertText(emoji, replacementRange: absoluteRange)
+                    }
+                }
+            }
+        }
+        
+        private func detectEmojiQuery(in textView: NSTextView) -> String? {
+            let selectedRange = textView.selectedRange()
+            guard selectedRange.location > 0 else { return nil }
+            
+            let text = textView.string as NSString
+            var loc = selectedRange.location - 1
+            var query = ""
+            
+            while loc >= 0 {
+                let char = text.substring(with: NSRange(location: loc, length: 1))
+                if char == ":" {
+                    if loc == 0 {
+                        return query
+                    }
+                    let prevChar = text.substring(with: NSRange(location: loc - 1, length: 1))
+                    if let firstScalar = prevChar.unicodeScalars.first {
+                        let char = Character(firstScalar)
+                        if !char.isLetter && !char.isNumber {
+                            return query
+                        }
+                    }
+                    return nil
+                }
+                if char.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    return nil
+                }
+                query = char + query
+                loc -= 1
+            }
+            return nil
+        }
+        
+        private func showEmojiWindow(matches: [EmojiMatch], in textView: NSTextView, for query: String) {
+            self.currentEmojiMatches = matches
+            self.currentEmojiQuery = query
+            
+            let contentView = EmojiAutocompleteView(matches: matches, selectedIndex: emojiSelectedIndex) { [weak self] match in
+                self?.insertEmoji(match, in: textView, for: query)
+            }
+            
+            if emojiWindow == nil {
+                let window = NSWindow(
+                    contentRect: NSRect(x: 0, y: 0, width: 200, height: 150),
+                    styleMask: [.borderless],
+                    backing: .buffered,
+                    defer: false
+                )
+                window.level = .popUpMenu
+                window.isReleasedWhenClosed = false
+                window.ignoresMouseEvents = false
+                window.contentView = NSHostingView(rootView: contentView)
+                emojiWindow = window
+            } else {
+                if let hostingView = emojiWindow?.contentView as? NSHostingView<EmojiAutocompleteView> {
+                    hostingView.rootView = contentView
+                }
+            }
+            
+            // Position window
+            let selectedRange = textView.selectedRange()
+            let screenRect = textView.firstRect(forCharacterRange: selectedRange, actualRange: nil)
+            
+            var windowFrame = emojiWindow!.frame
+            // Place it below the cursor
+            windowFrame.origin = NSPoint(x: screenRect.minX, y: screenRect.minY - windowFrame.height)
+            emojiWindow?.setFrame(windowFrame, display: true)
+            
+            if !(emojiWindow?.isVisible ?? false) {
+                emojiWindow?.orderFront(nil)
+            }
+        }
+        
+        private func closeEmojiWindow() {
+            emojiWindow?.orderOut(nil)
+            currentEmojiMatches = []
+            currentEmojiQuery = ""
+        }
+        
+        private func insertEmoji(_ match: EmojiMatch, in textView: NSTextView, for query: String) {
+            let selectedRange = textView.selectedRange()
+            let queryLength = query.count + 1
+            let replacementRange = NSRange(location: selectedRange.location - queryLength, length: queryLength)
+            
+            if textView.shouldChangeText(in: replacementRange, replacementString: match.emoji) {
+                textView.insertText(match.emoji, replacementRange: replacementRange)
+                closeEmojiWindow()
+            }
+        }
+        
+        public func handleKeyDown(with event: NSEvent) -> Bool {
+            guard let emojiWindow = emojiWindow, emojiWindow.isVisible else { return false }
+            
+            switch event.keyCode {
+            case 125: // Down Arrow
+                if !currentEmojiMatches.isEmpty {
+                    emojiSelectedIndex = (emojiSelectedIndex + 1) % currentEmojiMatches.count
+                    updateEmojiWindowContent()
+                    return true
+                }
+            case 126: // Up Arrow
+                if !currentEmojiMatches.isEmpty {
+                    emojiSelectedIndex = (emojiSelectedIndex - 1 + currentEmojiMatches.count) % currentEmojiMatches.count
+                    updateEmojiWindowContent()
+                    return true
+                }
+            case 36: // Return
+                if emojiSelectedIndex < currentEmojiMatches.count {
+                    let match = currentEmojiMatches[emojiSelectedIndex]
+                    if let textView = self.textView {
+                        insertEmoji(match, in: textView, for: currentEmojiQuery)
+                    }
+                    return true
+                }
+            case 53: // Escape
+                closeEmojiWindow()
+                return true
+            default:
+                break
+            }
+            return false
+        }
+        
+        private func updateEmojiWindowContent() {
+            let contentView = EmojiAutocompleteView(matches: currentEmojiMatches, selectedIndex: emojiSelectedIndex) { [weak self] match in
+                if let textView = self?.textView {
+                    self?.insertEmoji(match, in: textView, for: self?.currentEmojiQuery ?? "")
+                }
+            }
+            if let hostingView = emojiWindow?.contentView as? NSHostingView<EmojiAutocompleteView> {
+                hostingView.rootView = contentView
             }
         }
         
@@ -602,12 +796,13 @@ struct EditorView: NSViewRepresentable {
                             case .bullet:
                                 isListMarker = true
                                 hiddenAttributes[.listMarkerReplacement] = "circle.fill"
-                                hiddenAttributes[.listMarkerColor] = NSColor.systemOrange
+                                let bulletAttributes = attributes(for: .bullet)
+                                hiddenAttributes[.listMarkerColor] = bulletAttributes[NSAttributedString.Key.foregroundColor] as? NSColor ?? NSColor.systemOrange
                             case .checklist(let done):
                                 isListMarker = true
                                 hiddenAttributes[.listMarkerReplacement] = done ? "checkmark.square" : "square"
-                                let checklistAttributes = attributes(for: markdownRange.style)
-                                hiddenAttributes[.listMarkerColor] = checklistAttributes[NSAttributedString.Key.foregroundColor] as? NSColor ?? NSColor.labelColor
+                                let bulletAttributes = attributes(for: .bullet)
+                                hiddenAttributes[.listMarkerColor] = bulletAttributes[NSAttributedString.Key.foregroundColor] as? NSColor ?? NSColor.systemOrange
                             default:
                                 break
                             }
@@ -625,107 +820,7 @@ struct EditorView: NSViewRepresentable {
         }
         
         private func attributes(for style: MarkdownStyle) -> [NSAttributedString.Key: Any] {
-            let theme = parent.theme
-            let baseFont = parent.themeManager.font(for: theme)
-            let baseSize = parent.themeManager.bodyFontSize
-            let textColor = parent.themeManager.textColor(for: theme)
-            
-            switch style {
-            case .heading(let level):
-                let size: CGFloat = level == 1 ? baseSize + 10 : (level == 2 ? baseSize + 6 : (level == 3 ? baseSize + 4 : (level == 4 ? baseSize + 2 : baseSize)))
-                let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
-                return [
-                    .font: boldFont.withSize(size),
-                    .foregroundColor: textColor
-                ]
-            case .bold:
-                let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
-                return [
-                    .font: boldFont,
-                    .foregroundColor: textColor
-                ]
-            case .italic:
-                let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
-                return [
-                    .font: italicFont,
-                    .foregroundColor: textColor
-                ]
-            case .underline:
-                return [
-                    .font: baseFont,
-                    .foregroundColor: textColor,
-                    .underlineStyle: NSUnderlineStyle.single.rawValue
-                ]
-            case .code:
-                return [
-                    .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
-                    .foregroundColor: textColor,
-                    .backgroundColor: NSColor.quaternaryLabelColor
-                ]
-            case .codeBlock:
-                return [
-                    .font: NSFont.monospacedSystemFont(ofSize: baseSize - 1, weight: .regular),
-                    .foregroundColor: textColor,
-                    .backgroundColor: NSColor.quaternaryLabelColor
-                ]
-            case .checklist(let done):
-                if done {
-                    return [
-                        .strikethroughStyle: NSUnderlineStyle.single.rawValue,
-                        .foregroundColor: NSColor.secondaryLabelColor
-                    ]
-                } else {
-                    return [.foregroundColor: NSColor.labelColor]
-                }
-            case .bullet:
-                return [
-                    .font: baseFont,
-                    .foregroundColor: textColor
-                ]
-            case .link(let urlString):
-                var attrs: [NSAttributedString.Key: Any] = [
-                    .foregroundColor: NSColor.systemBlue,
-                    .underlineStyle: NSUnderlineStyle.single.rawValue
-                ]
-                if let urlString = urlString, let url = URL(string: urlString) {
-                    attrs[.link] = url
-                }
-                return attrs
-            case .image(let url, let title):
-                return [
-                    .foregroundColor: NSColor.systemGreen,
-                    .underlineStyle: NSUnderlineStyle.single.rawValue,
-                    .toolTip: title ?? url
-                ]
-            case .strikethrough:
-                return [
-                    .foregroundColor: textColor,
-                    .strikethroughStyle: NSUnderlineStyle.single.rawValue
-                ]
-            case .blockquote:
-                let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask)
-                return [
-                    .font: italicFont,
-                    .foregroundColor: NSColor.secondaryLabelColor
-                ]
-            case .horizontalRule:
-                return [
-                    .foregroundColor: textColor,
-                    .strikethroughStyle: NSUnderlineStyle.single.rawValue
-                ]
-            case .highlight:
-                return [
-                    .backgroundColor: NSColor.systemYellow.withAlphaComponent(0.3),
-                    .foregroundColor: textColor
-                ]
-            case .boldItalic:
-                let boldFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .boldFontMask)
-                let boldItalicFont = NSFontManager.shared.convert(boldFont, toHaveTrait: .italicFontMask)
-                return [
-                    .font: boldItalicFont,
-                    .foregroundColor: textColor
-                ]
-            }
+            return parent.themeManager.attributes(for: style, in: parent.theme)
         }
     }
 }

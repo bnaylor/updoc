@@ -166,7 +166,7 @@ public struct MarkdownEngine {
         let hrRegex = try! NSRegularExpression(pattern: "^---$|^-{3,}$", options: [.anchorsMatchLines])
         hrRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
             if let matchRange = match?.range {
-                ranges.append(MarkdownRange(range: matchRange, style: .horizontalRule, syntaxRanges: [matchRange]))
+                ranges.append(MarkdownRange(range: matchRange, style: .horizontalRule))
             }
         }
         
@@ -230,6 +230,22 @@ public struct MarkdownEngine {
                 // Syntax is just bullet character + trailing space
                 let syntaxRange = NSRange(location: markerStart, length: 2)
                 ranges.append(MarkdownRange(range: matchRange, style: .bullet, syntaxRanges: [syntaxRange]))
+            }
+        }
+        
+        // Raw URLs (e.g., http://foo.com)
+        let rawUrlRegex = try! NSRegularExpression(pattern: "https?://[^\\s]+", options: [])
+        let rawMatches = rawUrlRegex.matches(in: text, options: [], range: fullRange)
+        
+        for match in rawMatches {
+            let matchRange = match.range
+            // Check if this range overlaps with any existing range
+            let overlaps = ranges.contains { existing in
+                NSIntersectionRange(existing.range, matchRange).length > 0
+            }
+            if !overlaps {
+                let url = (text as NSString).substring(with: matchRange)
+                ranges.append(MarkdownRange(range: matchRange, style: .link(url: url)))
             }
         }
         
