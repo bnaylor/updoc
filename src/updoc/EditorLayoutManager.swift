@@ -57,5 +57,31 @@ class EditorLayoutManager: NSLayoutManager {
                 }
             }
         }
+        
+        textStorage.enumerateAttribute(.horizontalRule, in: charRange, options: []) { value, range, _ in
+            if value != nil {
+                let glyphRange = self.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+                guard glyphsToShow.contains(glyphRange.location) else { return }
+                
+                let color = textStorage.attribute(.horizontalRuleColor, at: range.location, effectiveRange: nil) as? NSColor ?? .labelColor
+                
+                var lineRect = self.lineFragmentRect(forGlyphAt: glyphRange.location, effectiveRange: nil)
+                
+                // Adjust for origin
+                lineRect.origin.x += origin.x
+                lineRect.origin.y += origin.y
+                
+                // Draw a line in the middle of the lineRect vertically
+                let y = lineRect.minY + (lineRect.height / 2.0)
+                
+                let path = NSBezierPath()
+                path.move(to: NSPoint(x: lineRect.minX, y: y))
+                path.line(to: NSPoint(x: lineRect.maxX, y: y))
+                path.lineWidth = 1.0
+                
+                color.setStroke()
+                path.stroke()
+            }
+        }
     }
 }
