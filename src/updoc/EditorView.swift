@@ -778,6 +778,10 @@ struct EditorView: NSViewRepresentable {
                 let styleAttributes = attributes(for: markdownRange.style)
                 textStorage.addAttributes(styleAttributes, range: markdownRange.range)
                 
+                if markdownRange.style == .codeBlock {
+                    applySyntaxHighlighting(to: textView, in: markdownRange.range)
+                }
+                
                 // Hide syntax if the cursor does NOT intersect the full markdownRange
                 let cursorIntersects = NSIntersectionRange(selectedRange, markdownRange.range).length > 0 || 
                                        (selectedRange.length == 0 && NSLocationInRange(selectedRange.location, markdownRange.range)) ||
@@ -821,6 +825,81 @@ struct EditorView: NSViewRepresentable {
         
         private func attributes(for style: MarkdownStyle) -> [NSAttributedString.Key: Any] {
             return parent.themeManager.attributes(for: style, in: parent.theme)
+        }
+        
+        private func applySyntaxHighlighting(to textView: NSTextView, in range: NSRange) {
+            guard let textStorage = textView.textStorage else { return }
+            let text = (textView.string as NSString).substring(with: range)
+            
+            // Find the first line to detect language
+            let lines = text.components(separatedBy: .newlines)
+            guard let firstLine = lines.first else { return }
+            
+            let language = firstLine.trimmingCharacters(in: CharacterSet(charactersIn: "`")).trimmingCharacters(in: .whitespaces)
+            
+            let keywords: [String]
+            let commentPattern: String
+            
+            switch language.lowercased() {
+            case "swift":
+                keywords = ["func", "var", "let", "if", "else", "return", "class", "struct", "enum", "import", "guard", "switch", "case"]
+                commentPattern = "//.*$"
+            case "python":
+                keywords = ["def", "class", "if", "elif", "else", "return", "import", "from", "as", "for", "in", "while", "try", "except", "print"]
+                commentPattern = "#.*$"
+            case "golang", "go":
+                keywords = ["func", "var", "if", "else", "return", "type", "struct", "package", "import", "range", "for", "switch", "case"]
+                commentPattern = "//.*$"
+            case "c", "cpp", "c++":
+                keywords = ["int", "float", "double", "char", "void", "if", "else", "return", "class", "struct", "enum", "include", "for", "while", "switch", "case"]
+                commentPattern = "//.*$"
+            case "bash", "sh":
+                keywords = ["if", "then", "else", "fi", "for", "in", "do", "done", "while", "case", "esac", "function", "return"]
+                commentPattern = "#.*$"
+            default:
+                keywords = ["func", "var", "let", "if", "else", "return", "class", "struct", "enum", "import"]
+                commentPattern = "//.*$"
+            }
+            
+            let keywordRegex = try! NSRegularExpression(pattern: "\\b(\(keywords.joined(separator: "|")))\\b", options: [])
+            let stringRegex = try! NSRegularExpression(pattern: "\".*?\"", options: [])
+            let commentRegex = try! NSRegularExpression(pattern: commentPattern, options: [.anchorsMatchLines])
+            let typeRegex = try! NSRegularExpression(pattern: "\\b[A-Z][a-zA-Z0-9]*\\b", options: [])
+            
+            // Softer color palette
+            let keywordColor = NSColor(red: 0.87, green: 0.54, blue: 0.74, alpha: 1.0) // Soft pink/purple
+            let typeColor = NSColor(red: 0.40, green: 0.70, blue: 0.85, alpha: 1.0) // Soft blue
+            let stringColor = NSColor(red: 0.85, green: 0.50, blue: 0.40, alpha: 1.0) // Soft red/orange
+            let commentColor = NSColor(red: 0.50, green: 0.70, blue: 0.50, alpha: 1.0) // Soft green
+            
+            // Apply types first so keywords can override them if needed
+            typeRegex.enumerateMatches(in: text, options: [], range: NSRange(location: 0, length: text.count)) { match, _, _ in
+                if let matchRange = match?.range {
+                    let absoluteRange = NSRange(location: range.location + matchRange.location, length: matchRange.length)
+                    textStorage.addAttribute(.foregroundColor, value: typeColor, range: absoluteRange)
+                }
+            }
+            
+            keywordRegex.enumerateMatches(in: text, options: [], range: NSRange(location: 0, length: text.count)) { match, _, _ in
+                if let matchRange = match?.range {
+                    let absoluteRange = NSRange(location: range.location + matchRange.location, length: matchRange.length)
+                    textStorage.addAttribute(.foregroundColor, value: keywordColor, range: absoluteRange)
+                }
+            }
+            
+            stringRegex.enumerateMatches(in: text, options: [], range: NSRange(location: 0, length: text.count)) { match, _, _ in
+                if let matchRange = match?.range {
+                    let absoluteRange = NSRange(location: range.location + matchRange.location, length: matchRange.length)
+                    textStorage.addAttribute(.foregroundColor, value: stringColor, range: absoluteRange)
+                }
+            }
+            
+            commentRegex.enumerateMatches(in: text, options: [], range: NSRange(location: 0, length: text.count)) { match, _, _ in
+                if let matchRange = match?.range {
+                    let absoluteRange = NSRange(location: range.location + matchRange.location, length: matchRange.length)
+                    textStorage.addAttribute(.foregroundColor, value: commentColor, range: absoluteRange)
+                }
+            }
         }
     }
 }
