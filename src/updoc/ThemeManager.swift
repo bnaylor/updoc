@@ -65,7 +65,6 @@ public class ThemeManager {
     }
     
     public func customTheme(from preset: AppTheme) -> CustomTheme {
-        let baseFont = font(for: preset)
         let baseSize = bodyFontSize
         let textColor = textColor(for: preset)
         let backgroundColor = backgroundColor(for: preset)
