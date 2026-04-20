@@ -7,6 +7,8 @@ public struct CalendarEvent: Codable, Identifiable, Sendable {
     public let location: String?
     public let start: Date
     public let attendees: [String]
+    public let eventType: String?
+    public let isAllDay: Bool
 }
 
 struct GCalendarResponse: Codable {
@@ -20,6 +22,7 @@ struct GCalendarEvent: Codable {
     let location: String?
     let start: GCalendarTime?
     let attendees: [GCalendarAttendee]?
+    let eventType: String?
 }
 
 struct GCalendarTime: Codable {
@@ -77,13 +80,17 @@ public actor GCalendarService {
                 startDate = dayFormatter.date(from: startStr) ?? Date()
             }
             
+            let isAllDay = gEvent.start?.dateTime == nil && gEvent.start?.date != nil
+            
             return CalendarEvent(
                 id: gEvent.id,
                 summary: gEvent.summary ?? "(No Title)",
                 description: gEvent.description,
                 location: gEvent.location,
                 start: startDate,
-                attendees: gEvent.attendees?.compactMap { $0.email } ?? []
+                attendees: gEvent.attendees?.compactMap { $0.email } ?? [],
+                eventType: gEvent.eventType,
+                isAllDay: isAllDay
             )
         }
     }

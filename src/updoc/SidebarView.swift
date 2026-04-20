@@ -11,10 +11,17 @@ struct SidebarView: View {
     @Binding var navigationMode: NavigationMode
     @Query private var templateRules: [TemplateRule]
     @Query private var allNotes: [Note]
+    @Query private var filterRules: [MeetingFilterRule]
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedNote: Note?
     
-    @State private var meetings: [CalendarEvent] = []
+    @State private var allFetchedMeetings: [CalendarEvent] = []
+    
+    private var filteredMeetings: [CalendarEvent] {
+        allFetchedMeetings.filter { meeting in
+            !shouldFilter(meeting)
+        }
+    }
     @State private var selectedMeetingID: String? = nil
     private let templateEngine = SmartTemplateEngine()
     
@@ -40,7 +47,7 @@ struct SidebarView: View {
             if AuthManager.shared.isAuthenticated() {
                 refreshMeetings()
             } else {
-                meetings = []
+                allFetchedMeetings = []
                 selectedMeetingID = nil
             }
         }
@@ -97,7 +104,7 @@ struct SidebarView: View {
     private var meetingsSection: some View {
         Section {
             if AuthManager.shared.isAuthenticated() {
-                ForEach(meetings) { meeting in
+                ForEach(filteredMeetings) { meeting in
                     MeetingRow(
                         meeting: meeting,
                         isSelected: selectedMeetingID == meeting.id,
@@ -107,6 +114,12 @@ struct SidebarView: View {
                             } else {
                                 selectedMeetingID = meeting.id
                             }
+                        },
+                        onCreateNote: {
+                            startNote(for: meeting)
+                        },
+                        onFilterMeeting: {
+                            filterMeeting(meeting)
                         }
                     )
                 }
@@ -189,10 +202,10 @@ struct SidebarView: View {
             do {
                 let fetchedMeetings = try await GCalendarService.shared.fetchTodaysEvents()
                 await MainActor.run {
-                    self.meetings = fetchedMeetings
+                    self.allFetchedMeetings = fetchedMeetings
                     // Clear selection if the meeting is no longer in the list
                     if let currentID = self.selectedMeetingID,
-                       !fetchedMeetings.contains(where: { $0.id == currentID }) {
+                       !self.filteredMeetings.contains(where: { $0.id == currentID }) {
                         self.selectedMeetingID = nil
                     }
                 }
@@ -202,9 +215,70 @@ struct SidebarView: View {
         }
     }
     
+    private func shouldFilter(_ meeting: CalendarEvent) -> Bool {
+        for rule in filterRules {
+            var matchesAll = true
+            
+            if let titlePat = rule.titlePattern, !titlePat.isEmpty {
+                if !meeting.summary.localizedCaseInsensitiveContains(titlePat) {
+                    matchesAll = false
+                }
+            }
+            
+            if let descPat = rule.descriptionPattern, !descPat.isEmpty {
+                if let desc = meeting.description, desc.localizedCaseInsensitiveContains(descPat) {
+                    // Matches
+                } else {
+                    matchesAll = false
+                }
+            }
+            
+            if let partPat = rule.participantPattern, !partPat.isEmpty {
+                if !meeting.attendees.contains(where: { $0.localizedCaseInsensitiveContains(partPat) }) {
+                    matchesAll = false
+                }
+            }
+            
+            if let typePat = rule.eventType, !typePat.isEmpty {
+                if let type = meeting.eventType, type.localizedCaseInsensitiveContains(typePat) {
+                    // Matches
+                } else {
+                    matchesAll = false
+                }
+            }
+            
+            if let isAllDay = rule.isAllDay {
+                if meeting.isAllDay != isAllDay {
+                    matchesAll = false
+                }
+            }
+            
+            if matchesAll {
+                return true // Filter it!
+            }
+        }
+        return false // Keep it!
+    }
+    
+    private func filterMeeting(_ meeting: CalendarEvent) {
+        let newRule = MeetingFilterRule(
+            titlePattern: meeting.summary,
+            isAllDay: meeting.isAllDay,
+            eventType: meeting.eventType
+        )
+        modelContext.insert(newRule)
+        do {
+            try modelContext.save()
+            print("Created filter rule for: \(meeting.summary)")
+            refreshMeetings()
+        } catch {
+            print("Failed to save filter rule: \(error.localizedDescription)")
+        }
+    }
+    
     private func addNote() {
         if let meetingID = selectedMeetingID,
-           let meeting = meetings.first(where: { $0.id == meetingID }) {
+           let meeting = allFetchedMeetings.first(where: { $0.id == meetingID }) {
             startNote(for: meeting)
         } else {
             let newNote = Note(title: "New Note", content: "")
@@ -260,6 +334,8 @@ struct MeetingRow: View {
     let meeting: CalendarEvent
     let isSelected: Bool
     let onTap: () -> Void
+    let onCreateNote: () -> Void
+    let onFilterMeeting: () -> Void
     
     var body: some View {
         HStack {
@@ -281,5 +357,14 @@ struct MeetingRow: View {
         .cornerRadius(6)
         .contentShape(Rectangle())
         .onTapGesture(perform: onTap)
+        .contextMenu {
+            Button(action: onCreateNote) {
+                Label("New Note", systemImage: "note.text.badge.plus")
+            }
+            
+            Button(action: onFilterMeeting) {
+                Label("Filter Meeting", systemImage: "line.3.horizontal.decrease.circle")
+            }
+        }
     }
 }

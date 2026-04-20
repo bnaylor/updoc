@@ -10,7 +10,7 @@ struct updocApp: App {
     
     init() {
         do {
-            container = try ModelContainer(for: Note.self, Folder.self, TemplateRule.self, ImageMap.self)
+            container = try ModelContainer(for: Note.self, Folder.self, TemplateRule.self, ImageMap.self, MeetingFilterRule.self)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -97,6 +97,17 @@ struct updocApp: App {
                     print("Rule saved successfully in app Settings")
                 } catch {
                     print("Failed to save rule in app Settings: \(error.localizedDescription)")
+                }
+            }, onAddFilterRule: {
+                print("onAddFilterRule called in app Settings")
+                let context = ModelContext(container)
+                let newRule = MeetingFilterRule(titlePattern: "Focus Time")
+                context.insert(newRule)
+                do {
+                    try context.save()
+                    print("Filter rule saved successfully in app Settings")
+                } catch {
+                    print("Failed to save filter rule in app Settings: \(error.localizedDescription)")
                 }
             }, onDone: nil)
             .environment(themeManager)

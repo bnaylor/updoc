@@ -8,12 +8,14 @@ struct SettingsView: View {
         case editor
         case templates
         case themes
+        case meetingFilter
     }
     
     @State private var selectedTab: Tab = .credentials
     @Environment(\.modelContext) private var modelContext
     
     var onAddRule: () -> Void
+    var onAddFilterRule: () -> Void
     
     // Credentials State
     @State private var clientID = ""
@@ -47,6 +49,10 @@ struct SettingsView: View {
                 ToolbarButton(title: "Themes", icon: "paintbrush.fill", isSelected: selectedTab == .themes) {
                     selectedTab = .themes
                 }
+                
+                ToolbarButton(title: "Filters", icon: "line.3.horizontal.decrease.circle", isSelected: selectedTab == .meetingFilter) {
+                    selectedTab = .meetingFilter
+                }
                 Spacer()
             }
             .padding()
@@ -66,6 +72,9 @@ struct SettingsView: View {
                         .environment(\.modelContext, modelContext)
                 case .themes:
                     themesPane
+                case .meetingFilter:
+                    FilterManagerView(onAddFilterRule: onAddFilterRule)
+                        .environment(\.modelContext, modelContext)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -481,6 +481,16 @@ struct ContentViewSheets: ViewModifier {
                     } catch {
                         print("Failed to save rule in ContentView: \(error.localizedDescription)")
                     }
+                }, onAddFilterRule: {
+                    print("onAddFilterRule called in ContentView")
+                    let newRule = MeetingFilterRule(titlePattern: "Focus Time")
+                    modelContext.insert(newRule)
+                    do {
+                        try modelContext.save()
+                        print("Filter rule saved successfully in ContentView")
+                    } catch {
+                        print("Failed to save filter rule in ContentView: \(error.localizedDescription)")
+                    }
                 }, onDone: {
                     showingSettings = false
                 })
