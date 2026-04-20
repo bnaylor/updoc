@@ -52,8 +52,9 @@ struct ContentView: View {
                     }
         
         } detail: {
-            if let note = selectedNote {
-                VStack(spacing: 0) {
+            Group {
+                if let note = selectedNote {
+                    VStack(spacing: 0) {
                     HStack {
                         TextField("Note Title", text: Binding(
                             get: { note.title },
@@ -258,6 +259,22 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .foregroundColor(.secondary)
             }
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: { showingSettings = true }) {
+                        Label("Settings", systemImage: "gear")
+                    }
+                    .help("Open App Settings")
+                }
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: { showingThemeSettings = true }) {
+                        Label("Themes", systemImage: "paintbrush")
+                    }
+                    .help("Open Theme Settings")
+                }
+            }
                 }
             } else {
                 NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -265,6 +282,21 @@ struct ContentView: View {
                         .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
                 } detail: {
                     WeeklyLogDashboardView(selectedNote: $selectedNote)
+                        .toolbar {
+                            ToolbarItem(placement: .primaryAction) {
+                                Button(action: { showingSettings = true }) {
+                                    Label("Settings", systemImage: "gear")
+                                }
+                                .help("Open App Settings")
+                            }
+                            
+                            ToolbarItem(placement: .primaryAction) {
+                                Button(action: { showingThemeSettings = true }) {
+                                    Label("Themes", systemImage: "paintbrush")
+                                }
+                                .help("Open Theme Settings")
+                            }
+                        }
                 }
             }
         }
@@ -327,21 +359,6 @@ struct ContentView: View {
             // Short delay to ensure view hierarchy is ready
             try? await Task.sleep(nanoseconds: 500_000_000)
             checkConfig()
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: { showingSettings = true }) {
-                    Label("Settings", systemImage: "gear")
-                }
-                .help("Open App Settings")
-            }
-            
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: { showingThemeSettings = true }) {
-                    Label("Themes", systemImage: "paintbrush")
-                }
-                .help("Open Theme Settings")
-            }
         }
         .background {
             Group {
