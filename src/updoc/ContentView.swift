@@ -260,21 +260,6 @@ struct ContentView: View {
                     .foregroundColor(.secondary)
             }
             }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: { showingSettings = true }) {
-                        Label("Settings", systemImage: "gear")
-                    }
-                    .help("Open App Settings")
-                }
-                
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: { showingThemeSettings = true }) {
-                        Label("Themes", systemImage: "paintbrush")
-                    }
-                    .help("Open Theme Settings")
-                }
-            }
                 }
             } else {
                 NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -282,21 +267,6 @@ struct ContentView: View {
                         .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
                 } detail: {
                     WeeklyLogDashboardView(selectedNote: $selectedNote)
-                        .toolbar {
-                            ToolbarItem(placement: .primaryAction) {
-                                Button(action: { showingSettings = true }) {
-                                    Label("Settings", systemImage: "gear")
-                                }
-                                .help("Open App Settings")
-                            }
-                            
-                            ToolbarItem(placement: .primaryAction) {
-                                Button(action: { showingThemeSettings = true }) {
-                                    Label("Themes", systemImage: "paintbrush")
-                                }
-                                .help("Open Theme Settings")
-                            }
-                        }
                 }
             }
         }
@@ -676,18 +646,19 @@ struct ContentViewSheets: ViewModifier {
     var modelContext: ModelContext
     var triggerSyncForNote: (Note) -> Void
     
+    @Environment(ThemeManager.self) private var themeManager
+    
     func body(content: Content) -> some View {
         content
             .sheet(isPresented: $showingRuleManager) {
                 RuleManagerView()
             }
-            .sheet(isPresented: $showingThemeSettings) {
-                ThemeSettingsView()
-            }
+
             .sheet(isPresented: $showingSettings) {
                 SettingsView {
                     showingSettings = false
                 }
+                .environment(themeManager)
             }
             .sheet(item: $activeConflict) { info in
                 ConflictResolutionView(local: info.local, remote: info.remote) { resolvedContent in

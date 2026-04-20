@@ -81,6 +81,7 @@ struct updocApp: App {
         
         Settings {
             SettingsView(onDone: nil)
+                .environment(themeManager)
         }
     }
 }

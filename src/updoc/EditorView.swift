@@ -108,6 +108,9 @@ struct EditorView: NSViewRepresentable {
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
+    
+    @AppStorage("spellcheckEnabled") private var spellcheckEnabled = true
+    @AppStorage("autocorrectEnabled") private var autocorrectEnabled = true
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSScrollView()
@@ -137,6 +140,9 @@ struct EditorView: NSViewRepresentable {
         textView.backgroundColor = themeManager.backgroundColor(for: theme)
         textView.isRichText = false
         textView.isAutomaticDashSubstitutionEnabled = false
+        
+        textView.isContinuousSpellCheckingEnabled = spellcheckEnabled
+        textView.isAutomaticSpellingCorrectionEnabled = autocorrectEnabled
         
         // Add some padding
         textView.textContainerInset = NSSize(width: 20, height: 20)
@@ -212,6 +218,14 @@ struct EditorView: NSViewRepresentable {
         // CRITICAL: Update coordinator's reference to parent to avoid stale bindings
         // and "cross-document bleed" when switching notes.
         context.coordinator.parent = self
+        
+        // Update preferences
+        if textView.isContinuousSpellCheckingEnabled != spellcheckEnabled {
+            textView.isContinuousSpellCheckingEnabled = spellcheckEnabled
+        }
+        if textView.isAutomaticSpellingCorrectionEnabled != autocorrectEnabled {
+            textView.isAutomaticSpellingCorrectionEnabled = autocorrectEnabled
+        }
         
         // Update colors if needed
         let newBgColor = themeManager.backgroundColor(for: theme)
