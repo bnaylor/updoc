@@ -6,6 +6,16 @@ struct updocApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var themeManager = ThemeManager.shared
     
+    let container: ModelContainer
+    
+    init() {
+        do {
+            container = try ModelContainer(for: Note.self, Folder.self, TemplateRule.self, ImageMap.self)
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+    }
+    
     var body: some Scene {
         WindowGroup("updoc") {
             ContentView()
@@ -14,7 +24,7 @@ struct updocApp: App {
                 }
                 .environment(themeManager)
         }
-        .modelContainer(for: [Note.self, Folder.self, TemplateRule.self, ImageMap.self])
+        .modelContainer(container)
         .commands {
             CommandGroup(replacing: .appTermination) {
                 Button("Quit updoc") {
@@ -62,10 +72,7 @@ struct updocApp: App {
             }
             
             CommandGroup(after: .toolbar) {
-                Button("Open Template Rules") {
-                    NotificationCenter.default.post(name: .openRules, object: nil)
-                }
-                .keyboardShortcut("r", modifiers: .command)
+
                 
                 Button("Global Search") {
                     NotificationCenter.default.post(name: .openGlobalSearch, object: nil)
@@ -80,8 +87,20 @@ struct updocApp: App {
         }
         
         Settings {
-            SettingsView(onDone: nil)
-                .environment(themeManager)
+            SettingsView(onAddRule: {
+                print("onAddRule called in app Settings")
+                let context = ModelContext(container)
+                let newRule = TemplateRule(attribute: .title, pattern: "1:1", templateContent: "# 1:1 w/ {{title}}\n\n## Discussion\n- ")
+                context.insert(newRule)
+                do {
+                    try context.save()
+                    print("Rule saved successfully in app Settings")
+                } catch {
+                    print("Failed to save rule in app Settings: \(error.localizedDescription)")
+                }
+            }, onDone: nil)
+            .environment(themeManager)
+            .modelContainer(container)
         }
     }
 }

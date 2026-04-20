@@ -6,10 +6,14 @@ struct SettingsView: View {
     enum Tab {
         case credentials
         case editor
+        case templates
         case themes
     }
     
     @State private var selectedTab: Tab = .credentials
+    @Environment(\.modelContext) private var modelContext
+    
+    var onAddRule: () -> Void
     
     // Credentials State
     @State private var clientID = ""
@@ -37,6 +41,9 @@ struct SettingsView: View {
                 ToolbarButton(title: "Editor", icon: "square.and.pencil", isSelected: selectedTab == .editor) {
                     selectedTab = .editor
                 }
+                ToolbarButton(title: "Templates", icon: "doc.text.magnifyingglass", isSelected: selectedTab == .templates) {
+                    selectedTab = .templates
+                }
                 ToolbarButton(title: "Themes", icon: "paintbrush.fill", isSelected: selectedTab == .themes) {
                     selectedTab = .themes
                 }
@@ -54,6 +61,9 @@ struct SettingsView: View {
                     credentialsPane
                 case .editor:
                     editorPane
+                case .templates:
+                    RuleManagerView(showNavigation: false, onAddRule: onAddRule)
+                        .environment(\.modelContext, modelContext)
                 case .themes:
                     themesPane
                 }

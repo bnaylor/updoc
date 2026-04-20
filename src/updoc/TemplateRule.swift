@@ -9,7 +9,7 @@ public enum RuleAttribute: String, Codable, CaseIterable {
 
 @Model
 public class TemplateRule {
-    @Attribute(.unique) public var id: UUID
+    public var id: UUID
     public var attribute: RuleAttribute
     public var pattern: String
     public var templateContent: String

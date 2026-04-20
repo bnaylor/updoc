@@ -52,214 +52,7 @@ struct ContentView: View {
                     }
         
         } detail: {
-            Group {
-                if let note = selectedNote {
-                    VStack(spacing: 0) {
-                    HStack {
-                        TextField("Note Title", text: Binding(
-                            get: { note.title },
-                            set: { note.title = $0 }
-                        ))
-                        .font(.headline)
-                        .textFieldStyle(.plain)
-                        .focused($isTitleFocused)
-                        .onSubmit {
-                            NotificationCenter.default.post(name: .focusEditor, object: nil)
-                        }
-                        
-                        if isSyncing {
-                            ProgressView()
-                                .controlSize(.small)
-                                .padding(.leading, 8)
-                        }
-                        
-                        Spacer()
-                        
-                        if let _ = note.googleDocId {
-                            Button(action: { openInBrowser() }) {
-                                Label("Open in Google Docs", systemImage: "arrow.up.right.square")
-                            }
-                            .help("Open linked Google Doc in browser")
-                            
-                            Button(action: { triggerSync(for: note) }) {
-                                Label(
-                                    title: { Text(liveSyncManager.isFastPolling ? "Receiving Edits..." : "Sync Now") },
-                                    icon: {
-                                        Image(systemName: "arrow.triangle.2.circlepath")
-                                            .foregroundStyle(liveSyncManager.isFastPolling ? .green : .primary)
-                                            .symbolEffect(.pulse, options: .repeating, isActive: liveSyncManager.isFastPolling)
-                                    }
-                                )
-                            }
-                            .disabled(isSyncing || !AuthManager.shared.isAuthenticated())
-                            .keyboardShortcut("s", modifiers: .command)
-                            .help("Sync changes with Google Docs (Cmd+S)")                        } else {
-                            Button(action: { publishDraft(note) }) {
-                                Label("Publish to Google Docs", systemImage: "arrow.up.doc.fill")
-                            }
-                            .disabled(isSyncing || !AuthManager.shared.isAuthenticated())
-                            .buttonStyle(.borderedProminent)
-                        }
-                        
-                        Button {
-                            showingInspector.toggle()
-                        } label: {
-                            Image(systemName: "sidebar.right")
-                        }
-                        .buttonStyle(.plain)
-                        .help("Toggle Inspector")
-                        .padding(.leading, 8)
-                    }
-                    .padding(.horizontal)
-                    .padding(.top)
-                    
-                    // Tagging row
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(note.categories, id: \.self) { cat in
-                                HStack(spacing: 4) {
-                                    Text("#\(cat)")
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.secondary)
-                                    Button {
-                                        note.categories.removeAll { $0 == cat }
-                                    } label: {
-                                        Image(systemName: "xmark")
-                                            .font(.system(size: 9, weight: .bold))
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.secondary.opacity(0.15))
-                                .cornerRadius(12)
-                            }
-                            
-                            HStack {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundColor(.secondary)
-                                TextField("Add Tag...", text: $newTagText)
-                                    .textFieldStyle(.plain)
-                                    .font(.caption)
-                                    .frame(width: 80)
-                                    .onSubmit {
-                                        let cleaned = newTagText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                                        if !cleaned.isEmpty && !note.categories.contains(cleaned) {
-                                            note.categories.append(cleaned)
-                                        }
-                                        newTagText = ""
-                                    }
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.secondary.opacity(0.05))
-                            .cornerRadius(12)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 12)
-                    .background(Color(NSColor.windowBackgroundColor))
-                    
-                    if let error = syncError {
-                        Text("Sync Error: \(error)")
-                            .font(.caption)
-                            .foregroundColor(.red)
-                            .padding(.horizontal)
-                    }
-                    
-                    Divider()
-                    
-                    EditorView(text: Binding(
-                        get: { note.content },
-                        set: { note.content = $0 }
-                    ), assetIds: Binding(
-                        get: { note.assetIds },
-                        set: { note.assetIds = $0 }
-                    ), selectionRange: $selectionRange, theme: themeManager.themeName(for: note))
-                    .onAppear {
-                        if note.title == "New Note" && note.content.isEmpty {
-                            isTitleFocused = true
-                        } else {
-                            NotificationCenter.default.post(name: .focusEditor, object: nil)
-                        }
-                    }
-                    .onChange(of: note.id) {
-                        if note.title == "New Note" && note.content.isEmpty {
-                            isTitleFocused = true
-                        } else {
-                            NotificationCenter.default.post(name: .focusEditor, object: nil)
-                        }
-                    }
-                    .onTapGesture {
-                        NotificationCenter.default.post(name: .focusEditor, object: nil)
-                    }
-                }
-                .navigationTitle(note.title)
-                .inspector(isPresented: $showingInspector) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Note Settings")
-                            .font(.headline)
-                            .padding(.bottom, 8)
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Theme")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            Picker("", selection: Binding(
-                                get: { note.themeName ?? "Default" },
-                                set: { note.themeName = $0 == "Default" ? nil : $0 }
-                            )) {
-                                Text("Default").tag("Default")
-                                ForEach(themeManager.allThemeNames, id: \.self) { themeName in
-                                    Text(themeName).tag(themeName)
-                                }
-                            }
-                            .pickerStyle(.menu)
-                        }
-                        
-                        Button("Apply Rules") {
-                            let input = TemplateInput(
-                                title: note.title,
-                                attendees: [],
-                                date: note.createdAt,
-                                location: nil,
-                                description: nil
-                            )
-                            let resolved = templateEngine.resolveTemplate(for: input, rules: templateRules)
-                            
-                            if let themeName = resolved.themeName {
-                                note.themeName = themeName
-                            }
-                            
-                            if note.content.isEmpty || note.content == "# \(note.title)\n\nDate: \(note.createdAt.formatted())\n\n## Notes\n- " {
-                                note.content = resolved.content
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                        .help("Apply template rules based on current title")
-                        
-                        Spacer()
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .inspectorColumnWidth(min: 250, ideal: 280, max: 400)
-                }
-                .onAppear {
-                    let manager = liveSyncManager
-                    if note.googleDocId != nil {
-                        manager.start(for: note)
-                    }
-                }
-            } else {
-                Text("Select a note to begin")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .foregroundColor(.secondary)
-            }
-            }
+            detailView
                 }
             } else {
                 NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -279,7 +72,7 @@ struct ContentView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
-        .modifier(ContentViewSheets(showingRuleManager: $showingRuleManager, showingSettings: $showingSettings, showingThemeSettings: $showingThemeSettings, activeConflict: $activeConflict, modelContext: modelContext, triggerSyncForNote: { triggerSync(for: $0) }))
+        .modifier(ContentViewSheets(showingSettings: $showingSettings, showingThemeSettings: $showingThemeSettings, activeConflict: $activeConflict, modelContext: modelContext, triggerSyncForNote: { triggerSync(for: $0) }))
         .modifier(DeletionConfirmationModifier(deletionManager: $deletionManager, selectedNote: $selectedNote, modelContext: modelContext))
         .overlay {
             if showingCommandPalette {
@@ -379,11 +172,6 @@ struct ContentView: View {
             Command(title: "Sync All Notes", subtitle: "App", shortcut: "⇧⌘S") {
                 Task { @MainActor in
                     syncAllNotes()
-                }
-            },
-            Command(title: "Open Template Rules", subtitle: "App", shortcut: "⌘R") {
-                Task { @MainActor in
-                    showingRuleManager = true
                 }
             }
         ]
@@ -517,6 +305,35 @@ struct ContentView: View {
             }
         }
     }
+    
+    private var detailView: some View {
+        Group {
+            if let note = selectedNote {
+                makeNoteDetailView(note: note)
+            } else {
+                Text("Select a note to begin")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+    
+    private func makeNoteDetailView(note: Note) -> some View {
+        NoteDetailView(
+            note: note,
+            rules: templateRules,
+            isTitleFocused: $isTitleFocused,
+            isSyncing: isSyncing,
+            liveSyncManager: liveSyncManager,
+            syncError: syncError,
+            newTagText: $newTagText,
+            selectionRange: $selectionRange,
+            showingInspector: $showingInspector,
+            triggerSync: { self.triggerSync(for: $0) },
+            openInBrowser: { self.openInBrowser(note: note) },
+            publishDraft: { self.publishDraft($0) }
+        )
+    }
 }
 
 struct DeletionConfirmationModifier: ViewModifier {
@@ -567,6 +384,8 @@ struct DeletionConfirmationModifier: ViewModifier {
             }
         }
     }
+    
+
 }
 
 struct ContentViewReceivers: ViewModifier {
@@ -639,7 +458,6 @@ struct ContentViewReceivers: ViewModifier {
 }
 
 struct ContentViewSheets: ViewModifier {
-    @Binding var showingRuleManager: Bool
     @Binding var showingSettings: Bool
     @Binding var showingThemeSettings: Bool
     @Binding var activeConflict: ContentView.ConflictInfo?
@@ -650,15 +468,24 @@ struct ContentViewSheets: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .sheet(isPresented: $showingRuleManager) {
-                RuleManagerView()
-            }
+
 
             .sheet(isPresented: $showingSettings) {
-                SettingsView {
+                SettingsView(onAddRule: {
+                    print("onAddRule called in ContentView")
+                    let newRule = TemplateRule(attribute: .title, pattern: "1:1", templateContent: "# 1:1 w/ {{title}}\n\n## Discussion\n- ")
+                    modelContext.insert(newRule)
+                    do {
+                        try modelContext.save()
+                        print("Rule saved successfully in ContentView")
+                    } catch {
+                        print("Failed to save rule in ContentView: \(error.localizedDescription)")
+                    }
+                }, onDone: {
                     showingSettings = false
-                }
+                })
                 .environment(themeManager)
+                .modelContainer(modelContext.container)
             }
             .sheet(item: $activeConflict) { info in
                 ConflictResolutionView(local: info.local, remote: info.remote) { resolvedContent in

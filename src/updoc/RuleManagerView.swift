@@ -6,8 +6,44 @@ struct RuleManagerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
+    var showNavigation: Bool = true
+    var onAddRule: () -> Void
+    
     var body: some View {
-        NavigationStack {
+        Group {
+            if showNavigation {
+                NavigationStack {
+                    contentView
+                }
+            } else {
+                contentView
+            }
+        }
+        .frame(minWidth: 400, minHeight: 300)
+        .onAppear {
+            print("RuleManagerView appeared. Rules count: \(rules.count)")
+            do {
+                let descriptor = FetchDescriptor<TemplateRule>()
+                let fetchedRules = try modelContext.fetch(descriptor)
+                print("Manually fetched rules count: \(fetchedRules.count)")
+            } catch {
+                print("Failed to fetch rules manually: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private var contentView: some View {
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Button(action: onAddRule) {
+                    Label("Add Rule", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent)
+                
+                Spacer()
+            }
+            .padding()
+            
             List {
                 ForEach(rules) { rule in
                     VStack(alignment: .leading, spacing: 12) {
@@ -140,25 +176,17 @@ struct RuleManagerView: View {
                 }
             }
             .navigationTitle("Template Rules")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: addDefaultRule) {
-                        Label("Add Rule", systemImage: "plus")
-                    }
-                }
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
         }
-        .frame(minWidth: 400, minHeight: 300)
     }
     
     private func addDefaultRule() {
         let newRule = TemplateRule(attribute: .title, pattern: "1:1", templateContent: "# 1:1 w/ {{title}}\n\n## Discussion\n- ")
         modelContext.insert(newRule)
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save rule: \(error.localizedDescription)")
+        }
     }
     
     private func deleteRules(offsets: IndexSet) {
