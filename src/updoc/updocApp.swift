@@ -128,4 +128,5 @@ extension Notification.Name {
     static let noRemoteEditDetected = Notification.Name("noRemoteEditDetected")
     static let clearMeetingSelection = Notification.Name("clearMeetingSelection")
     static let treeNeedsRefresh = Notification.Name("treeNeedsRefresh")
+    static let meetingNoteCreated = Notification.Name("meetingNoteCreated")
 }

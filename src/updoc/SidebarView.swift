@@ -19,15 +19,16 @@ struct SidebarView: View {
     private let templateEngine = SmartTemplateEngine()
     
     var body: some View {
-        List {
-            categoriesSection
-            meetingsSection
+        VStack(alignment: .leading, spacing: 0) {
+            headerView
+            
+            List {
+                categoriesSection
+                meetingsSection
+            }
+            .listStyle(.sidebar)
         }
-        .listStyle(.sidebar)
         .navigationTitle("updoc")
-        .toolbar {
-            toolbarItems
-        }
         .onAppear {
             DispatchQueue.main.async {
                 if AuthManager.shared.isAuthenticated() {
@@ -138,23 +139,37 @@ struct SidebarView: View {
         }
     }
     
-    private var toolbarItems: some ToolbarContent {
-        ToolbarItem(placement: .primaryAction) {
-            HStack {
-                if selectedMeetingID != nil {
-                    Button(action: addNote) {
-                        Label("Start Meeting Note", systemImage: "plus.circle.fill")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .help("Create note for selected meeting")
-                } else {
-                    Button(action: addNote) {
-                        Label("Add Note", systemImage: "plus")
-                    }
-                    .help("Add a blank note")
-                }
+    private var headerView: some View {
+        HStack(spacing: 12) {
+            Text("Notes")
+                .font(.headline)
+                .foregroundColor(.secondary)
+            
+            Spacer()
+            
+            Button(action: { addNote() }) {
+                Image(systemName: "square.and.pencil")
+                    .font(.system(size: 14, weight: .medium))
             }
+            .buttonStyle(.plain)
+            .help("New Note")
+            
+            Button(action: { createRootFolder() }) {
+                Image(systemName: "folder.badge.plus")
+                    .font(.system(size: 14, weight: .medium))
+            }
+            .buttonStyle(.plain)
+            .help("New Folder")
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color(NSColor.windowBackgroundColor))
+    }
+    
+    private func createRootFolder() {
+        let newFolder = Folder(name: "New Folder")
+        modelContext.insert(newFolder)
+        NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
     }
     
     private func login() {
@@ -220,6 +235,13 @@ struct SidebarView: View {
         
         modelContext.insert(newNote)
         selectedNote = newNote
+        
+        let calendar = Calendar.current
+        let year = calendar.component(.year, from: meeting.start)
+        let month = calendar.component(.month, from: meeting.start)
+        let day = calendar.component(.day, from: meeting.start)
+        
+        NotificationCenter.default.post(name: .meetingNoteCreated, object: nil, userInfo: ["year": year, "month": month, "day": day])
     }
     
     private func extractDocId(from location: String?) -> String? {

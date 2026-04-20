@@ -13,6 +13,7 @@ struct NoteListView: View {
     @State private var expandedFolders: Set<UUID> = []
     @AppStorage("expandedFoldersJSON") private var expandedFoldersJSON = "[]"
     @State private var updateTick = 0
+    @State private var expandedMeetingGroups: Set<String> = []
     
     var body: some View {
         List(selection: $selectedNote) {
@@ -34,16 +35,20 @@ struct NoteListView: View {
                     .foregroundColor(.secondary)
             }
         }
-        .navigationTitle("Workspace")
-        .toolbar {
-            Button(action: { createRootFolder() }) {
-                Label("New Folder", systemImage: "folder.badge.plus")
-            }
-            .help("Create new top-level folder")
-        }
+        .navigationTitle("updoc")
         .onReceive(NotificationCenter.default.publisher(for: .treeNeedsRefresh)) { _ in
             DispatchQueue.main.async {
                 updateTick += 1
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .meetingNoteCreated)) { notification in
+            if let userInfo = notification.userInfo,
+               let year = userInfo["year"] as? Int,
+               let month = userInfo["month"] as? Int,
+               let day = userInfo["day"] as? Int {
+                expandedMeetingGroups.insert("\(year)")
+                expandedMeetingGroups.insert("\(year)-\(month)")
+                expandedMeetingGroups.insert("\(year)-\(month)-\(day)")
             }
         }
         .onAppear {
@@ -84,11 +89,11 @@ struct NoteListView: View {
     @ViewBuilder
     private var meetingNotesSection: some View {
         ForEach(meetingGroups) { yearGroup in
-            DisclosureGroup("\(String(yearGroup.year))") {
+            DisclosureGroup("\(String(yearGroup.year))", isExpanded: binding(for: yearGroup.id)) {
                 ForEach(yearGroup.months) { monthGroup in
-                    DisclosureGroup("\(monthGroup.monthName)") {
+                    DisclosureGroup("\(monthGroup.monthName)", isExpanded: binding(for: monthGroup.id)) {
                         ForEach(monthGroup.days) { dayGroup in
-                            DisclosureGroup("Day \(dayGroup.day)") {
+                            DisclosureGroup("Day \(dayGroup.day)", isExpanded: binding(for: dayGroup.id)) {
                                 ForEach(dayGroup.notes) { note in
                                     NoteRowView(note: note)
                                         .tag(note)
@@ -167,6 +172,19 @@ struct NoteListView: View {
             
             return YearGroup(id: "\(year)", year: year, months: mSorted)
         }.sorted { $0.year > $1.year }
+    }
+    
+    private func binding(for id: String) -> Binding<Bool> {
+        Binding(
+            get: { expandedMeetingGroups.contains(id) },
+            set: { shouldExpand in
+                if shouldExpand {
+                    expandedMeetingGroups.insert(id)
+                } else {
+                    expandedMeetingGroups.remove(id)
+                }
+            }
+        )
     }
 }
 
