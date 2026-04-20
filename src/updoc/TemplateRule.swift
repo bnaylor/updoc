@@ -4,6 +4,7 @@ import SwiftData
 public enum RuleAttribute: String, Codable, CaseIterable {
     case title = "Title"
     case participant = "Participant"
+    case participantCount = "Participant Count"
 }
 
 @Model

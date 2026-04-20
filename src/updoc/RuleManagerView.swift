@@ -10,7 +10,27 @@ struct RuleManagerView: View {
         NavigationStack {
             List {
                 ForEach(rules) { rule in
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "arrow.right.circle.fill")
+                                .foregroundColor(.accentColor)
+                            
+                            Text("Rule")
+                                .font(.headline)
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                if let index = rules.firstIndex(where: { $0.id == rule.id }) {
+                                    modelContext.delete(rules[index])
+                                }
+                            }) {
+                                Image(systemName: "trash")
+                                    .foregroundColor(.red)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        
                         HStack {
                             Picker("IF", selection: Binding(
                                 get: { rule.attribute },
@@ -21,22 +41,62 @@ struct RuleManagerView: View {
                                 }
                             }
                             .pickerStyle(.menu)
-                            .frame(width: 140)
+                            .frame(width: 150)
                             
-                            Text("contains")
-                                .foregroundColor(.secondary)
-                            
-                            TextField("Pattern (e.g., 1:1)", text: Binding(
-                                get: { rule.pattern },
-                                set: { rule.pattern = $0 }
-                            ))
-                            .textFieldStyle(.roundedBorder)
+                            if rule.attribute == .participantCount {
+                                Picker("", selection: Binding(
+                                    get: {
+                                        if rule.pattern.hasPrefix(">") { return ">" }
+                                        if rule.pattern.hasPrefix("<") { return "<" }
+                                        return "=="
+                                    },
+                                    set: { newOp in
+                                        let value = rule.pattern.hasPrefix(">") || rule.pattern.hasPrefix("<") ? String(rule.pattern.dropFirst()) : rule.pattern
+                                        if newOp == "==" {
+                                            rule.pattern = value
+                                        } else {
+                                            rule.pattern = newOp + value
+                                        }
+                                    }
+                                )) {
+                                    Text("is equal to").tag("==")
+                                    Text("is greater than").tag(">")
+                                    Text("is less than").tag("<")
+                                }
+                                .pickerStyle(.menu)
+                                .frame(width: 130)
+                                
+                                TextField("Count", text: Binding(
+                                    get: {
+                                        let pattern = rule.pattern
+                                        if pattern.hasPrefix(">") || pattern.hasPrefix("<") {
+                                            return String(pattern.dropFirst())
+                                        }
+                                        return pattern
+                                    },
+                                    set: { newValue in
+                                        let pattern = rule.pattern
+                                        let op = pattern.hasPrefix(">") ? ">" : (pattern.hasPrefix("<") ? "<" : "")
+                                        rule.pattern = op + newValue
+                                    }
+                                ))
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 60)
+                            } else {
+                                Text("contains")
+                                    .foregroundColor(.secondary)
+                                
+                                TextField("Pattern (e.g., 1:1)", text: Binding(
+                                    get: { rule.pattern },
+                                    set: { rule.pattern = $0 }
+                                ))
+                                .textFieldStyle(.roundedBorder)
+                            }
                         }
                         
                         HStack {
                             Text("Theme:")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.subheadline)
                             
                             Picker("", selection: Binding(
                                 get: { rule.themeName ?? "Default" },
@@ -50,22 +110,34 @@ struct RuleManagerView: View {
                             .pickerStyle(.menu)
                             .frame(width: 150)
                         }
+                        
                         VStack(alignment: .leading, spacing: 4) {
                             Text("THEN apply markdown template:")
-                                .font(.caption)
+                                .font(.subheadline)
                                 .foregroundColor(.secondary)
+                            
                             TextEditor(text: Binding(
                                 get: { rule.templateContent },
                                 set: { rule.templateContent = $0 }
                             ))
                             .font(.system(.caption, design: .monospaced))
-                            .frame(height: 80)
+                            .frame(height: 100)
+                            .padding(4)
+                            .background(Color(NSColor.textBackgroundColor))
+                            .cornerRadius(4)
                             .border(Color.secondary.opacity(0.2))
                         }
+                        
+                        Text("Variables: {{title}}, {{date}}, {{location}}, {{description}}, {{attendees}}")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
-                    .padding(.vertical, 4)
+                    .padding()
+                    .background(Color(NSColor.windowBackgroundColor))
+                    .cornerRadius(8)
+                    .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+                    .padding(.vertical, 6)
                 }
-                .onDelete(perform: deleteRules)
             }
             .navigationTitle("Template Rules")
             .toolbar {

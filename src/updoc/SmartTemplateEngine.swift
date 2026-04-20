@@ -35,6 +35,20 @@ public struct SmartTemplateEngine {
                 if input.attendees.contains(where: { $0.localizedCaseInsensitiveContains(rule.pattern) }) {
                     return ResolvedTemplate(content: apply(template: rule.templateContent, to: input), themeName: rule.themeName)
                 }
+            case .participantCount:
+                if rule.pattern.hasPrefix(">") {
+                    let numberStr = rule.pattern.dropFirst().trimmingCharacters(in: .whitespaces)
+                    if let number = Int(numberStr), input.attendees.count > number {
+                        return ResolvedTemplate(content: apply(template: rule.templateContent, to: input), themeName: rule.themeName)
+                    }
+                } else if rule.pattern.hasPrefix("<") {
+                    let numberStr = rule.pattern.dropFirst().trimmingCharacters(in: .whitespaces)
+                    if let number = Int(numberStr), input.attendees.count < number {
+                        return ResolvedTemplate(content: apply(template: rule.templateContent, to: input), themeName: rule.themeName)
+                    }
+                } else if let count = Int(rule.pattern.trimmingCharacters(in: .whitespaces)), input.attendees.count == count {
+                    return ResolvedTemplate(content: apply(template: rule.templateContent, to: input), themeName: rule.themeName)
+                }
             }
         }
         return ResolvedTemplate(content: defaultTemplate(for: input), themeName: nil)
