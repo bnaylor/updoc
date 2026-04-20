@@ -37,6 +37,16 @@ struct NoteDetailView: View {
                         .padding(.leading, 8)
                 }
                 
+                if note.isReadOnly {
+                    Label("Read-Only", systemImage: "lock.fill")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(Color.secondary.opacity(0.15))
+                        .cornerRadius(4)
+                }
+                
                 Spacer()
                 
                 if let _ = note.googleDocId {
@@ -137,7 +147,7 @@ struct NoteDetailView: View {
             
             Divider()
             
-            EditorView(text: $note.content, assetIds: $note.assetIds, selectionRange: $selectionRange, theme: themeManager.themeName(for: note))
+            EditorView(text: $note.content, assetIds: $note.assetIds, selectionRange: $selectionRange, theme: themeManager.themeName(for: note), isReadOnly: note.isReadOnly)
             .onAppear {
                 if note.title == "New Note" && note.content.isEmpty {
                     isTitleFocused.wrappedValue = true

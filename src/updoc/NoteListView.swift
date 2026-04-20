@@ -197,6 +197,8 @@ struct FolderTreeItem: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showingRenameAlert = false
     @State private var pendingName = ""
+    @State private var showingImportAlert = false
+    @State private var pendingUrl = ""
     
     var isExpanded: Binding<Bool> {
         Binding(
@@ -206,6 +208,50 @@ struct FolderTreeItem: View {
                 else { expandedFolders.remove(folder.id) }
             }
         )
+    }
+    
+    private func importNote(from urlString: String, into folder: Folder) {
+        guard let docId = extractDocId(from: urlString) else {
+            print("Failed to extract Doc ID from URL: \(urlString)")
+            return
+        }
+        
+        Task {
+            do {
+                let syncCoordinator = SyncCoordinator()
+                let (markdown, doc) = try await syncCoordinator.gDocs.fetchDocContent(docId: docId)
+                let metadata = try await syncCoordinator.gDrive.getFileMetadata(fileId: docId)
+                
+                let isReadOnly = !(metadata.capabilities?.canEdit ?? false)
+                
+                await MainActor.run {
+                    let newNote = Note(
+                        title: doc.title,
+                        content: markdown,
+                        googleDocId: docId,
+                        folder: folder,
+                        isReadOnly: isReadOnly
+                    )
+                    modelContext.insert(newNote)
+                    selectedNote = newNote
+                    expandedFolders.insert(folder.id)
+                }
+            } catch {
+                print("Failed to import note: \(error)")
+            }
+        }
+    }
+    
+    private func extractDocId(from urlString: String) -> String? {
+        let pattern = "document/d/([^/]+)"
+        let regex = try? NSRegularExpression(pattern: pattern, options: [])
+        let nsString = urlString as NSString
+        let results = regex?.matches(in: urlString, options: [], range: NSRange(location: 0, length: nsString.length))
+        
+        if let match = results?.first, match.numberOfRanges > 1 {
+            return nsString.substring(with: match.range(at: 1))
+        }
+        return nil
     }
     
     var body: some View {
@@ -242,6 +288,13 @@ struct FolderTreeItem: View {
                         Label("New Subfolder", systemImage: "folder.badge.plus")
                     }
                     
+                    Button {
+                        pendingUrl = ""
+                        showingImportAlert = true
+                    } label: {
+                        Label("Import Note from Drive", systemImage: "arrow.down.doc")
+                    }
+                    
                     Divider()
                     
                     Button {
@@ -262,6 +315,13 @@ struct FolderTreeItem: View {
                     Button("Cancel", role: .cancel) { }
                     Button("Rename") {
                         folder.name = pendingName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
+                .alert("Import Note from Drive", isPresented: $showingImportAlert) {
+                    TextField("Google Doc URL", text: $pendingUrl)
+                    Button("Cancel", role: .cancel) { }
+                    Button("Import") {
+                        importNote(from: pendingUrl, into: folder)
                     }
                 }
         }

@@ -9,6 +9,12 @@ public struct CalendarEvent: Codable, Identifiable, Sendable {
     public let attendees: [String]
     public let eventType: String?
     public let isAllDay: Bool
+    public let attachments: [CalendarAttachment]
+}
+
+public struct CalendarAttachment: Codable, Sendable {
+    public let fileUrl: String
+    public let title: String
 }
 
 struct GCalendarResponse: Codable {
@@ -23,6 +29,12 @@ struct GCalendarEvent: Codable {
     let start: GCalendarTime?
     let attendees: [GCalendarAttendee]?
     let eventType: String?
+    let attachments: [GCalendarAttachment]?
+}
+
+struct GCalendarAttachment: Codable {
+    let fileUrl: String?
+    let title: String?
 }
 
 struct GCalendarTime: Codable {
@@ -82,6 +94,11 @@ public actor GCalendarService {
             
             let isAllDay = gEvent.start?.dateTime == nil && gEvent.start?.date != nil
             
+            let attachments = gEvent.attachments?.compactMap { gAttachment -> CalendarAttachment? in
+                guard let url = gAttachment.fileUrl, let title = gAttachment.title else { return nil }
+                return CalendarAttachment(fileUrl: url, title: title)
+            } ?? []
+            
             return CalendarEvent(
                 id: gEvent.id,
                 summary: gEvent.summary ?? "(No Title)",
@@ -90,7 +107,8 @@ public actor GCalendarService {
                 start: startDate,
                 attendees: gEvent.attendees?.compactMap { $0.email } ?? [],
                 eventType: gEvent.eventType,
-                isAllDay: isAllDay
+                isAllDay: isAllDay,
+                attachments: attachments
             )
         }
     }

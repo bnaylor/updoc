@@ -14,6 +14,11 @@ public struct GDriveFile: Codable {
 public struct GDriveFileMetadata: Codable {
     public let id: String
     public let ownedByMe: Bool
+    public let capabilities: GDriveCapabilities?
+}
+
+public struct GDriveCapabilities: Codable {
+    public let canEdit: Bool
 }
 
 public struct GDriveSearchResponse: Codable {
@@ -168,7 +173,7 @@ public struct GDriveService: Sendable {
 
     public func getFileMetadata(fileId: String) async throws -> GDriveFileMetadata {
         let token = try await AuthManager.shared.getAccessToken()
-        let url = URL(string: "https://www.googleapis.com/drive/v3/files/\(fileId)?fields=id,ownedByMe")!
+        let url = URL(string: "https://www.googleapis.com/drive/v3/files/\(fileId)?fields=id,ownedByMe,capabilities/canEdit")!
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         

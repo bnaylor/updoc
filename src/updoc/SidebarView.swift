@@ -23,6 +23,9 @@ struct SidebarView: View {
         }
     }
     @State private var selectedMeetingID: String? = nil
+    @State private var showingAttachmentAlert = false
+    @State private var pendingAttachment: CalendarAttachment? = nil
+    @State private var pendingMeeting: CalendarEvent? = nil
     private let templateEngine = SmartTemplateEngine()
     
     var body: some View {
@@ -34,6 +37,21 @@ struct SidebarView: View {
                 meetingsSection
             }
             .listStyle(.sidebar)
+            .alert("Linked Note Found", isPresented: $showingAttachmentAlert) {
+                Button("Use Existing") {
+                    if let attachment = pendingAttachment, let meeting = pendingMeeting {
+                        importNote(from: attachment.fileUrl, for: meeting)
+                    }
+                }
+                Button("Create My Own") {
+                    if let meeting = pendingMeeting {
+                        createBlankNote(for: meeting)
+                    }
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("There is already a note linked to this meeting. Do you want to use it, or create your own?")
+            }
         }
         .navigationTitle("updoc")
         .onAppear {
@@ -288,6 +306,17 @@ struct SidebarView: View {
     }
     
     private func startNote(for meeting: CalendarEvent) {
+        if let attachment = meeting.attachments.first {
+            pendingAttachment = attachment
+            pendingMeeting = meeting
+            showingAttachmentAlert = true
+            return
+        }
+        
+        createBlankNote(for: meeting)
+    }
+    
+    private func createBlankNote(for meeting: CalendarEvent) {
         let input = TemplateInput(
             title: meeting.summary,
             attendees: meeting.attendees,
@@ -316,6 +345,41 @@ struct SidebarView: View {
         let day = calendar.component(.day, from: meeting.start)
         
         NotificationCenter.default.post(name: .meetingNoteCreated, object: nil, userInfo: ["year": year, "month": month, "day": day])
+    }
+    
+    private func importNote(from urlString: String, for meeting: CalendarEvent) {
+        guard let docId = extractDocId(from: urlString) else { return }
+        
+        Task {
+            do {
+                let syncCoordinator = SyncCoordinator()
+                let (markdown, doc) = try await syncCoordinator.gDocs.fetchDocContent(docId: docId)
+                let metadata = try await syncCoordinator.gDrive.getFileMetadata(fileId: docId)
+                
+                let isReadOnly = !(metadata.capabilities?.canEdit ?? false)
+                
+                await MainActor.run {
+                    let newNote = Note(
+                        title: doc.title,
+                        content: markdown,
+                        googleDocId: docId,
+                        meetingID: meeting.id,
+                        isReadOnly: isReadOnly
+                    )
+                    modelContext.insert(newNote)
+                    selectedNote = newNote
+                    
+                    let calendar = Calendar.current
+                    let year = calendar.component(.year, from: meeting.start)
+                    let month = calendar.component(.month, from: meeting.start)
+                    let day = calendar.component(.day, from: meeting.start)
+                    
+                    NotificationCenter.default.post(name: .meetingNoteCreated, object: nil, userInfo: ["year": year, "month": month, "day": day])
+                }
+            } catch {
+                print("Failed to import note: \(error)")
+            }
+        }
     }
     
     private func extractDocId(from location: String?) -> String? {

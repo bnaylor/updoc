@@ -105,6 +105,7 @@ struct EditorView: NSViewRepresentable {
     @Binding var assetIds: [String]
     @Binding var selectionRange: NSRange?
     var theme: String
+    var isReadOnly: Bool = false
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
@@ -163,7 +164,7 @@ struct EditorView: NSViewRepresentable {
         }
         textView.font = themeManager.font(for: theme)
         textView.textColor = themeManager.textColor(for: theme)
-        textView.isEditable = true
+        textView.isEditable = !isReadOnly
         textView.isSelectable = true
         textView.isAutomaticQuoteSubstitutionEnabled = false
         textView.isContinuousSpellCheckingEnabled = true

@@ -18,8 +18,9 @@ public class Note {
     public var folder: Folder?
     public var themeName: String?
     public var dragId: String = UUID().uuidString
+    public var isReadOnly: Bool = false
     
-    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], categories: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil, dragId: String = UUID().uuidString, themeName: String? = nil) {
+    public init(title: String, content: String, createdAt: Date = .now, googleDocId: String? = nil, lastSyncedRevision: String? = nil, lastSyncedLocalContent: String? = nil, assetIds: [String] = [], categories: [String] = [], meetingID: String? = nil, isWeeklyLog: Bool = false, weeklyLogId: String? = nil, folder: Folder? = nil, dragId: String = UUID().uuidString, themeName: String? = nil, isReadOnly: Bool = false) {
         self.title = title
         self.content = content
         self.createdAt = createdAt
@@ -34,6 +35,7 @@ public class Note {
         self.folder = folder
         self.dragId = dragId
         self.themeName = themeName
+        self.isReadOnly = isReadOnly
     }
     
     public var stableDragId: String {
