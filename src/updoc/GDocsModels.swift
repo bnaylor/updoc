@@ -74,6 +74,8 @@ public struct GDocsParagraphElement: Codable {
     public let endIndex: Int?
     public let textRun: GDocsTextRun?
     public let inlineObjectElement: GDocsInlineObjectElement?
+    public let person: GDocsPerson?
+    public let richLink: GDocsRichLink?
 }
 
 public struct GDocsInlineObjectElement: Codable {
@@ -83,6 +85,27 @@ public struct GDocsInlineObjectElement: Codable {
 public struct GDocsTextRun: Codable {
     public let content: String?
     public let textStyle: GDocsTextStyle?
+}
+
+public struct GDocsPerson: Codable {
+    public let personId: String
+    public let personProperties: GDocsPersonProperties?
+}
+
+public struct GDocsPersonProperties: Codable {
+    public let name: String?
+    public let email: String?
+}
+
+public struct GDocsRichLink: Codable {
+    public let richLinkId: String
+    public let richLinkProperties: GDocsRichLinkProperties?
+}
+
+public struct GDocsRichLinkProperties: Codable {
+    public let title: String?
+    public let uri: String?
+    public let mimeType: String?
 }
 
 public struct GDocsTextStyle: Codable {

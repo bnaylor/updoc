@@ -289,7 +289,7 @@ public struct GDocsService: Sendable {
                     }
                 }
                 
-                markdown += paragraphPrefix
+                var paragraphText = ""
                 
                 for element in paragraph.elements {
                     if let textRun = element.textRun, let content = textRun.content {
@@ -321,7 +321,7 @@ public struct GDocsService: Sendable {
                             }
                         }
                         
-                        markdown += styledContent
+                        paragraphText += styledContent
                     } else if let inlineObjectElement = element.inlineObjectElement {
                         let objectId = inlineObjectElement.inlineObjectId
                         if let object = doc.inlineObjects?[objectId] {
@@ -329,14 +329,31 @@ public struct GDocsService: Sendable {
                             let description = props.description ?? ""
                             if description.hasPrefix("updoc_asset:") {
                                 let assetId = description.replacingOccurrences(of: "updoc_asset:", with: "")
-                                markdown += "![[\(assetId)]]"
+                                paragraphText += "![[\(assetId)]]"
                             } else if let sourceUri = props.imageProperties?.contentUri {
-                                markdown += "![\(props.title ?? "image")](\(sourceUri))"
+                                paragraphText += "![\(props.title ?? "image")](\(sourceUri))"
                             }
                         }
+                    } else if let person = element.person, let props = person.personProperties {
+                        let name = props.name ?? "Person"
+                        let email = props.email ?? ""
+                        paragraphText += "[@\(name)](mailto:\(email))"
+                    } else if let richLink = element.richLink, let props = richLink.richLinkProperties {
+                        let title = props.title ?? "Link"
+                        let uri = props.uri ?? ""
+                        paragraphText += "[\(title)](\(uri))"
                     }
                 }
-                markdown += paragraphSuffix
+                
+                let trimmedParagraph = paragraphText.trimmingCharacters(in: .newlines)
+                if !trimmedParagraph.isEmpty {
+                    markdown += paragraphPrefix + trimmedParagraph + paragraphSuffix
+                    if paragraph.bullet == nil {
+                        markdown += "\n\n"
+                    } else {
+                        markdown += "\n"
+                    }
+                }
             }
         }
         return markdown

@@ -738,26 +738,19 @@ struct EditorView: NSViewRepresentable {
         }
         
         func insertChip(for match: AutocompleteMatch, in textView: NSTextView) {
-            let attachment = NSTextAttachment()
-            let label: String
-            
+            let replacementText: String
             switch match {
             case .person(let person):
-                label = "@\(person.name)"
+                replacementText = "[@\(person.name)](mailto:\(person.email))"
             case .date(let date):
                 let formatter = DateFormatter()
                 formatter.dateStyle = .medium
-                label = "@\(formatter.string(from: date))"
+                replacementText = "[@\(formatter.string(from: date))](updoc://date)"
             }
             
-            let attributedString = NSMutableAttributedString(attachment: attachment)
-            attributedString.addAttribute(.link, value: "updoc://chip", range: NSRange(location: 0, length: attributedString.length))
-            
-            // For now, just insert the label as a placeholder if we don't have full chip UI
-            let chipString = NSAttributedString(string: label, attributes: [
-                .backgroundColor: NSColor.systemBlue.withAlphaComponent(0.2),
+            let chipString = NSAttributedString(string: replacementText, attributes: [
                 .foregroundColor: NSColor.systemBlue,
-                .font: NSFont.boldSystemFont(ofSize: 14)
+                .underlineStyle: NSUnderlineStyle.single.rawValue
             ])
             
             let selectedRange = textView.selectedRange()
@@ -785,9 +778,9 @@ struct EditorView: NSViewRepresentable {
             // Apply Markdown styles sorted by location descending to avoid shifting ranges when we replace text with attachments
             let sortedRanges = ranges.sorted {
                 if $0.range.location != $1.range.location {
-                    return $0.range.location > $1.range.location
+                    return $0.range.location < $1.range.location
                 }
-                return $0.range.length < $1.range.length
+                return $0.range.length > $1.range.length
             }
             for markdownRange in sortedRanges {
                 let styleAttributes = attributes(for: markdownRange.style)
@@ -799,8 +792,7 @@ struct EditorView: NSViewRepresentable {
                 
                 // Hide syntax if the cursor does NOT intersect the full markdownRange
                 let cursorIntersects = NSIntersectionRange(selectedRange, markdownRange.range).length > 0 || 
-                                       (selectedRange.length == 0 && NSLocationInRange(selectedRange.location, markdownRange.range)) ||
-                                       selectedRange.location == markdownRange.range.location + markdownRange.range.length // cursor right after element
+                                       (selectedRange.length == 0 && NSLocationInRange(selectedRange.location, markdownRange.range))
 
                 if !cursorIntersects {
                     for (index, syntaxRange) in markdownRange.syntaxRanges.enumerated() {
@@ -833,6 +825,7 @@ struct EditorView: NSViewRepresentable {
                         }
                         
                         textStorage.addAttributes(hiddenAttributes, range: syntaxRange)
+                        textStorage.removeAttribute(.link, range: syntaxRange)
                     }
                 }
             }
