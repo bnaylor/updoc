@@ -11,6 +11,7 @@ struct ContentView: View {
     }
     
     @State private var selectedNote: Note?
+    @State private var selectedNotes: Set<Note> = []
     @State private var isSyncing = false
     @State private var syncError: String?
     @State private var activeConflict: ConflictInfo?
@@ -47,7 +48,7 @@ struct ContentView: View {
                         CategoryNoteListView(category: category, selectedNote: $selectedNote)
                             .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
                     } else {
-                        NoteListView(selectedNote: $selectedNote)
+                        NoteListView(selectedNotes: $selectedNotes, selectedNote: $selectedNote)
                             .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 400)
                     }
         
@@ -110,6 +111,7 @@ struct ContentView: View {
             showingGlobalSearch: $showingGlobalSearch,
             showingCommandPalette: $showingCommandPalette,
             selectedNote: $selectedNote,
+            selectedNotes: $selectedNotes,
             deletionManager: $deletionManager,
             liveSyncManager: liveSyncManager,
             notes: notes,
@@ -393,6 +395,7 @@ struct ContentViewReceivers: ViewModifier {
     @Binding var showingGlobalSearch: Bool
     @Binding var showingCommandPalette: Bool
     @Binding var selectedNote: Note?
+    @Binding var selectedNotes: Set<Note>
     @Binding var deletionManager: DeletionManager
     var liveSyncManager: LiveSyncManager
     var notes: [Note]
@@ -418,6 +421,8 @@ struct ContentViewReceivers: ViewModifier {
             .onReceive(NotificationCenter.default.publisher(for: .deleteSelectedNote)) { notification in
                 if let n = notification.object as? Note {
                     deletionManager.prepareDeletion(for: n)
+                } else if self.selectedNotes.count > 1 {
+                    NotificationCenter.default.post(name: .deleteMultipleNotes, object: nil)
                 } else if let n = selectedNote {
                     deletionManager.prepareDeletion(for: n)
                 }

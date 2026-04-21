@@ -136,6 +136,7 @@ extension Notification.Name {
     static let openCommandPalette = Notification.Name("openCommandPalette")
     static let focusEditor = Notification.Name("focusEditor")
     static let deleteSelectedNote = Notification.Name("deleteSelectedNote")
+    static let deleteMultipleNotes = Notification.Name("deleteMultipleNotes")
     static let syncNote = Notification.Name("syncNote")
     static let openNoteInBrowser = Notification.Name("openNoteInBrowser")
     static let publishNote = Notification.Name("publishNote")

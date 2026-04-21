@@ -105,6 +105,7 @@ struct SidebarView: View {
                         let importer = BulkImporter(modelContainer: modelContext.container)
                         try await importer.importNotes(from: url)
                         NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
+                        NotificationCenter.default.post(name: .syncAllNotes, object: nil)
                     } catch {
                         await MainActor.run {
                             importErrorMessage = error.localizedDescription

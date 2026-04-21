@@ -4,19 +4,20 @@ import SwiftData
 struct NoteListView: View {
     @Query(sort: \Note.createdAt, order: .reverse) private var notes: [Note]
     @Query(sort: \Folder.name) private var folders: [Folder]
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.modelContext) private var context
+    @Binding var selectedNotes: Set<Note>
     @Binding var selectedNote: Note?
     @Environment(ThemeManager.self) private var themeManager
-    
     @State private var isGeneralExpanded = true
     @State private var isMeetingsExpanded = true
     @State private var expandedFolders: Set<UUID> = []
     @AppStorage("expandedFoldersJSON") private var expandedFoldersJSON = "[]"
     @State private var updateTick = 0
     @State private var expandedMeetingGroups: Set<String> = []
+    @State private var showingDeleteNotesConfirmation = false
     
     var body: some View {
-        List(selection: $selectedNote) {
+        List(selection: $selectedNotes) {
             DisclosureGroup(isExpanded: $isGeneralExpanded) {
                 generalNotesSection
             } label: {
@@ -36,6 +37,43 @@ struct NoteListView: View {
             }
         }
         .navigationTitle("updoc")
+        .onReceive(NotificationCenter.default.publisher(for: .deleteMultipleNotes)) { _ in
+            showingDeleteNotesConfirmation = true
+        }
+        .onChange(of: selectedNotes) { oldVal, newVal in
+            if let first = newVal.first, newVal.count == 1 {
+                selectedNote = first
+            } else if newVal.isEmpty {
+                selectedNote = nil
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                if selectedNotes.count > 1 {
+                    Button(role: .destructive) {
+                        showingDeleteNotesConfirmation = true
+                    } label: {
+                        Label("Delete Selected", systemImage: "trash")
+                    }
+                }
+            }
+        }
+        .alert("Delete Notes", isPresented: $showingDeleteNotesConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                let notesToDelete = selectedNotes
+                selectedNotes.removeAll()
+                selectedNote = nil
+                
+                for note in notesToDelete {
+                    context.delete(note)
+                }
+                try? context.save()
+                NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
+            }
+        } message: {
+            Text("Are you sure you want to delete \(selectedNotes.count) selected notes?")
+        }
         .onReceive(NotificationCenter.default.publisher(for: .treeNeedsRefresh)) { _ in
             DispatchQueue.main.async {
                 updateTick += 1
@@ -76,11 +114,11 @@ struct NoteListView: View {
         let rootNotes = notes.filter { $0.meetingID == nil && !$0.isWeeklyLog && $0.folder == nil }
         
         ForEach(rootFolders) { folder in
-            FolderTreeItem(folder: folder, selectedNote: $selectedNote, expandedFolders: $expandedFolders, updateTick: $updateTick)
+            FolderTreeItem(folder: folder, selectedNotes: $selectedNotes, expandedFolders: $expandedFolders, updateTick: $updateTick)
         }
         
         ForEach(rootNotes) { note in
-            NoteRowView(note: note)
+            NoteRowView(note: note, selectedNotes: $selectedNotes)
                 .tag(note)
         }
     }
@@ -95,14 +133,14 @@ struct NoteListView: View {
                         ForEach(monthGroup.days) { dayGroup in
                             DisclosureGroup("Day \(dayGroup.day)", isExpanded: binding(for: dayGroup.id)) {
                                 ForEach(dayGroup.notes) { note in
-                                    NoteRowView(note: note)
+                                    NoteRowView(note: note, selectedNotes: $selectedNotes)
                                         .tag(note)
                                 }
                             }
                             .dropDestination(for: String.self) { items, _ in
                                 guard let stableId = items.first else { return false }
                                 let descriptor = FetchDescriptor<Note>()
-                                if let allNotes = try? modelContext.fetch(descriptor),
+                                if let allNotes = try? context.fetch(descriptor),
                                    let draggedNote = allNotes.first(where: { $0.stableDragId == stableId }) {
                                     var comps = DateComponents()
                                     comps.year = yearGroup.year
@@ -113,7 +151,7 @@ struct NoteListView: View {
                                         draggedNote.createdAt = newDate
                                         draggedNote.meetingID = draggedNote.meetingID ?? "manual-meeting-\(UUID().uuidString)"
                                         draggedNote.folder = nil
-                                        try? modelContext.save()
+                                        try? context.save()
                                         NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
                                         return true
                                     }
@@ -125,11 +163,12 @@ struct NoteListView: View {
                 }
             }
         }
+
     }
     
     private func createRootFolder() {
         let newFolder = Folder(name: "New Folder")
-        modelContext.insert(newFolder)
+        context.insert(newFolder)
     }
     
     // MARK: - Chronological Groups
@@ -191,10 +230,12 @@ struct NoteListView: View {
 // MARK: - Components
 struct FolderTreeItem: View {
     let folder: Folder
-    @Binding var selectedNote: Note?
+    @Binding var selectedNotes: Set<Note>
     @Binding var expandedFolders: Set<UUID>
     @Binding var updateTick: Int
     @Environment(\.modelContext) private var modelContext
+    @State private var showingDeleteConfirmation = false
+    @State private var folderToDelete: Folder? = nil
     @State private var showingRenameAlert = false
     @State private var pendingName = ""
     @State private var showingImportAlert = false
@@ -208,6 +249,26 @@ struct FolderTreeItem: View {
                 else { expandedFolders.remove(folder.id) }
             }
         )
+    }
+    
+    @MainActor
+    private func countNotesRecursive(folder: Folder) -> Int {
+        var count = folder.notes.count
+        for child in folder.children {
+            count += countNotesRecursive(folder: child)
+        }
+        return count
+    }
+    
+    @MainActor
+    private func deleteFolderRecursive(_ folder: Folder) {
+        for note in folder.notes {
+            self.modelContext.delete(note)
+        }
+        for child in folder.children {
+            deleteFolderRecursive(child)
+        }
+        self.modelContext.delete(folder)
     }
     
     private func importNote(from urlString: String, into folder: Folder) {
@@ -233,7 +294,7 @@ struct FolderTreeItem: View {
                         isReadOnly: isReadOnly
                     )
                     modelContext.insert(newNote)
-                    selectedNote = newNote
+                    selectedNotes = [newNote]
                     expandedFolders.insert(folder.id)
                 }
             } catch {
@@ -257,16 +318,12 @@ struct FolderTreeItem: View {
     var body: some View {
         DisclosureGroup(isExpanded: isExpanded) {
             ForEach(folder.children.sorted { $0.name < $1.name }) { childFolder in
-                FolderTreeItem(folder: childFolder, selectedNote: $selectedNote, expandedFolders: $expandedFolders, updateTick: $updateTick)
+                FolderTreeItem(folder: childFolder, selectedNotes: $selectedNotes, expandedFolders: $expandedFolders, updateTick: $updateTick)
             }
             
             ForEach(folder.notes.sorted { $0.createdAt > $1.createdAt }) { note in
-                NoteRowView(note: note)
+                NoteRowView(note: note, selectedNotes: $selectedNotes)
                     .tag(note)
-                    .onTapGesture {
-                        selectedNote = note
-                        NotificationCenter.default.post(name: .clearMeetingSelection, object: nil)
-                    }
             }
         } label: {
             Label(folder.name, systemImage: "folder")
@@ -274,7 +331,7 @@ struct FolderTreeItem: View {
                     Button {
                         let newNote = Note(title: "New Note", content: "", folder: folder)
                         modelContext.insert(newNote)
-                        selectedNote = newNote
+                        selectedNotes = [newNote]
                         expandedFolders.insert(folder.id)
                     } label: {
                         Label("New Note", systemImage: "square.and.pencil")
@@ -283,7 +340,9 @@ struct FolderTreeItem: View {
                     Button {
                         let child = Folder(name: "New Subfolder", parent: folder)
                         modelContext.insert(child)
+                        try? modelContext.save()
                         expandedFolders.insert(folder.id)
+                        NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
                     } label: {
                         Label("New Subfolder", systemImage: "folder.badge.plus")
                     }
@@ -305,7 +364,15 @@ struct FolderTreeItem: View {
                     }
                     
                     Button(role: .destructive) {
-                        modelContext.delete(folder)
+                        let noteCount = countNotesRecursive(folder: folder)
+                        if noteCount == 0 {
+                            deleteFolderRecursive(folder)
+                            try? modelContext.save()
+                            NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
+                        } else {
+                            folderToDelete = folder
+                            showingDeleteConfirmation = true
+                        }
                     } label: {
                         Label("Delete Folder", systemImage: "trash")
                     }
@@ -324,6 +391,21 @@ struct FolderTreeItem: View {
                         importNote(from: pendingUrl, into: folder)
                     }
                 }
+        }
+        .alert("Delete Folder", isPresented: $showingDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                if let folder = folderToDelete {
+                    deleteFolderRecursive(folder)
+                }
+            }
+        } message: {
+            if let folder = folderToDelete {
+                let count = countNotesRecursive(folder: folder)
+                Text("There are \(count) notes in this folder - delete all?")
+            } else {
+                Text("Are you sure you want to delete this folder?")
+            }
         }
         .onTapGesture {
             NotificationCenter.default.post(name: .clearMeetingSelection, object: nil)
@@ -346,34 +428,51 @@ struct FolderTreeItem: View {
 
 struct NoteRowView: View {
     let note: Note
+    @Binding var selectedNotes: Set<Note>
     @Environment(ThemeManager.self) private var themeManager
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(note.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                
-                Spacer()
-                
-                if note.googleDocId == nil {
-                    Text("DRAFT")
-                        .font(.system(size: 8, weight: .bold))
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 2)
-                        .background(Color.orange.opacity(0.8))
-                        .foregroundColor(.white)
-                        .cornerRadius(4)
+        Button {
+            if NSEvent.modifierFlags.contains(.command) {
+                if selectedNotes.contains(note) {
+                    selectedNotes.remove(note)
+                } else {
+                    selectedNotes.insert(note)
                 }
+            } else {
+                selectedNotes = [note]
             }
-            
-            Text(note.content.prefix(60))
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .lineLimit(1)
+            NotificationCenter.default.post(name: .clearMeetingSelection, object: nil)
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(note.title)
+                        .font(.headline)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    if note.googleDocId == nil {
+                        Text("DRAFT")
+                            .font(.system(size: 8, weight: .bold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(Color.orange.opacity(0.8))
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
+                    }
+                }
+                
+                Text(note.content.prefix(60))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            .padding(.vertical, 2)
+            .contentShape(Rectangle())
+            .draggable(note.stableDragId)
         }
-        .padding(.vertical, 2)
+        .buttonStyle(PlainButtonStyle())
         .contextMenu {
             if let _ = note.googleDocId {
                 Button {
@@ -411,11 +510,15 @@ struct NoteRowView: View {
             }
             Divider()
             Button(role: .destructive) {
-                NotificationCenter.default.post(name: .deleteSelectedNote, object: note)
+                if selectedNotes.contains(note) && selectedNotes.count > 1 {
+                    NotificationCenter.default.post(name: .deleteMultipleNotes, object: Array(selectedNotes))
+                } else {
+                    NotificationCenter.default.post(name: .deleteSelectedNote, object: note)
+                }
             } label: {
-                Label("Delete Note", systemImage: "trash")
+                Label(selectedNotes.contains(note) && selectedNotes.count > 1 ? "Delete Selected Notes" : "Delete Note", systemImage: "trash")
             }
         }
-        .draggable(note.stableDragId)
     }
+
 }
