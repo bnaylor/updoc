@@ -76,6 +76,17 @@ public struct GDocsParagraphElement: Codable {
     public let inlineObjectElement: GDocsInlineObjectElement?
     public let person: GDocsPerson?
     public let richLink: GDocsRichLink?
+    public let dateElement: GDocsDateElement?
+}
+
+public struct GDocsDateElement: Codable {
+    public let dateId: String
+    public let dateElementProperties: GDocsDateElementProperties?
+}
+
+public struct GDocsDateElementProperties: Codable {
+    public let timestamp: String?
+    public let displayText: String?
 }
 
 public struct GDocsInlineObjectElement: Codable {

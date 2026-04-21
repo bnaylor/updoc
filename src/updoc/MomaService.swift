@@ -1,7 +1,7 @@
 // MomaService.swift
 import Foundation
 
-public struct Person: Identifiable, Codable, Sendable {
+public struct Person: Identifiable, Codable, Sendable, Hashable {
     public let id: String
     public let name: String
     public let email: String

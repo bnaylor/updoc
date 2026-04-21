@@ -1,7 +1,7 @@
 // AutocompleteManager.swift
 import Foundation
 
-public enum AutocompleteMatch: Sendable {
+public enum AutocompleteMatch: Sendable, Hashable {
     case person(Person)
     case date(Date)
 }

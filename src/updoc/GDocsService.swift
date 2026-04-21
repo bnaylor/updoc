@@ -342,6 +342,9 @@ public struct GDocsService: Sendable {
                         let title = props.title ?? "Link"
                         let uri = props.uri ?? ""
                         paragraphText += "[\(title)](\(uri))"
+                    } else if let dateElement = element.dateElement, let props = dateElement.dateElementProperties {
+                        let displayText = props.displayText ?? "Date"
+                        paragraphText += "[@\(displayText)](updoc://date)"
                     }
                 }
                 

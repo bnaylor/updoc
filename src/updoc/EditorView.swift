@@ -512,6 +512,8 @@ struct EditorView: NSViewRepresentable {
         private var currentEmojiMatches: [EmojiMatch] = []
         private var currentEmojiQuery: String = ""
         
+        private var autocompleteWindow: NSWindow?
+        
         private func checkForEmojiShortcodes(in textView: NSTextView) {
             let selectedRange = textView.selectedRange()
             guard selectedRange.location > 0 else { return }
@@ -542,31 +544,93 @@ struct EditorView: NSViewRepresentable {
             let selectedRange = textView.selectedRange()
             guard selectedRange.location > 0 else { return nil }
             
-            let text = textView.string as NSString
-            var loc = selectedRange.location - 1
-            var query = ""
+            guard let textStorage = textView.textStorage else { return nil }
             
-            while loc >= 0 {
-                let char = text.substring(with: NSRange(location: loc, length: 1))
-                if char == ":" {
-                    if loc == 0 {
+            let cursorLoc = selectedRange.location
+            let startLoc = max(0, cursorLoc - 20)
+            let scanRange = NSRange(location: startLoc, length: cursorLoc - startLoc)
+            
+            let scanString = textStorage.attributedSubstring(from: scanRange).string
+            
+            if let colonIndex = scanString.range(of: ":", options: .backwards) {
+                let queryRange = Range(uncheckedBounds: (lower: colonIndex.upperBound, upper: scanString.endIndex))
+                let query = String(scanString[queryRange])
+                
+                // Verify no whitespace in query
+                if query.contains(where: { $0.isWhitespace }) { return nil }
+                
+                // Check if preceded by non-alphanumeric
+                let colonIndexInScanString = colonIndex.lowerBound
+                if colonIndexInScanString == scanString.startIndex {
+                    if startLoc == 0 { return query }
+                    let prevCharRange = NSRange(location: startLoc - 1, length: 1)
+                    let prevChar = textStorage.attributedSubstring(from: prevCharRange).string
+                    if let character = prevChar.first, !character.isLetter && !character.isNumber {
                         return query
                     }
-                    let prevChar = text.substring(with: NSRange(location: loc - 1, length: 1))
-                    if let firstScalar = prevChar.unicodeScalars.first {
-                        let char = Character(firstScalar)
-                        if !char.isLetter && !char.isNumber {
-                            return query
-                        }
+                } else {
+                    let prevIndex = scanString.index(before: colonIndexInScanString)
+                    let character = scanString[prevIndex]
+                    if !character.isLetter && !character.isNumber {
+                        return query
                     }
-                    return nil
                 }
-                if char.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    return nil
-                }
-                query = char + query
-                loc -= 1
+                
+                return query
             }
+            
+            return nil
+        }
+        
+        private func detectMentionQuery(in textView: NSTextView) -> String? {
+            let selectedRange = textView.selectedRange()
+            guard selectedRange.location > 0 else { return nil }
+            
+            // Access textStorage to avoid full string bridging copy on huge docs
+            guard let textStorage = textView.textStorage else { return nil }
+            
+            let cursorLoc = selectedRange.location
+            let startLoc = max(0, cursorLoc - 50)
+            let scanRange = NSRange(location: startLoc, length: cursorLoc - startLoc)
+            
+            let scanString = textStorage.attributedSubstring(from: scanRange).string
+            
+            // Search from right to left for '@'
+            if let atIndex = scanString.range(of: "@", options: .backwards) {
+                let queryRange = Range(uncheckedBounds: (lower: atIndex.upperBound, upper: scanString.endIndex))
+                let query = String(scanString[queryRange])
+                
+                // Verify no newline in between
+                if query.contains("\n") { return nil }
+                
+                // Verify allowed characters
+                for character in query {
+                    if !character.isLetter && !character.isNumber && !character.isWhitespace && character != "," {
+                        return nil
+                    }
+                }
+                
+                // Check if '@' is at start or preceded by non-alphanumeric
+                let atIndexInScanString = atIndex.lowerBound
+                if atIndexInScanString == scanString.startIndex {
+                    if startLoc == 0 { return query }
+                    // If startLoc > 0, we need to check character before startLoc in full text
+                    let prevCharRange = NSRange(location: startLoc - 1, length: 1)
+                    let prevChar = textStorage.attributedSubstring(from: prevCharRange).string
+                    if let character = prevChar.first, !character.isLetter && !character.isNumber {
+                        return query
+                    }
+                } else {
+                    let prevIndex = scanString.index(before: atIndexInScanString)
+                    let character = scanString[prevIndex]
+                    if !character.isLetter && !character.isNumber {
+                        return query
+                    }
+                }
+                
+                return query
+            }
+            
             return nil
         }
         
@@ -677,21 +741,15 @@ struct EditorView: NSViewRepresentable {
             let selectedRange = textView.selectedRange()
             guard selectedRange.location > 0 else { return }
             
-            let text = textView.string
-            let lastCharRange = NSRange(location: selectedRange.location - 1, length: 1)
-            let lastChar = (text as NSString).substring(with: lastCharRange)
-            
-            if lastChar == "@" {
+            if let query = detectMentionQuery(in: textView) {
                 autocompleteTask?.cancel()
                 autocompleteTask = Task {
                     do {
-                        // findMatches now includes its own 300ms debounce
-                        let matches = try await autocompleteManager.findMatches(for: "")
-                        if !Task.isCancelled {
-                            showAutocompleteMenu(for: matches, in: textView)
+                        let matches = try await autocompleteManager.findMatches(for: query)
+                        if !Task.isCancelled && !matches.isEmpty {
+                            showAutocompleteWindow(for: matches, in: textView, for: query)
                         }
                     } catch is CancellationError {
-                        // Superseded by a newer task
                     } catch {
                         print("Autocomplete error: \(error)")
                     }
@@ -699,45 +757,62 @@ struct EditorView: NSViewRepresentable {
             }
         }
 
-        private func showAutocompleteMenu(for matches: [AutocompleteMatch], in textView: NSTextView) {
-            let menu = NSMenu(title: "Autocomplete")
-            for match in matches {
-                let title: String
+        private func showAutocompleteWindow(for matches: [AutocompleteMatch], in textView: NSTextView, for query: String) {
+            let items = matches.map { match -> String in
                 switch match {
-                case .person(let person):
-                    title = "Person: \(person.name)"
+                case .person(let person): return "@\(person.name)"
                 case .date(let date):
                     let formatter = DateFormatter()
                     formatter.dateStyle = .medium
-                    title = "Date: \(formatter.string(from: date))"
+                    return "@\(formatter.string(from: date))"
                 }
-                
-                let item = NSMenuItem(title: title, action: #selector(menuItemSelected(_:)), keyEquivalent: "")
-                item.representedObject = match
-                item.target = self
-                menu.addItem(item)
             }
             
-            // Get cursor position in view coordinates
-            let layoutManager = textView.layoutManager!
-            let textContainer = textView.textContainer!
+            let contentView = MentionAutocompleteView(items: items) { [weak self] index in
+                let match = matches[index]
+                let selectedRange = textView.selectedRange()
+                let replaceRange = NSRange(location: selectedRange.location - query.count - 1, length: query.count + 1)
+                self?.insertChip(for: match, in: textView, replaceRange: replaceRange)
+                self?.closeAutocompleteWindow()
+            }
+            
+            if autocompleteWindow == nil {
+                let window = NSWindow(
+                    contentRect: NSRect(x: 0, y: 0, width: 250, height: 150),
+                    styleMask: [.borderless],
+                    backing: .buffered,
+                    defer: false
+                )
+                window.level = .popUpMenu
+                window.isReleasedWhenClosed = false
+                window.ignoresMouseEvents = false
+                window.contentView = NSHostingView(rootView: contentView)
+                autocompleteWindow = window
+            } else {
+                if let hostingView = autocompleteWindow?.contentView as? NSHostingView<MentionAutocompleteView> {
+                    hostingView.rootView = contentView
+                }
+            }
+            
+            // Position window
             let selectedRange = textView.selectedRange()
-            let glyphRange = layoutManager.glyphRange(forCharacterRange: NSRange(location: selectedRange.location - 1, length: 1), actualCharacterRange: nil)
-            let rect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
-            let containerOrigin = textView.textContainerOrigin
-            let menuOrigin = NSPoint(x: rect.minX + containerOrigin.x, y: rect.maxY + containerOrigin.y)
+            let screenRect = textView.firstRect(forCharacterRange: selectedRange, actualRange: nil)
             
-            menu.popUp(positioning: nil, at: menuOrigin, in: textView)
-        }
-
-        @objc private func menuItemSelected(_ sender: NSMenuItem) {
-            guard let match = sender.representedObject as? AutocompleteMatch,
-                  let textView = NSApp.keyWindow?.firstResponder as? NSTextView else { return }
+            var windowFrame = autocompleteWindow!.frame
+            // Place it below the cursor
+            windowFrame.origin = NSPoint(x: screenRect.minX, y: screenRect.minY - windowFrame.height)
+            autocompleteWindow?.setFrame(windowFrame, display: true)
             
-            insertChip(for: match, in: textView)
+            if !(autocompleteWindow?.isVisible ?? false) {
+                autocompleteWindow?.orderFront(nil)
+            }
         }
         
-        func insertChip(for match: AutocompleteMatch, in textView: NSTextView) {
+        private func closeAutocompleteWindow() {
+            autocompleteWindow?.orderOut(nil)
+        }
+        
+        func insertChip(for match: AutocompleteMatch, in textView: NSTextView, replaceRange: NSRange) {
             let replacementText: String
             switch match {
             case .person(let person):
@@ -752,10 +827,6 @@ struct EditorView: NSViewRepresentable {
                 .foregroundColor: NSColor.systemBlue,
                 .underlineStyle: NSUnderlineStyle.single.rawValue
             ])
-            
-            let selectedRange = textView.selectedRange()
-            // Replace the "@" if it was just typed
-            let replaceRange = NSRange(location: selectedRange.location - 1, length: 1)
             
             if textView.shouldChangeText(in: replaceRange, replacementString: chipString.string) {
                 textView.textStorage?.replaceCharacters(in: replaceRange, with: chipString)
