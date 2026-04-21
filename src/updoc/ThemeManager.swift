@@ -422,19 +422,37 @@ public class ThemeManager {
                 .foregroundColor: textColor,
                 .backgroundColor: NSColor.quaternaryLabelColor
             ]
-        case .checklist(let done):
+        case .checklist(let done, let level):
+            let style = NSMutableParagraphStyle()
+            let baseIndent: CGFloat = 20
+            let indentPerLevel: CGFloat = 20
+            style.firstLineHeadIndent = baseIndent + CGFloat(level) * indentPerLevel
+            style.headIndent = style.firstLineHeadIndent + 15
+            
+            var attrs: [NSAttributedString.Key: Any] = [
+                .font: baseFont,
+                .paragraphStyle: style
+            ]
+            
             if done {
-                return [
-                    .strikethroughStyle: NSUnderlineStyle.single.rawValue,
-                    .foregroundColor: NSColor.secondaryLabelColor
-                ]
+                attrs[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+                attrs[.foregroundColor] = NSColor.secondaryLabelColor
             } else {
-                return [.foregroundColor: NSColor.labelColor]
+                attrs[.foregroundColor] = NSColor.labelColor
             }
-        case .bullet:
+            return attrs
+            
+        case .bullet(let level):
+            let style = NSMutableParagraphStyle()
+            let baseIndent: CGFloat = 20
+            let indentPerLevel: CGFloat = 20
+            style.firstLineHeadIndent = baseIndent + CGFloat(level) * indentPerLevel
+            style.headIndent = style.firstLineHeadIndent + 15
+            
             return [
                 .font: baseFont,
-                .foregroundColor: textColor
+                .foregroundColor: textColor,
+                .paragraphStyle: style
             ]
         case .link(let urlString):
             var attrs: [NSAttributedString.Key: Any] = [

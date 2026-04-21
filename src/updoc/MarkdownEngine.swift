@@ -7,8 +7,8 @@ public enum MarkdownStyle: Equatable {
     case underline
     case code
     case link(url: String?)
-    case checklist(done: Bool)
-    case bullet
+    case checklist(done: Bool, level: Int)
+    case bullet(level: Int)
     case image(url: String, title: String?)
     case strikethrough
     case blockquote
@@ -143,13 +143,19 @@ public struct MarkdownEngine {
         // 4. Checklist (e.g., [ ], [x], or √)
         let checklistRegex = try! NSRegularExpression(pattern: "^(\\s*)(\\[[ x]\\]|√)\\s+(.*)$", options: [.anchorsMatchLines])
         checklistRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
-            if let match = match, match.numberOfRanges >= 3 {
+            if let match = match, match.numberOfRanges >= 4 {
+                let spaceRange = match.range(at: 1)
                 let markerRange = match.range(at: 2)
+                
+                let spaces = (text as NSString).substring(with: spaceRange)
+                let level = spaces.count / 2 // Assume 2 spaces per level
+                
                 let marker = (text as NSString).substring(with: markerRange)
                 let done = marker == "[x]" || marker == "√"
+                
                 // Hide the marker plus the trailing space
                 let syntaxRange = NSRange(location: markerRange.location, length: markerRange.length + 1)
-                ranges.append(MarkdownRange(range: match.range, style: .checklist(done: done), syntaxRanges: [syntaxRange]))
+                ranges.append(MarkdownRange(range: match.range, style: .checklist(done: done, level: level), syntaxRanges: [syntaxRange]))
             }
         }
         
@@ -159,6 +165,22 @@ public struct MarkdownEngine {
             if let matchRange = match?.range {
                 let syntaxRange = NSRange(location: matchRange.location, length: 2) // "> "
                 ranges.append(MarkdownRange(range: matchRange, style: .blockquote, syntaxRanges: [syntaxRange]))
+            }
+        }
+        
+        // 7. Bullets (e.g., * Bullet)
+        let bulletRegex = try! NSRegularExpression(pattern: "^(\\s*)[*+-]\\s+(.*)$", options: [.anchorsMatchLines])
+        bulletRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
+            if let matchRange = match?.range, match!.numberOfRanges >= 3 {
+                let spaceRange = match!.range(at: 1)
+                let markerStart = matchRange.location + spaceRange.length
+                
+                let spaces = (text as NSString).substring(with: spaceRange)
+                let level = spaces.count / 2 // Assume 2 spaces per level
+                
+                // Syntax is just bullet character + trailing space
+                let syntaxRange = NSRange(location: markerStart, length: 2)
+                ranges.append(MarkdownRange(range: matchRange, style: .bullet(level: level), syntaxRanges: [syntaxRange]))
             }
         }
         
@@ -221,17 +243,7 @@ public struct MarkdownEngine {
             }
         }
         
-        // 7. Bullets (e.g., * Bullet)
-        let bulletRegex = try! NSRegularExpression(pattern: "^(\\s*)[*+-]\\s+(.*)$", options: [.anchorsMatchLines])
-        bulletRegex.enumerateMatches(in: text, options: [], range: fullRange) { match, _, _ in
-            if let matchRange = match?.range, match!.numberOfRanges >= 3 {
-                let spaceRange = match!.range(at: 1)
-                let markerStart = matchRange.location + spaceRange.length
-                // Syntax is just bullet character + trailing space
-                let syntaxRange = NSRange(location: markerStart, length: 2)
-                ranges.append(MarkdownRange(range: matchRange, style: .bullet, syntaxRanges: [syntaxRange]))
-            }
-        }
+
         
         // Raw URLs (e.g., http://foo.com)
         let rawUrlRegex = try! NSRegularExpression(pattern: "https?://[^\\s]+", options: [])

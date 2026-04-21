@@ -804,15 +804,15 @@ struct EditorView: NSViewRepresentable {
                         // Apply replacement symbol only to the first syntax range of list items
                         if index == 0 {
                             switch markdownRange.style {
-                            case .bullet:
+                            case .bullet(let level):
                                 isListMarker = true
                                 hiddenAttributes[.listMarkerReplacement] = "circle.fill"
-                                let bulletAttributes = attributes(for: .bullet)
+                                let bulletAttributes = attributes(for: .bullet(level: level))
                                 hiddenAttributes[.listMarkerColor] = bulletAttributes[NSAttributedString.Key.foregroundColor] as? NSColor ?? NSColor.systemOrange
-                            case .checklist(let done):
+                            case .checklist(let done, let level):
                                 isListMarker = true
                                 hiddenAttributes[.listMarkerReplacement] = done ? "checkmark.square" : "square"
-                                let bulletAttributes = attributes(for: .bullet)
+                                let bulletAttributes = attributes(for: .bullet(level: level))
                                 hiddenAttributes[.listMarkerColor] = bulletAttributes[NSAttributedString.Key.foregroundColor] as? NSColor ?? NSColor.systemOrange
                             default:
                                 break
