@@ -152,7 +152,7 @@ struct NoteListView: View {
 
     private var meetingGroups: [YearGroup] {
         let calendar = Calendar.current
-        let mNotes = notes.filter { $0.meetingID != nil }
+        let mNotes = notes.filter { !($0.meetingID ?? "").isEmpty }
         
         let yGroup = Dictionary(grouping: mNotes) { calendar.component(.year, from: $0.createdAt) }
         

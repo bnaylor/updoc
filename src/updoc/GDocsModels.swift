@@ -114,9 +114,9 @@ public struct GDocsWeightedFontFamily: Codable {
 }
 
 public struct GDocsLink: Codable {
-    public let url: String
+    public let url: String?
     
-    public init(url: String) {
+    public init(url: String?) {
         self.url = url
     }
 }

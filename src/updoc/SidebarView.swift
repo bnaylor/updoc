@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 public enum NavigationMode: Equatable, Hashable {
     case allNotes
@@ -18,14 +19,43 @@ struct SidebarView: View {
     @State private var allFetchedMeetings: [CalendarEvent] = []
     
     private var filteredMeetings: [CalendarEvent] {
-        allFetchedMeetings.filter { meeting in
+        let fetched = allFetchedMeetings.filter { meeting in
             !shouldFilter(meeting)
         }
+        
+        let notesWithMeetingID = allNotes.filter { !($0.meetingID ?? "").isEmpty }
+        var dummyMeetings: [CalendarEvent] = []
+        
+        for note in notesWithMeetingID {
+            guard let meetingID = note.meetingID else { continue }
+            
+            if !fetched.contains(where: { $0.id == meetingID }) {
+                if !dummyMeetings.contains(where: { $0.id == meetingID }) {
+                    dummyMeetings.append(CalendarEvent(
+                        id: meetingID,
+                        summary: note.title,
+                        description: "Imported Note",
+                        location: nil,
+                        start: note.createdAt,
+                        attendees: [],
+                        eventType: nil,
+                        isAllDay: false,
+                        attachments: []
+                    ))
+                }
+            }
+        }
+        
+        let combined = fetched + dummyMeetings
+        return combined.sorted { $0.start > $1.start }
     }
     @State private var selectedMeetingID: String? = nil
     @State private var showingAttachmentAlert = false
     @State private var pendingAttachment: CalendarAttachment? = nil
     @State private var pendingMeeting: CalendarEvent? = nil
+    @State private var showingFileImporter = false
+    @State private var showingImportError = false
+    @State private var importErrorMessage = ""
     private let templateEngine = SmartTemplateEngine()
     
     var body: some View {
@@ -52,6 +82,47 @@ struct SidebarView: View {
             } message: {
                 Text("There is already a note linked to this meeting. Do you want to use it, or create your own?")
             }
+        }
+        .fileImporter(
+            isPresented: $showingFileImporter,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                
+                let accessing = url.startAccessingSecurityScopedResource()
+                
+                Task {
+                    defer {
+                        if accessing {
+                            url.stopAccessingSecurityScopedResource()
+                        }
+                    }
+                    
+                    do {
+                        let importer = BulkImporter(modelContainer: modelContext.container)
+                        try await importer.importNotes(from: url)
+                        NotificationCenter.default.post(name: .treeNeedsRefresh, object: nil)
+                    } catch {
+                        await MainActor.run {
+                            importErrorMessage = error.localizedDescription
+                            showingImportError = true
+                        }
+                    }
+                }
+            case .failure(let error):
+                print("File selection failed: \(error)")
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .triggerImport)) { _ in
+            showingFileImporter = true
+        }
+        .alert("Import Failed", isPresented: $showingImportError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(importErrorMessage)
         }
         .navigationTitle("updoc")
         .onAppear {

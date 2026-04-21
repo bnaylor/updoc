@@ -30,6 +30,15 @@ public class SyncCoordinator {
         
         guard let note = context.model(for: noteId) as? Note, let docId = note.googleDocId else { return }
         
+        // Re-check permissions
+        do {
+            let metadata = try await gDrive.getFileMetadata(fileId: docId)
+            let canEdit = metadata.capabilities?.canEdit ?? false
+            note.isReadOnly = !canEdit
+        } catch {
+            print("Failed to fetch file metadata for \(docId): \(error)")
+        }
+        
         // Capture local state BEFORE any network calls
         let localContent = note.content
         print("Syncing note \(docId): localContent length = \(localContent.count)")
@@ -43,7 +52,7 @@ public class SyncCoordinator {
             let remoteRev = baseDoc.revisionId ?? ""
             print("Syncing note \(docId): remoteContent length = \(remoteContent.count), revision = \(remoteRev)")
             
-            let isLocalUnchanged = (note.lastSyncedLocalContent == localContent)
+            let isLocalUnchanged = (note.lastSyncedLocalContent ?? "") == localContent
             let isRemoteUnchanged = (note.lastSyncedRevision == remoteRev)
             
             if isLocalUnchanged && !isRemoteUnchanged {

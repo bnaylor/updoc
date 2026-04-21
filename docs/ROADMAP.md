@@ -16,23 +16,25 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
 - [x] **Hierarchical Organization**: 
   - Full drag-and-drop file/folder nesting for General notes mirroring the UI to the filesystem and Google Drive.
   - Self-organizing `YYYY-MM-DD` tree structure for Meeting Notes.
-- [ ] **Smart Templates**: First-class UI for managing and automatically applying structure (e.g. distinct 1:1 meeting formats).
+- [x] **Smart Templates**: First-class UI for managing and automatically applying structure (e.g. distinct 1:1 meeting formats).
 - [x] **Category Tags**: Interactive tagging to cleanly slice documents.
-- [ ] **Code Syntax Highlighting**: Advanced color rules for code blocks in the editor.
+- [x] **More Markdown Support**: `code`, code blocks, blockquote, horizonal rule, highlight, bold & italic, strikethrough, emojis
+- [x] **Theme Granularity**: Extend theme support to allow defining colors and styles for all markdown elements.
+- [x] **Code Syntax Highlighting**: Advanced color rules for code blocks in the editor.
 - [ ] **Sharpei Linkage**: Right click integration to instantly pipe actionable items to a Sharpei task.
+- [ ] Import notes and external doc links from gNotebooks
 
 ## P2: Polish & Scaling
 - [ ] **Apple Ecosystem Integration (AppIntents)**:
   - Enable deep integration with Siri, Spotlight, and Widgets.
   - Allow users to "Sync all notes" or "Create new note" via Siri Shortcuts.
   - Expose note metadata to Spotlight for system-wide search.
-- [ ] **Smart Filtering for Calendar Events**:
+- [x] **Smart Filtering for Calendar Events**:
   - Automatically filter out non-meeting events (e.g., "Lunch", "Exercise", "Work Location") to reduce sidebar clutter.
   - Allow users to define custom "Ignore" keywords.
-- [ ] **Multi-account Support**: Allow syncing with multiple Google Workspace accounts.
 - [ ] **Advanced Markdown Support**: Tables, footnotes, and advanced formatting.
-- [ ] **External Doc Aliasing**: Link external complex web docs inline, potentially rendering as a simple pointer or iframe.
+- [x] **External Doc Aliasing**: Link external complex web docs inline, potentially rendering as a simple pointer or iframe.
 - [ ] **Embedded Gemini Assist**: Integrate direct AI summarization tools.
 
 ## Tech Debt & Refactoring
-- [ ] **Rule Editor UX**: Rethink what happens when you click "Add Rule" in the rule editor to make it more intuitive.
+- [x] **Rule Editor UX**: Rethink what happens when you click "Add Rule" in the rule editor to make it more intuitive.

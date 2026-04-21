@@ -40,6 +40,12 @@ struct updocApp: App {
                 .keyboardShortcut("n", modifiers: .command)
             }
             
+            CommandGroup(replacing: .importExport) {
+                Button("Import Notes from JSON...") {
+                    NotificationCenter.default.post(name: .triggerImport, object: nil)
+                }
+            }
+            
             CommandGroup(replacing: .pasteboard) {
                 Button("Cut") { NSApp.sendAction(#selector(NSText.cut(_:)), to: nil, from: nil) }
                     .keyboardShortcut("x", modifiers: .command)
@@ -138,6 +144,7 @@ extension Notification.Name {
     static let remoteEditDetected = Notification.Name("remoteEditDetected")
     static let noRemoteEditDetected = Notification.Name("noRemoteEditDetected")
     static let clearMeetingSelection = Notification.Name("clearMeetingSelection")
+    static let triggerImport = Notification.Name("triggerImport")
     static let treeNeedsRefresh = Notification.Name("treeNeedsRefresh")
     static let meetingNoteCreated = Notification.Name("meetingNoteCreated")
 }
