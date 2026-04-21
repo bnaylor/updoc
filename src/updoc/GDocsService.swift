@@ -253,8 +253,15 @@ public struct GDocsService: Sendable {
     
     private func convertToMarkdown(_ doc: GDocsDocument) -> String {
         var markdown = ""
+        var wasPreviousBullet = false
         for element in doc.body.content {
             if let paragraph = element.paragraph {
+                let isBullet = paragraph.bullet != nil
+                
+                if wasPreviousBullet && !isBullet {
+                    markdown += "\n"
+                }
+                
                 var paragraphPrefix = ""
                 let paragraphSuffix = ""
                 
@@ -357,6 +364,7 @@ public struct GDocsService: Sendable {
                         markdown += "\n"
                     }
                 }
+                wasPreviousBullet = isBullet
             }
         }
         return markdown
