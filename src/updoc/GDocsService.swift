@@ -35,6 +35,8 @@ public struct GDocsService: Sendable {
             throw NSError(domain: "GDocsService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Failed to fetch doc: \(errorBody)"])
         }
         
+
+        
         let doc = try JSONDecoder().decode(GDocsDocument.self, from: data)
         return (markdown: convertToMarkdown(doc), document: doc)
     }
@@ -280,7 +282,7 @@ public struct GDocsService: Sendable {
                     var isCheckbox = false
                     if let nestingLevels = list.listProperties?.nestingLevels, nestingLevel < nestingLevels.count {
                         let levelInfo = nestingLevels[nestingLevel]
-                        if levelInfo.glyphType == nil && levelInfo.glyphFormat == "[%0]" { // Simplistic checkbox check, Google Docs can be weird
+                        if levelInfo.glyphType == "GLYPH_TYPE_UNSPECIFIED" || (levelInfo.glyphType == nil && levelInfo.glyphFormat == "[%0]") { // Checkboxes can be UNSPECIFIED or custom format
                             isCheckbox = true
                         } else if let textStyle = bullet.textStyle, textStyle.strikethrough == true { // Completed checklist item is often struck through
                             isCheckbox = true
@@ -289,7 +291,13 @@ public struct GDocsService: Sendable {
                     
                     // Also check for explicit checkboxes if available in a future API, but for now rely on bullet presets
                     if isCheckbox {
-                        let isDone = bullet.textStyle?.strikethrough == true
+                        var isDone = false
+                        for el in paragraph.elements {
+                            if let textRun = el.textRun, textRun.textStyle?.strikethrough == true {
+                                isDone = true
+                                break
+                            }
+                        }
                         paragraphPrefix = indentation + (isDone ? "[x] " : "[ ] ")
                     } else {
                         paragraphPrefix = indentation + "* "
