@@ -123,6 +123,13 @@ struct updocApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        if let url = Bundle.main.url(forResource: "updoc", withExtension: "jpeg"),
+           let image = NSImage(contentsOfFile: url.path) {
+            NSApp.applicationIconImage = image
+        }
+    }
+    
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
     }

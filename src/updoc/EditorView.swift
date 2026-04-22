@@ -297,6 +297,19 @@ struct EditorView: NSViewRepresentable {
             self.lastSentText = nil
         }
 
+        func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+            if commandSelector == #selector(NSResponder.insertTab(_:)) {
+                if handleListBehavior(keyCode: 48, modifierFlags: [], in: textView) {
+                    return true
+                }
+            } else if commandSelector == #selector(NSResponder.insertBacktab(_:)) {
+                if handleListBehavior(keyCode: 48, modifierFlags: [.shift], in: textView) {
+                    return true
+                }
+            }
+            return false
+        }
+
         func openEditor(for attachment: RemoteImageAttachment) {
             self.editingAttachment = attachment
             if let textView = self.textView {
@@ -692,6 +705,12 @@ struct EditorView: NSViewRepresentable {
         }
         
         public func handleKeyDown(with event: NSEvent) -> Bool {
+            if let textView = self.textView {
+                if handleListBehavior(keyCode: event.keyCode, modifierFlags: event.modifierFlags, in: textView) {
+                    return true
+                }
+            }
+
             guard let emojiWindow = emojiWindow, emojiWindow.isVisible else { return false }
             
             switch event.keyCode {
@@ -721,6 +740,106 @@ struct EditorView: NSViewRepresentable {
             default:
                 break
             }
+            return false
+        }
+        
+        private func handleListBehavior(keyCode: UInt16, modifierFlags: NSEvent.ModifierFlags, in textView: NSTextView) -> Bool {
+            guard keyCode == 36 || keyCode == 51 || keyCode == 48 else { return false } // Return, Backspace, or Tab
+            
+            let selectedRange = textView.selectedRange()
+            guard let textStorage = textView.textStorage else { return false }
+            
+            let text = textStorage.string as NSString
+            let lineRange = text.lineRange(for: NSRange(location: selectedRange.location, length: 0))
+            let line = text.substring(with: lineRange)
+            
+            // Check if line is a bulleted list item
+            let pattern = "^(\\s*)([*+-])(\\s+)(.*)"
+            let regex = try? NSRegularExpression(pattern: pattern, options: [])
+            let nsString = line as NSString
+            let results = regex?.matches(in: line, options: [], range: NSRange(location: 0, length: nsString.length))
+            
+            guard let match = results?.first else { return false }
+            
+            let indentRange = match.range(at: 1)
+            let markerRange = match.range(at: 2)
+            let spaceRange = match.range(at: 3)
+            let contentRange = match.range(at: 4)
+            
+            let indent = nsString.substring(with: indentRange)
+            let marker = nsString.substring(with: markerRange)
+            let content = nsString.substring(with: contentRange)
+            
+            if keyCode == 36 { // Return
+                // First enter: Create new line with same indent
+                // Subsequent enter: Decrease indent
+                // No bullet left -> remove bullet
+                
+                if content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    // Empty content on line
+                    if indent.isEmpty {
+                        // No indent, remove bullet
+                        let absoluteRange = NSRange(location: lineRange.location, length: lineRange.length)
+                        if textView.shouldChangeText(in: absoluteRange, replacementString: "") {
+                            textView.insertText("", replacementRange: absoluteRange)
+                            return true
+                        }
+                    } else {
+                        // Decrease indent
+                        let absoluteRange = NSRange(location: lineRange.location, length: lineRange.length)
+                        let newIndent = String(indent.dropLast(4)) // Assume 4 spaces per level
+                        let newLine = "\(newIndent)\(marker) "
+                        if textView.shouldChangeText(in: absoluteRange, replacementString: newLine) {
+                            textView.insertText(newLine, replacementRange: absoluteRange)
+                            return true
+                        }
+                    }
+                } else {
+                    // Content exists, normal return (but with auto-indent)
+                    let absoluteRange = NSRange(location: selectedRange.location, length: 0)
+                    let newLine = "\n\(indent)\(marker) "
+                    if textView.shouldChangeText(in: absoluteRange, replacementString: newLine) {
+                        textView.insertText(newLine, replacementRange: absoluteRange)
+                        return true
+                    }
+                }
+            } else if keyCode == 48 { // Tab
+                // Tab on empty bullet: Increase bullet indent
+                // Shift+Tab: Decrease indent
+                
+                if content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    let absoluteRange = NSRange(location: lineRange.location, length: lineRange.length)
+                    if modifierFlags.contains(.shift) { // Shift+Tab
+                        if !indent.isEmpty {
+                            let newIndent = String(indent.dropLast(4))
+                            let newLine = "\(newIndent)\(marker) "
+                            if textView.shouldChangeText(in: absoluteRange, replacementString: newLine) {
+                                textView.insertText(newLine, replacementRange: absoluteRange)
+                                return true
+                            }
+                        }
+                    } else { // Tab
+                        let newIndent = indent + "    " // Assume 4 spaces per level
+                        let newLine = "\(newIndent)\(marker) "
+                        if textView.shouldChangeText(in: absoluteRange, replacementString: newLine) {
+                            textView.insertText(newLine, replacementRange: absoluteRange)
+                            return true
+                        }
+                    }
+                }
+            } else if keyCode == 51 { // Backspace
+                // Backspace with no text: Remove bullets and indentation
+                // Backspace with text: normal behavior
+                
+                if content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    let absoluteRange = NSRange(location: lineRange.location, length: lineRange.length)
+                    if textView.shouldChangeText(in: absoluteRange, replacementString: "") {
+                        textView.insertText("", replacementRange: absoluteRange)
+                        return true
+                    }
+                }
+            }
+            
             return false
         }
         

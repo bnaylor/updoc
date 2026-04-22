@@ -463,10 +463,7 @@ struct NoteRowView: View {
                     }
                 }
                 
-                Text(note.content.prefix(60))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+
             }
             .padding(.vertical, 2)
             .contentShape(Rectangle())

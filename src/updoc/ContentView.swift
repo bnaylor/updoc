@@ -282,11 +282,38 @@ struct ContentView: View {
             do {
                 // 1. Get/Create Folder Structure
                 let rootFolder = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: "updoc")
-                let subfolderName = note.meetingID != nil ? "Meetings" : "General"
-                let subfolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: subfolderName, parentId: rootFolder)
+                let leafFolderId: String
+                
+                if note.meetingID != nil {
+                    let meetingsFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: "Meetings", parentId: rootFolder)
+                    
+                    let calendar = Calendar.current
+                    let year = calendar.component(.year, from: note.createdAt)
+                    let month = calendar.component(.month, from: note.createdAt)
+                    let day = calendar.component(.day, from: note.createdAt)
+                    
+                    let yearFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: String(year), parentId: meetingsFolderId)
+                    let monthFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: String(format: "%02d", month), parentId: yearFolderId)
+                    leafFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: String(format: "%02d", day), parentId: monthFolderId)
+                } else {
+                    let generalFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: "General", parentId: rootFolder)
+                    
+                    var currentFolderId = generalFolderId
+                    var folderPath: [String] = []
+                    var currentFolder = note.folder
+                    while let folder = currentFolder {
+                        folderPath.insert(folder.name, at: 0)
+                        currentFolder = folder.parent
+                    }
+                    
+                    for folderName in folderPath {
+                        currentFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: folderName, parentId: currentFolderId)
+                    }
+                    leafFolderId = currentFolderId
+                }
                 
                 // 2. Create Doc
-                let docId = try await Self.syncCoordinator.gDrive.createDoc(name: note.title, parentId: subfolderId)
+                let docId = try await Self.syncCoordinator.gDrive.createDoc(name: note.title, parentId: leafFolderId)
                 
                 // 3. Link and Initial Sync
                 await MainActor.run {
