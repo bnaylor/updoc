@@ -20,10 +20,10 @@ struct SidebarView: View {
     
     private var filteredMeetings: [CalendarEvent] {
         let fetched = allFetchedMeetings.filter { meeting in
-            !shouldFilter(meeting)
+            !shouldFilter(meeting) && Calendar.current.isDateInToday(meeting.start)
         }
         
-        let notesWithMeetingID = allNotes.filter { !($0.meetingID ?? "").isEmpty }
+        let notesWithMeetingID = allNotes.filter { !($0.meetingID ?? "").isEmpty && Calendar.current.isDateInToday($0.createdAt) }
         var dummyMeetings: [CalendarEvent] = []
         
         for note in notesWithMeetingID {
@@ -47,7 +47,7 @@ struct SidebarView: View {
         }
         
         let combined = fetched + dummyMeetings
-        return combined.sorted { $0.start > $1.start }
+        return combined.sorted { $0.start < $1.start }
     }
     @State private var selectedMeetingID: String? = nil
     @State private var showingAttachmentAlert = false

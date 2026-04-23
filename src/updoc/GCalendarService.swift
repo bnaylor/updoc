@@ -59,6 +59,7 @@ public actor GCalendarService {
         let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
         
         let formatter = ISO8601DateFormatter()
+        formatter.timeZone = Calendar.current.timeZone
         let timeMin = formatter.string(from: startOfDay)
         let timeMax = formatter.string(from: endOfDay)
         
