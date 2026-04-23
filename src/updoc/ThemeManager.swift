@@ -455,6 +455,15 @@ public class ThemeManager {
                 .paragraphStyle: style
             ]
         case .link(let urlString):
+            if let urlString = urlString, urlString.hasPrefix("updoc://") {
+                return [
+                    .foregroundColor: NSColor.labelColor,
+                    NSAttributedString.Key("smartChip"): true,
+                    NSAttributedString.Key("smartChipColor"): NSColor.systemOrange,
+                    NSAttributedString.Key("smartChipURL"): urlString
+                ]
+            }
+            
             var attrs: [NSAttributedString.Key: Any] = [
                 .foregroundColor: NSColor.systemBlue,
                 .underlineStyle: NSUnderlineStyle.single.rawValue

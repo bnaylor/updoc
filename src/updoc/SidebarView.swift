@@ -293,9 +293,9 @@ struct SidebarView: View {
                 let fetchedMeetings = try await GCalendarService.shared.fetchTodaysEvents()
                 
                 // Scrape contacts from attendees
-                let emails = fetchedMeetings.flatMap { $0.attendees }
+                let participants = fetchedMeetings.flatMap { $0.attendees }
                 let manager = AddressBookManager(modelContainer: modelContext.container)
-                try? await manager.addContacts(emails: emails)
+                try? await manager.addParticipants(participants)
                 
                 await MainActor.run {
                     self.allFetchedMeetings = fetchedMeetings
@@ -330,7 +330,7 @@ struct SidebarView: View {
             }
             
             if let partPat = rule.participantPattern, !partPat.isEmpty {
-                if !meeting.attendees.contains(where: { $0.localizedCaseInsensitiveContains(partPat) }) {
+                if !meeting.attendees.contains(where: { $0.email.localizedCaseInsensitiveContains(partPat) || ($0.name?.localizedCaseInsensitiveContains(partPat) ?? false) }) {
                     matchesAll = false
                 }
             }
@@ -397,7 +397,7 @@ struct SidebarView: View {
     private func createBlankNote(for meeting: CalendarEvent) {
         let input = TemplateInput(
             title: meeting.summary,
-            attendees: meeting.attendees,
+            attendees: meeting.attendees.map { $0.email },
             date: meeting.start,
             location: meeting.location,
             description: meeting.description

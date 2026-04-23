@@ -10,6 +10,7 @@ struct ContactAutocompleteView: View {
     let items: [AutocompleteItem]
     let selectedIndex: Int
     let onSelect: (AutocompleteMatch) -> Void
+    let onAddNewContact: () -> Void
     
     var body: some View {
         let selectedItemId = selectedIndex < items.count ? items[selectedIndex].id : nil
@@ -43,6 +44,21 @@ struct ContactAutocompleteView: View {
                     onSelect(item.match)
                 }
                 Divider()
+            }
+            
+            HStack {
+                Image(systemName: "person.badge.plus")
+                    .foregroundColor(.accentColor)
+                Text("Add New Contact...")
+                    .font(.headline)
+                    .foregroundColor(.accentColor)
+                Spacer()
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal, 8)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                onAddNewContact()
             }
         }
         .frame(width: 250)

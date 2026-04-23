@@ -83,5 +83,30 @@ class EditorLayoutManager: NSLayoutManager {
                 path.stroke()
             }
         }
+        
+        textStorage.enumerateAttribute(NSAttributedString.Key("smartChip"), in: charRange, options: []) { value, range, _ in
+            if value != nil {
+                let glyphRange = self.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+                guard glyphsToShow.contains(glyphRange.location) else { return }
+                
+                let color = textStorage.attribute(NSAttributedString.Key("smartChipColor"), at: range.location, effectiveRange: nil) as? NSColor ?? .controlAccentColor
+                
+                let textContainer = self.textContainers.first!
+                let rect = self.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+                var drawRect = rect.offsetBy(dx: origin.x, dy: origin.y)
+                
+                // Add some padding around text
+                drawRect = drawRect.insetBy(dx: -4, dy: -2)
+                
+                let path = NSBezierPath(roundedRect: drawRect, xRadius: 4, yRadius: 4)
+                
+                color.withAlphaComponent(0.2).setFill()
+                path.fill()
+                
+                color.setStroke()
+                path.lineWidth = 1.0
+                path.stroke()
+            }
+        }
     }
 }
