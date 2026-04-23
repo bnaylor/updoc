@@ -291,6 +291,12 @@ struct SidebarView: View {
         Task {
             do {
                 let fetchedMeetings = try await GCalendarService.shared.fetchTodaysEvents()
+                
+                // Scrape contacts from attendees
+                let emails = fetchedMeetings.flatMap { $0.attendees }
+                let manager = AddressBookManager(modelContainer: modelContext.container)
+                try? await manager.addContacts(emails: emails)
+                
                 await MainActor.run {
                     self.allFetchedMeetings = fetchedMeetings
                     // Clear selection if the meeting is no longer in the list

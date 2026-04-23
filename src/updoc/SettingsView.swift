@@ -9,10 +9,12 @@ struct SettingsView: View {
         case templates
         case themes
         case meetingFilter
+        case addressBook
     }
     
     @State private var selectedTab: Tab = .credentials
     @Environment(\.modelContext) private var modelContext
+    @Query private var contacts: [Contact]
     
     var onAddRule: () -> Void
     var onAddFilterRule: () -> Void
@@ -53,6 +55,9 @@ struct SettingsView: View {
                 ToolbarButton(title: "Filters", icon: "line.3.horizontal.decrease.circle", isSelected: selectedTab == .meetingFilter) {
                     selectedTab = .meetingFilter
                 }
+                ToolbarButton(title: "Address Book", icon: "person.text.rectangle", isSelected: selectedTab == .addressBook) {
+                    selectedTab = .addressBook
+                }
                 Spacer()
             }
             .padding()
@@ -75,6 +80,8 @@ struct SettingsView: View {
                 case .meetingFilter:
                     FilterManagerView(onAddFilterRule: onAddFilterRule)
                         .environment(\.modelContext, modelContext)
+                case .addressBook:
+                    addressBookPane
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -269,6 +276,37 @@ struct SettingsView: View {
             }
             .padding()
         }
+    }
+    
+    private var addressBookPane: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Address Book")
+                .font(.headline)
+            
+            Text("Manage your contacts here.")
+                .foregroundColor(.secondary)
+            
+            List(contacts) { contact in
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text(contact.name)
+                            .font(.headline)
+                        Text(contact.email)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                    Button(role: .destructive) {
+                        modelContext.delete(contact)
+                        try? modelContext.save()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding()
     }
     
     // MARK: - Helper Views

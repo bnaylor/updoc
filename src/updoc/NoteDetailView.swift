@@ -14,6 +14,7 @@ struct NoteDetailView: View {
     @Binding var showingInspector: Bool
     
     @Environment(ThemeManager.self) private var themeManager
+    @Environment(\.modelContext) private var modelContext
     private let templateEngine = SmartTemplateEngine()
     
     var triggerSync: (Note) -> Void
@@ -147,7 +148,7 @@ struct NoteDetailView: View {
             
             Divider()
             
-            EditorView(text: $note.content, assetIds: $note.assetIds, selectionRange: $selectionRange, theme: themeManager.themeName(for: note), isReadOnly: note.isReadOnly)
+            EditorView(text: $note.content, assetIds: $note.assetIds, selectionRange: $selectionRange, theme: themeManager.themeName(for: note), isReadOnly: note.isReadOnly, modelContainer: modelContext.container)
             .onAppear {
                 if note.title == "New Note" && note.content.isEmpty {
                     isTitleFocused.wrappedValue = true

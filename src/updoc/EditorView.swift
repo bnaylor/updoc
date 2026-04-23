@@ -2,12 +2,15 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 @preconcurrency import QuickLookUI
+import SwiftData
 
 extension NSAttributedString.Key {
     static let listMarkerReplacement = NSAttributedString.Key("listMarkerReplacement")
     static let listMarkerColor = NSAttributedString.Key("listMarkerColor")
     static let horizontalRule = NSAttributedString.Key("horizontalRule")
     static let horizontalRuleColor = NSAttributedString.Key("horizontalRuleColor")
+    static let smartChip = NSAttributedString.Key("smartChip")
+    static let smartChipColor = NSAttributedString.Key("smartChipColor")
 }
 
 @MainActor
@@ -25,31 +28,29 @@ class EditorTextView: NSTextView {
         super.keyDown(with: event)
     }
     
-    override func menu(for event: NSEvent) -> NSMenu? {
-        let menu = super.menu(for: event) ?? NSMenu()
-        
-        // Context menu items for images can go here.
-        
-        // Find if there's an image at the click location
-        let point = self.convert(event.locationInWindow, from: nil)
-        let index = self.layoutManager?.characterIndex(for: point, in: self.textContainer!, fractionOfDistanceBetweenInsertionPoints: nil)
-        
-        if let index = index, index < self.textStorage?.length ?? 0 {
-            if let attachment = self.textStorage?.attribute(.attachment, at: index, effectiveRange: nil) as? RemoteImageAttachment {
-                menu.addItem(NSMenuItem.separator())
-                let editItem = NSMenuItem(title: "✎ Edit Image...", action: #selector(editImageAction(_:)), keyEquivalent: "")
-                editItem.target = self
-                editItem.representedObject = attachment
-                menu.addItem(editItem)
-            }
-        }
-        
-        return menu
-    }
+
     
     @objc func editImageAction(_ sender: NSMenuItem) {
         if let attachment = sender.representedObject as? RemoteImageAttachment {
             onEditRequested?(attachment)
+        }
+    }
+    
+    @objc func emailAction(_ sender: NSMenuItem) {
+        if let url = sender.representedObject as? URL,
+           let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           let email = components.queryItems?.first(where: { $0.name == "email" })?.value {
+            let mailto = URL(string: "mailto:\(email)")!
+            NSWorkspace.shared.open(mailto)
+        }
+    }
+    
+    @objc func openTeamsAction(_ sender: NSMenuItem) {
+        if let url = sender.representedObject as? URL,
+           let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           let email = components.queryItems?.first(where: { $0.name == "email" })?.value {
+            let teamsURL = URL(string: "https://moma.corp.google.com/person/\(email)")!
+            NSWorkspace.shared.open(teamsURL)
         }
     }
     
@@ -107,6 +108,7 @@ struct EditorView: NSViewRepresentable {
     var theme: String
     var isReadOnly: Bool = false
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
+    var modelContainer: ModelContainer
     @Environment(ThemeManager.self) private var themeManager
     private let engine = MarkdownEngine()
     
@@ -280,21 +282,27 @@ struct EditorView: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        Coordinator(self, modelContainer: modelContainer)
     }
 
     @MainActor
     class Coordinator: NSObject, NSTextViewDelegate, @preconcurrency QLPreviewPanelDataSource, @preconcurrency QLPreviewPanelDelegate {
         var parent: EditorView
         var lastSentText: String?
-        private let autocompleteManager = AutocompleteManager()
+        private let autocompleteManager: AutocompleteManager
+        private let addressBookManager: AddressBookManager
         private var syncTask: Task<Void, Never>?
         var editingAttachment: RemoteImageAttachment?
         weak var textView: NSTextView?
 
-        init(_ parent: EditorView) {
+        init(_ parent: EditorView, modelContainer: ModelContainer) {
             self.parent = parent
             self.lastSentText = nil
+            let manager = AddressBookManager(modelContainer: modelContainer)
+            self.addressBookManager = manager
+            self.autocompleteManager = AutocompleteManager(searchPeople: { query in
+                return try await manager.searchPeople(query: query)
+            })
         }
 
         func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
@@ -308,6 +316,44 @@ struct EditorView: NSViewRepresentable {
                 }
             }
             return false
+        }
+
+        func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
+            if let url = link as? URL, url.scheme == "updoc" {
+                print("Clicked on updoc link: \(url)")
+                return true
+            }
+            return false
+        }
+
+        func textView(_ textView: NSTextView, menu: NSMenu, for event: NSEvent, at charIndex: Int) -> NSMenu? {
+            if let urlString = textView.textStorage?.attribute(NSAttributedString.Key("smartChipURL"), at: charIndex, effectiveRange: nil) as? String {
+                let url = URL(string: urlString)!
+                
+                let chipMenu = NSMenu()
+                let emailItem = NSMenuItem(title: "✉ Email...", action: #selector(EditorTextView.emailAction(_:)), keyEquivalent: "")
+                emailItem.target = textView
+                emailItem.representedObject = url
+                chipMenu.addItem(emailItem)
+                
+                let teamsItem = NSMenuItem(title: "👥 Open Teams Page", action: #selector(EditorTextView.openTeamsAction(_:)), keyEquivalent: "")
+                teamsItem.target = textView
+                teamsItem.representedObject = url
+                chipMenu.addItem(teamsItem)
+                
+                return chipMenu
+            }
+            
+            if let attachment = textView.textStorage?.attribute(.attachment, at: charIndex, effectiveRange: nil) as? RemoteImageAttachment {
+                menu.addItem(NSMenuItem.separator())
+                let editItem = NSMenuItem(title: "✎ Edit Image...", action: #selector(EditorTextView.editImageAction(_:)), keyEquivalent: "")
+                editItem.target = textView
+                editItem.representedObject = attachment
+                menu.addItem(editItem)
+                return menu
+            }
+            
+            return menu
         }
 
         func openEditor(for attachment: RemoteImageAttachment) {
@@ -877,18 +923,8 @@ struct EditorView: NSViewRepresentable {
         }
 
         private func showAutocompleteWindow(for matches: [AutocompleteMatch], in textView: NSTextView, for query: String) {
-            let items = matches.map { match -> String in
-                switch match {
-                case .person(let person): return "@\(person.name)"
-                case .date(let date):
-                    let formatter = DateFormatter()
-                    formatter.dateStyle = .medium
-                    return "@\(formatter.string(from: date))"
-                }
-            }
-            
-            let contentView = MentionAutocompleteView(items: items) { [weak self] index in
-                let match = matches[index]
+            let items = matches.map { AutocompleteItem(match: $0) }
+            let contentView = ContactAutocompleteView(items: items, selectedIndex: 0) { [weak self] match in
                 let selectedRange = textView.selectedRange()
                 let replaceRange = NSRange(location: selectedRange.location - query.count - 1, length: query.count + 1)
                 self?.insertChip(for: match, in: textView, replaceRange: replaceRange)
@@ -908,7 +944,7 @@ struct EditorView: NSViewRepresentable {
                 window.contentView = NSHostingView(rootView: contentView)
                 autocompleteWindow = window
             } else {
-                if let hostingView = autocompleteWindow?.contentView as? NSHostingView<MentionAutocompleteView> {
+                if let hostingView = autocompleteWindow?.contentView as? NSHostingView<ContactAutocompleteView> {
                     hostingView.rootView = contentView
                 }
             }
@@ -935,7 +971,7 @@ struct EditorView: NSViewRepresentable {
             let replacementText: String
             switch match {
             case .person(let person):
-                replacementText = "[@\(person.name)](mailto:\(person.email))"
+                replacementText = "[@\(person.name)](updoc://person?email=\(person.email))"
             case .date(let date):
                 let formatter = DateFormatter()
                 formatter.dateStyle = .medium

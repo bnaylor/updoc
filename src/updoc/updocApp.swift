@@ -10,7 +10,7 @@ struct updocApp: App {
     
     init() {
         do {
-            container = try ModelContainer(for: Note.self, Folder.self, TemplateRule.self, ImageMap.self, MeetingFilterRule.self)
+            container = try ModelContainer(for: Note.self, Folder.self, TemplateRule.self, ImageMap.self, MeetingFilterRule.self, Contact.self)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }

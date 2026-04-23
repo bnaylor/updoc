@@ -75,7 +75,7 @@ struct WeeklyLogDashboardView: View {
                 ), assetIds: Binding(
                     get: { note.assetIds },
                     set: { note.assetIds = $0 }
-                ), selectionRange: $selectionRange, theme: themeManager.themeName(for: note), isReadOnly: note.isReadOnly)
+                ), selectionRange: $selectionRange, theme: themeManager.themeName(for: note), isReadOnly: note.isReadOnly, modelContainer: modelContext.container)
                 .onAppear {
                     NotificationCenter.default.post(name: .focusEditor, object: nil)
                 }
