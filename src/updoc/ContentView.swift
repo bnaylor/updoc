@@ -28,6 +28,8 @@ struct ContentView: View {
     @FocusState private var isTitleFocused: Bool
     @State private var navigationMode: NavigationMode = .allNotes
     @State private var newTagText = ""
+    @State private var contactToEdit: Contact?
+    @State private var showingAddContactDialog = false
     
     @Query private var notes: [Note]
     @Environment(ThemeManager.self) private var themeManager
@@ -73,7 +75,7 @@ struct ContentView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
-        .modifier(ContentViewSheets(showingSettings: $showingSettings, showingThemeSettings: $showingThemeSettings, activeConflict: $activeConflict, modelContext: modelContext, triggerSyncForNote: { triggerSync(for: $0) }))
+        .modifier(ContentViewSheets(showingSettings: $showingSettings, showingThemeSettings: $showingThemeSettings, contactToEdit: $contactToEdit, activeConflict: $activeConflict, modelContext: modelContext, triggerSyncForNote: { triggerSync(for: $0) }))
         .modifier(DeletionConfirmationModifier(deletionManager: $deletionManager, selectedNote: $selectedNote, modelContext: modelContext))
         .overlay {
             if showingCommandPalette {
@@ -110,6 +112,7 @@ struct ContentView: View {
             showingRuleManager: $showingRuleManager,
             showingGlobalSearch: $showingGlobalSearch,
             showingCommandPalette: $showingCommandPalette,
+            contactToEdit: $contactToEdit,
             selectedNote: $selectedNote,
             selectedNotes: $selectedNotes,
             deletionManager: $deletionManager,
@@ -421,6 +424,7 @@ struct ContentViewReceivers: ViewModifier {
     @Binding var showingRuleManager: Bool
     @Binding var showingGlobalSearch: Bool
     @Binding var showingCommandPalette: Bool
+    @Binding var contactToEdit: Contact?
     @Binding var selectedNote: Note?
     @Binding var selectedNotes: Set<Note>
     @Binding var deletionManager: DeletionManager
@@ -444,6 +448,11 @@ struct ContentViewReceivers: ViewModifier {
             }
             .onReceive(NotificationCenter.default.publisher(for: .openCommandPalette)) { _ in
                 showingCommandPalette = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openAddContactDialog)) { notification in
+                if let contact = notification.object as? Contact {
+                    contactToEdit = contact
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .deleteSelectedNote)) { notification in
                 if let n = notification.object as? Note {
@@ -492,6 +501,7 @@ struct ContentViewReceivers: ViewModifier {
 struct ContentViewSheets: ViewModifier {
     @Binding var showingSettings: Bool
     @Binding var showingThemeSettings: Bool
+    @Binding var contactToEdit: Contact?
     @Binding var activeConflict: ContentView.ConflictInfo?
     var modelContext: ModelContext
     var triggerSyncForNote: (Note) -> Void
@@ -535,6 +545,9 @@ struct ContentViewSheets: ViewModifier {
                 } onCancel: {
                     activeConflict = nil
                 }
+            }
+            .sheet(item: $contactToEdit) { contact in
+                AddContactView(contact: contact)
             }
     }
     

@@ -155,4 +155,5 @@ extension Notification.Name {
     static let triggerImport = Notification.Name("triggerImport")
     static let treeNeedsRefresh = Notification.Name("treeNeedsRefresh")
     static let meetingNoteCreated = Notification.Name("meetingNoteCreated")
+    static let openAddContactDialog = Notification.Name("openAddContactDialog")
 }

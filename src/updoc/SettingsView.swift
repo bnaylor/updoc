@@ -15,6 +15,9 @@ struct SettingsView: View {
     @State private var selectedTab: Tab = .credentials
     @Environment(\.modelContext) private var modelContext
     @Query private var contacts: [Contact]
+    @State private var showingAddContactDialog = false
+    @State private var selectedContactId: PersistentIdentifier?
+    @State private var contactToEdit: Contact?
     
     var onAddRule: () -> Void
     var onAddFilterRule: () -> Void
@@ -110,6 +113,9 @@ struct SettingsView: View {
             NavigationStack {
                 ThemeEditorView(theme: theme)
             }
+        }
+        .sheet(isPresented: $showingAddContactDialog) {
+            AddContactView(contact: contactToEdit)
         }
     }
     
@@ -280,13 +286,36 @@ struct SettingsView: View {
     
     private var addressBookPane: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Address Book")
-                .font(.headline)
+            HStack {
+                Text("Address Book")
+                    .font(.headline)
+                Spacer()
+                
+                Button {
+                    contactToEdit = nil
+                    showingAddContactDialog = true
+                } label: {
+                    Label("Add Contact", systemImage: "person.badge.plus")
+                }
+                .buttonStyle(.borderedProminent)
+                
+                Button {
+                    if let id = selectedContactId,
+                       let contact = contacts.first(where: { $0.persistentModelID == id }) {
+                        contactToEdit = contact
+                        showingAddContactDialog = true
+                    }
+                } label: {
+                    Label("Edit Contact", systemImage: "pencil")
+                }
+                .buttonStyle(.bordered)
+                .disabled(selectedContactId == nil)
+            }
             
             Text("Manage your contacts here.")
                 .foregroundColor(.secondary)
             
-            List(contacts) { contact in
+            List(contacts, selection: $selectedContactId) { contact in
                 HStack {
                     VStack(alignment: .leading) {
                         Text(contact.name)
@@ -304,6 +333,7 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                .tag(contact.persistentModelID)
             }
         }
         .padding()

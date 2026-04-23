@@ -17,3 +17,13 @@ public class Contact {
         self.avatarData = avatarData
     }
 }
+
+extension Contact: Hashable, Identifiable {
+    public static func == (lhs: Contact, rhs: Contact) -> Bool {
+        lhs.email == rhs.email
+    }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(email)
+    }
+    public var id: String { email }
+}

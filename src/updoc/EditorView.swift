@@ -924,12 +924,15 @@ struct EditorView: NSViewRepresentable {
 
         private func showAutocompleteWindow(for matches: [AutocompleteMatch], in textView: NSTextView, for query: String) {
             let items = matches.map { AutocompleteItem(match: $0) }
-            let contentView = ContactAutocompleteView(items: items, selectedIndex: 0) { [weak self] match in
+            let contentView = ContactAutocompleteView(items: items, selectedIndex: 0, onSelect: { [weak self] match in
                 let selectedRange = textView.selectedRange()
                 let replaceRange = NSRange(location: selectedRange.location - query.count - 1, length: query.count + 1)
                 self?.insertChip(for: match, in: textView, replaceRange: replaceRange)
                 self?.closeAutocompleteWindow()
-            }
+            }, onAddNewContact: { [weak self] in
+                self?.closeAutocompleteWindow()
+                NotificationCenter.default.post(name: .openAddContactDialog, object: Contact(name: "", username: "", email: ""))
+            })
             
             if autocompleteWindow == nil {
                 let window = NSWindow(

@@ -1,12 +1,22 @@
 import Foundation
 
+public struct Participant: Codable, Sendable {
+    public let email: String
+    public let name: String?
+    
+    public init(email: String, name: String?) {
+        self.email = email
+        self.name = name
+    }
+}
+
 public struct CalendarEvent: Codable, Identifiable, Sendable {
     public let id: String
     public let summary: String
     public let description: String?
     public let location: String?
     public let start: Date
-    public let attendees: [String]
+    public let attendees: [Participant]
     public let eventType: String?
     public let isAllDay: Bool
     public let attachments: [CalendarAttachment]
@@ -21,6 +31,16 @@ struct GCalendarResponse: Codable {
     let items: [GCalendarEvent]
 }
 
+struct GCalendarOrganizer: Codable {
+    let email: String?
+    let displayName: String?
+}
+
+struct GCalendarCreator: Codable {
+    let email: String?
+    let displayName: String?
+}
+
 struct GCalendarEvent: Codable {
     let id: String
     let summary: String?
@@ -30,6 +50,8 @@ struct GCalendarEvent: Codable {
     let attendees: [GCalendarAttendee]?
     let eventType: String?
     let attachments: [GCalendarAttachment]?
+    let organizer: GCalendarOrganizer?
+    let creator: GCalendarCreator?
 }
 
 struct GCalendarAttachment: Codable {
@@ -44,6 +66,7 @@ struct GCalendarTime: Codable {
 
 struct GCalendarAttendee: Codable {
     let email: String?
+    let displayName: String?
 }
 
 public actor GCalendarService {
@@ -78,6 +101,14 @@ public actor GCalendarService {
         
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
+        
+        // Save raw data for debugging
+        if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            let debugURL = appSupport.appendingPathComponent("updoc/calendar_debug.json")
+            try? data.write(to: debugURL)
+            print("Saved raw calendar data to: \(debugURL.path)")
+        }
+        
         let calendarResponse = try decoder.decode(GCalendarResponse.self, from: data)
         
         return calendarResponse.items.compactMap { gEvent in
@@ -106,7 +137,26 @@ public actor GCalendarService {
                 description: gEvent.description,
                 location: gEvent.location,
                 start: startDate,
-                attendees: gEvent.attendees?.compactMap { $0.email } ?? [],
+                attendees: {
+                    var participants = gEvent.attendees?.compactMap { gAttendee -> Participant? in
+                        guard let email = gAttendee.email else { return nil }
+                        return Participant(email: email, name: gAttendee.displayName)
+                    } ?? []
+                    
+                    if let organizer = gEvent.organizer, let email = organizer.email {
+                        if !participants.contains(where: { $0.email == email }) {
+                            participants.append(Participant(email: email, name: organizer.displayName))
+                        }
+                    }
+                    
+                    if let creator = gEvent.creator, let email = creator.email {
+                        if !participants.contains(where: { $0.email == email }) {
+                            participants.append(Participant(email: email, name: creator.displayName))
+                        }
+                    }
+                    
+                    return participants
+                }(),
                 eventType: gEvent.eventType,
                 isAllDay: isAllDay,
                 attachments: attachments

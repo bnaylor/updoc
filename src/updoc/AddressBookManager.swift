@@ -19,7 +19,16 @@ public actor AddressBookManager {
     public func addContact(name: String, username: String, email: String, teamsLink: String? = nil) throws {
         let descriptor = FetchDescriptor<Contact>(predicate: #Predicate { $0.email == email })
         let existing = try modelContext.fetch(descriptor)
-        if existing.isEmpty {
+        if let contact = existing.first {
+            // Update name if it was a fallback name and new name is better
+            let inferredUsername = email.split(separator: "@").first.map(String.init) ?? email
+            let fallbackName = inferredUsername.capitalized
+            
+            if name != fallbackName && contact.name == fallbackName {
+                contact.name = name
+                try modelContext.save()
+            }
+        } else {
             let contact = Contact(name: name, username: username, email: email, teamsLink: teamsLink)
             modelContext.insert(contact)
             try modelContext.save()
@@ -30,6 +39,22 @@ public actor AddressBookManager {
         for email in emails {
             let username = email.split(separator: "@").first.map(String.init) ?? email
             let name = username.capitalized
+            try addContact(name: name, username: username, email: email)
+        }
+    }
+    
+    public func addParticipants(_ participants: [Participant]) throws {
+        for participant in participants {
+            let email = participant.email
+            
+            // Skip conference rooms and resources
+            if email.hasSuffix("@resource.calendar.google.com") {
+                continue
+            }
+            
+            let name = participant.name ?? email.split(separator: "@").first.map(String.init)?.capitalized ?? email
+            let username = email.split(separator: "@").first.map(String.init) ?? email
+            
             try addContact(name: name, username: username, email: email)
         }
     }
