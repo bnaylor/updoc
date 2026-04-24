@@ -28,14 +28,14 @@ struct CategoryNoteListView: View {
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 2)
                                 .background(Color.orange.opacity(0.8))
-                                .foregroundColor(.white)
-                                .cornerRadius(4)
+                                .foregroundStyle(.white)
+                                .clipShape(.rect(cornerRadius: 4))
                         }
                     }
                     
                     Text(note.content.prefix(100))
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
                 .padding(.vertical, 4)

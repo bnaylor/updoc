@@ -36,7 +36,7 @@ public struct GlobalSearchOverlayView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "magnifyingglass")
                         .font(.title2)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     
                     TextField("Search notes, snippets, and #tags...", text: $query)
                         .textFieldStyle(.plain)
@@ -51,7 +51,7 @@ public struct GlobalSearchOverlayView: View {
                             query = ""
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
                     }
@@ -61,8 +61,8 @@ public struct GlobalSearchOverlayView: View {
                         .padding(.horizontal, 4)
                         .padding(.vertical, 2)
                         .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(4)
-                        .foregroundColor(.secondary)
+                        .clipShape(.rect(cornerRadius: 4))
+                        .foregroundStyle(.secondary)
                 }
                 .padding()
                 
@@ -83,7 +83,7 @@ public struct GlobalSearchOverlayView: View {
                 .frame(maxHeight: 400)
             }
             .background(Color(NSColor.windowBackgroundColor))
-            .cornerRadius(12)
+            .clipShape(.rect(cornerRadius: 12))
             .shadow(radius: 20)
             .frame(width: 600)
             .onAppear {
@@ -111,7 +111,7 @@ public struct GlobalSearchOverlayView: View {
         ScrollViewReader { proxy in
             List {
                 ForEach(results) { result in
-                    Section(header: Text(result.note.title).font(.headline).foregroundColor(.primary)) {
+                    Section(header: Text(result.note.title).font(.headline).foregroundStyle(.primary)) {
                         if result.snippets.isEmpty {
                             FlatResultRow(
                                 note: result.note,
@@ -157,7 +157,7 @@ public struct GlobalSearchOverlayView: View {
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
             .background(selectedTagIndex == index ? Color.accentColor.opacity(0.1) : Color.clear)
-            .cornerRadius(4)
+            .clipShape(.rect(cornerRadius: 4))
             .contentShape(Rectangle())
             .onTapGesture {
                 applyTagSuggestion(tag)
@@ -165,7 +165,7 @@ public struct GlobalSearchOverlayView: View {
         }
         .listStyle(.plain)
         .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(8)
+        .clipShape(.rect(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.2)))
         .shadow(radius: 5)
         .frame(maxWidth: 200)
@@ -176,10 +176,10 @@ public struct GlobalSearchOverlayView: View {
         VStack(spacing: 12) {
             Image(systemName: "doc.text.magnifyingglass")
                 .font(.system(size: 48))
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             Text("No results found for \"\(query)\"")
                 .font(.headline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
@@ -190,7 +190,7 @@ public struct GlobalSearchOverlayView: View {
             Text("Recent Notes")
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .padding(.horizontal)
                 .padding(.top)
             
@@ -326,14 +326,14 @@ struct FlatResultRow: View {
                 } else {
                     Text("Matched in title")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             .padding(.vertical, 4)
             .padding(.horizontal, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-            .cornerRadius(6)
+            .clipShape(.rect(cornerRadius: 6))
         }
         .buttonStyle(.plain)
     }
@@ -348,7 +348,7 @@ struct FlatResultRow: View {
         let suffix = String(text[range.upperBound...])
         
         return Text(prefix) +
-               Text(match).fontWeight(.bold).foregroundColor(.accentColor) +
+               Text(match).fontWeight(.bold).foregroundStyle(Color.accentColor) +
                Text(suffix)
     }
 }

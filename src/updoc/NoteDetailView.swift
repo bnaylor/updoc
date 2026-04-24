@@ -13,6 +13,8 @@ struct NoteDetailView: View {
     @Binding var selectionRange: NSRange?
     @Binding var showingInspector: Bool
     
+    @State private var selectedTheme = "Default"
+    
     @Environment(ThemeManager.self) private var themeManager
     @Environment(\.modelContext) private var modelContext
     private let templateEngine = SmartTemplateEngine()
@@ -40,12 +42,12 @@ struct NoteDetailView: View {
                 
                 if note.isReadOnly {
                     Label("Read-Only", systemImage: "lock.fill")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .font(.caption)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 3)
                         .background(Color.secondary.opacity(0.15))
-                        .cornerRadius(4)
+                        .clipShape(.rect(cornerRadius: 4))
                 }
                 
                 Spacer()
@@ -90,33 +92,33 @@ struct NoteDetailView: View {
             .padding(.top)
             
             // Tagging row
-            ScrollView(.horizontal, showsIndicators: false) {
+            ScrollView(.horizontal) {
                 HStack(spacing: 6) {
                     ForEach(note.categories, id: \.self) { cat in
                         HStack(spacing: 4) {
                             Text("#\(cat)")
                                 .font(.caption)
                                 .fontWeight(.medium)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                             Button {
                                 note.categories.removeAll { $0 == cat }
                             } label: {
                                 Image(systemName: "xmark")
                                     .font(.system(size: 9, weight: .bold))
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                             }
                             .buttonStyle(.plain)
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.secondary.opacity(0.15))
-                        .cornerRadius(12)
+                        .clipShape(.rect(cornerRadius: 12))
                     }
                     
                     HStack {
                         Image(systemName: "plus")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         TextField("Add Tag...", text: $newTagText)
                             .textFieldStyle(.plain)
                             .font(.caption)
@@ -132,9 +134,10 @@ struct NoteDetailView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(Color.secondary.opacity(0.05))
-                    .cornerRadius(12)
+                    .clipShape(.rect(cornerRadius: 12))
                 }
             }
+            .scrollIndicators(.hidden)
             .padding(.horizontal)
             .padding(.bottom, 12)
             .background(Color(NSColor.windowBackgroundColor))
@@ -142,7 +145,7 @@ struct NoteDetailView: View {
             if let error = syncError {
                 Text("Sync Error: \(error)")
                     .font(.caption)
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
                     .padding(.horizontal)
             }
             
@@ -156,7 +159,7 @@ struct NoteDetailView: View {
                     NotificationCenter.default.post(name: .focusEditor, object: nil)
                 }
             }
-            .onChange(of: note.id) {
+            .onChange(of: note.id) { _, _ in
                 if note.title == "New Note" && note.content.isEmpty {
                     isTitleFocused.wrappedValue = true
                 } else {
@@ -177,18 +180,21 @@ struct NoteDetailView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Theme")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     
-                    Picker("", selection: Binding(
-                        get: { note.themeName ?? "Default" },
-                        set: { note.themeName = $0 == "Default" ? nil : $0 }
-                    )) {
+                    Picker("", selection: $selectedTheme) {
                         Text("Default").tag("Default")
                         ForEach(themeManager.allThemeNames, id: \.self) { themeName in
                             Text(themeName).tag(themeName)
                         }
                     }
                     .pickerStyle(.menu)
+                    .onChange(of: selectedTheme) { _, newValue in
+                        note.themeName = newValue == "Default" ? nil : newValue
+                    }
+                    .onAppear {
+                        selectedTheme = note.themeName ?? "Default"
+                    }
                 }
                 
                 Button("Apply Rules") {

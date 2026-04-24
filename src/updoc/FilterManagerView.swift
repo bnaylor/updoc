@@ -22,14 +22,14 @@ struct FilterManagerView: View {
             List {
                 if rules.isEmpty {
                     Text("No filter rules defined yet.")
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .padding()
                 } else {
                     ForEach(rules) { rule in
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Image(systemName: "line.3.horizontal.decrease.circle.fill")
-                                    .foregroundColor(.accentColor)
+                                    .foregroundStyle(Color.accentColor)
                                 Text("Rule")
                                     .font(.headline)
                                 Spacer()
@@ -38,7 +38,7 @@ struct FilterManagerView: View {
                                     try? modelContext.save()
                                 }) {
                                     Image(systemName: "trash")
-                                        .foregroundColor(.red)
+                                        .foregroundStyle(.red)
                                 }
                                 .buttonStyle(.plain)
                             }

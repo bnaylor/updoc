@@ -102,12 +102,7 @@ public actor GCalendarService {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         
-        // Save raw data for debugging
-        if let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            let debugURL = appSupport.appendingPathComponent("updoc/calendar_debug.json")
-            try? data.write(to: debugURL)
-            print("Saved raw calendar data to: \(debugURL.path)")
-        }
+
         
         let calendarResponse = try decoder.decode(GCalendarResponse.self, from: data)
         

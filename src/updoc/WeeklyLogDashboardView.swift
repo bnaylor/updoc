@@ -87,7 +87,7 @@ struct WeeklyLogDashboardView: View {
                     Spacer()
                     Image(systemName: "text.badge.plus")
                         .font(.system(size: 40))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     Text("No snippet log found for this week.")
                         .font(.headline)
                     Button("Start Weekly Log") {

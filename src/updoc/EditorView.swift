@@ -110,7 +110,6 @@ struct EditorView: NSViewRepresentable {
     var onEditRequested: ((RemoteImageAttachment) -> Void)?
     var modelContainer: ModelContainer
     @Environment(ThemeManager.self) private var themeManager
-    private let engine = MarkdownEngine()
     
     @AppStorage("spellcheckEnabled") private var spellcheckEnabled = true
     @AppStorage("autocorrectEnabled") private var autocorrectEnabled = true
@@ -186,7 +185,7 @@ struct EditorView: NSViewRepresentable {
             .foregroundColor: NSColor.labelColor
         ]
         
-        NotificationCenter.default.addObserver(forName: .focusEditor, object: nil, queue: .main) { _ in
+        let token = NotificationCenter.default.addObserver(forName: .focusEditor, object: nil, queue: .main) { _ in
             Task { @MainActor in
                 @MainActor func attemptFocus(retries: Int) {
                     NSApplication.shared.activate(ignoringOtherApps: true)
@@ -206,6 +205,7 @@ struct EditorView: NSViewRepresentable {
                 attemptFocus(retries: 10)
             }
         }
+        context.coordinator.focusObserverToken = token
         
         return scrollView
     }
@@ -280,6 +280,12 @@ struct EditorView: NSViewRepresentable {
             }
         }
     }
+    
+    static func dismantleNSView(_ nsView: NSScrollView, coordinator: Coordinator) {
+        if let token = coordinator.focusObserverToken {
+            NotificationCenter.default.removeObserver(token)
+        }
+    }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self, modelContainer: modelContainer)
@@ -291,6 +297,8 @@ struct EditorView: NSViewRepresentable {
         var lastSentText: String?
         private let autocompleteManager: AutocompleteManager
         private let addressBookManager: AddressBookManager
+        let engine = MarkdownEngine()
+        var focusObserverToken: NSObjectProtocol?
         private var syncTask: Task<Void, Never>?
         var editingAttachment: RemoteImageAttachment?
         weak var textView: NSTextView?
@@ -304,6 +312,8 @@ struct EditorView: NSViewRepresentable {
                 return try await manager.searchPeople(query: query)
             })
         }
+        
+
 
         func textView(_ textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
             if commandSelector == #selector(NSResponder.insertTab(_:)) {
@@ -995,7 +1005,7 @@ struct EditorView: NSViewRepresentable {
         func applyStyles(to textView: NSTextView) {
             guard let textStorage = textView.textStorage else { return }
             let text = textView.string
-            let ranges = parent.engine.parse(text)
+            let ranges = engine.parse(text)
             let selectedRange = textView.selectedRange()
             
             // Reset styles using theme font and label color

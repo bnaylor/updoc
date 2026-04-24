@@ -76,7 +76,7 @@ struct ConflictResolutionView: View {
                     .padding(8)
             }
             .background(Color(NSColor.controlBackgroundColor))
-            .cornerRadius(8)
+            .clipShape(.rect(cornerRadius: 8))
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)

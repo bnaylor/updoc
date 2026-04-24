@@ -49,7 +49,7 @@ struct RuleManagerView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Image(systemName: "arrow.right.circle.fill")
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(Color.accentColor)
                             
                             Text("Rule")
                                 .font(.headline)
@@ -62,7 +62,7 @@ struct RuleManagerView: View {
                                 }
                             }) {
                                 Image(systemName: "trash")
-                                    .foregroundColor(.red)
+                                    .foregroundStyle(.red)
                             }
                             .buttonStyle(.plain)
                         }
@@ -120,7 +120,7 @@ struct RuleManagerView: View {
                                 .frame(width: 60)
                             } else {
                                 Text("contains")
-                                    .foregroundColor(.secondary)
+                                    .foregroundStyle(.secondary)
                                 
                                 TextField("Pattern (e.g., 1:1)", text: Binding(
                                     get: { rule.pattern },
@@ -150,7 +150,7 @@ struct RuleManagerView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("THEN apply markdown template:")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                             
                             TextEditor(text: Binding(
                                 get: { rule.templateContent },
@@ -160,17 +160,17 @@ struct RuleManagerView: View {
                             .frame(height: 100)
                             .padding(4)
                             .background(Color(NSColor.textBackgroundColor))
-                            .cornerRadius(4)
+                            .clipShape(.rect(cornerRadius: 4))
                             .border(Color.secondary.opacity(0.2))
                         }
                         
                         Text("Variables: {{title}}, {{date}}, {{location}}, {{description}}, {{attendees}}")
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding()
                     .background(Color(NSColor.windowBackgroundColor))
-                    .cornerRadius(8)
+                    .clipShape(.rect(cornerRadius: 8))
                     .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
                     .padding(.vertical, 6)
                 }
