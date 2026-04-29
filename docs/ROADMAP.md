@@ -22,7 +22,7 @@ This document tracks planned features, improvements, and "nice-to-have" ideas fo
 - [x] **Theme Granularity**: Extend theme support to allow defining colors and styles for all markdown elements.
 - [x] **Code Syntax Highlighting**: Advanced color rules for code blocks in the editor.
 - [ ] **Sharpei Linkage**: Right click integration to instantly pipe actionable items to a Sharpei task.
-- [ ] Import notes and external doc links from gNotebooks
+- [x] Import notes and external doc links from gNotebooks
 
 ## P2: Polish & Scaling
 - [ ] **Apple Ecosystem Integration (AppIntents)**:
