@@ -1,110 +1,104 @@
 # updoc
 
-`updoc` is a less-friction, native macOS note-taking application designed for engineers and managers who live in the Google ecosystem but crave a high-performance, distraction-free local editing experience with organization and integration with Calendar, etc.
+`updoc` is a native macOS note-taking app for engineers and managers who live in the Google ecosystem. It gives you a fast, distraction-free local editing experience with deep Calendar, Docs, and Drive integration.
 
 ![updoc Icon](assets/updoc_icon.png)
 
-## 🎯 Why updoc?
+## Why updoc?
 
-Most Google Docs workflows suffer from "tab fatigue" and latency. `updoc` bridges the gap by providing:
-- **Zero-Lag Editing:** A native `TextKit 2` editor that feels as fast as your favorite IDE.
-- **Deep Google Integration:** Bidirectional sync with Google Docs, Drive, and Calendar.
-- **Task-First Workflow:** A dedicated sidebar that promotes checklist items to tracked tasks.
-- **Native macOS Experience:** Built with SwiftUI and SwiftData for performance and system-wide integration (Markup, QuickLook, etc.).
-
----
-
-## ✨ Major Features
-
-### 🚀 High-Performance Markdown Editor
-Write in clean Markdown with real-time, theme-aware styling. Powered by `TextKit 2`, it handles large documents with ease and supports:
-- Headings, bold, italic, and code blocks.
-- Inline `#hashtags` for automatic indexing and search.
-- Interactive checklists with `[ ]` and `√` shortcuts.
-
-### 🔄 Google Sync
-Seamlessly bridge your local notes with the cloud:
-- **Bidirectional Sync:** Edit locally or on the web; `updoc` handles the rest.
-- **Smart Conflict Resolution:** A side-by-side UI for resolving version mismatches when changes occur in both places.
-- **Drive Asset Library:** Images are automatically synced to a dedicated `updoc_assets` folder on Google Drive.
-
-### 🗓 Meeting-Aware Organization
-Stop hunting for meeting notes:
-- **Calendar Integration:** Automatically links notes to Google Calendar events.
-- **Smart Folder Trees:** Auto-organizes notes into `/updoc/Meetings` (by date) or `/updoc/General`.
-- **Meeting Attribution:** Tracks attendees and event metadata for better context.
-
-### ✅ Integrated Task Sidebar
-Turn your notes into action:
-- **Global Action Items:** See all tasks across all notes in one unified, grouped view (Overdue, Today, Upcoming).
-- **Bidirectional Checkbox Sync:** Toggling a task in the sidebar updates the source Markdown file instantly.
-- **Note Navigation:** Click any task to jump directly to the relevant line in the editor.
-
-### 🖼 Advanced Image Handling
-- **Native Markup:** Double-click any image to open the macOS Markup toolkit for cropping, rotation, and annotation.
-- **Cloud Parity:** Uses image metadata to maintain sync between local files and Google Docs.
+Most Google Docs workflows suffer from tab fatigue and latency. `updoc` bridges the gap by providing:
+- **Zero-lag editing:** A CodeMirror 6 editor (WebKit-hosted) with live Markdown rendering and syntax hiding.
+- **Deep Google integration:** Bidirectional sync with Google Docs, Drive, and Calendar.
+- **Task-first workflow:** A dedicated sidebar that promotes checklist items to tracked tasks.
+- **Native macOS shell:** SwiftUI + SwiftData wrapper around the editor, so the app feels native while the editor is best-in-class.
 
 ---
 
-## 📸 Screenshots
+## Features
 
-### Main Editor & Navigation
-> *[PLACEHOLDER: A screenshot showing the 3-column layout with the note list, the Markdown editor, and the Task Sidebar]*
+### Markdown Editor (CodeMirror 6)
+Write in clean Markdown with real-time theme-aware rendering. The editor is a [CodeMirror 6](https://codemirror.net/) bundle served from the app via a `WKWebView`:
+- Headings H1–H6, bold, italic, bold+italic
+- Underline (`~text~`), strikethrough (`~~text~~`), highlight (`==text==`)
+- Inline code and fenced code blocks with syntax highlighting
+- Blockquotes, horizontal rules, links
+- GFM task lists (`- [ ] task`) with interactive checkboxes; `√` (Option+V) inserts `- [ ] `
+- Syntax hiding: markers disappear when the cursor moves off-line
+- Theme-aware colors and fonts via CSS custom properties
 
-### Conflict Resolution UI
-> *[PLACEHOLDER: A screenshot showing the side-by-side comparison view for resolving sync conflicts]*
+### Google Sync
+- **Bidirectional sync:** Edit locally or on the web; `updoc` handles the rest.
+- **Smart conflict resolution:** Side-by-side UI for resolving version mismatches.
+- **Drive asset library:** Images are automatically synced to a dedicated `updoc_assets` folder.
 
-### Settings & Google Auth
-> *[PLACEHOLDER: A screenshot of the native macOS Settings pane for Google API configuration]*
+### Meeting-aware organization
+- **Calendar integration:** Automatically links notes to Google Calendar events.
+- **Smart folder trees:** Auto-organizes notes into `/updoc/Meetings` (by date) or `/updoc/General`.
+- **Meeting attribution:** Tracks attendees and event metadata for context.
+
+### Integrated task sidebar
+- **Global action items:** All tasks across all notes, grouped as Overdue / Today / Upcoming.
+- **Bidirectional checkbox sync:** Toggling a task in the sidebar updates the source note instantly.
+- **Note navigation:** Click any task to jump to the relevant line in the editor.
+
+### Image handling
+- **Native Markup:** Double-click any image to open the macOS Markup toolkit.
+- **Cloud parity:** Image metadata maintains sync between local files and Google Docs.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
-- **Language:** Swift 6.0 (Strict Concurrency)
-- **UI Framework:** SwiftUI & TextKit 2
-- **Persistence:** SwiftData
-- **Auth:** GTMAppAuth & AuthenticationServices
-- **Sync:** REST-based Google Drive/Docs/Calendar APIs
+| Layer | Technology |
+|---|---|
+| Language | Swift 6.0 (strict concurrency) |
+| UI | SwiftUI |
+| Persistence | SwiftData |
+| Editor | CodeMirror 6 (TypeScript, bundled via esbuild) |
+| Editor host | WKWebView + custom `editor://` URL scheme handler |
+| Auth | GTMAppAuth + AuthenticationServices |
+| Sync | Google Drive / Docs / Calendar REST APIs |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - macOS 14.0+
-- Xcode 15.0+
-- A Google Cloud Project with Docs, Drive, and Calendar APIs enabled.
+- Swift 5.9+ (comes with Xcode 15 or the standalone toolchain)
+- Node.js 18+ and npm — required to **rebuild** the editor bundle if you change TypeScript source. The pre-built `editor.js` is committed to the repo, so Swift builds work without Node.
+- A Google Cloud project with Docs, Drive, and Calendar APIs enabled.
 
-### Building from Source
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/bnaylor/updoc.git
-   cd updoc
-   ```
-2. Run the bundling script to create the `.app` bundle:
-   ```bash
-   ./scripts/bundle.sh
-   ```
-3. Open `updoc.app` from the root directory.
+### Building from source
+
+```bash
+git clone https://github.com/bnaylor/updoc.git
+cd updoc
+./scripts/bundle.sh       # produces updoc.app in the repo root
+open updoc.app
+```
+
+To rebuild the editor bundle after TypeScript changes:
+
+```bash
+cd editor && npm ci && cd ..
+./scripts/build_editor.sh
+```
 
 ### Configuration
-On first launch, open **Settings (Cmd+,)** and enter your Google Client ID and Secret to enable synchronization features.
+
+On first launch, open **Settings (Cmd+,)** and enter your Google Client ID and Secret to enable sync.
 
 ---
 
-## 📝 Development Status
-`updoc` is currently in active development (**Phase 9: App Bundling & Persistent Settings Complete**). See [STATUS.md](STATUS.md) for a detailed breakdown of completed features and [ROADMAP.md](docs/ROADMAP.md) for what's coming next.
+## Development status
+
+Active development. The CodeMirror 6 editor migration is complete; the legacy TextKit 2 editor has been removed. Known gap: inline image rendering (`![alt](url)`) shows as styled text until a follow-up decoration pass is implemented.
+
+See [STATUS.md](STATUS.md) for feature details and [docs/ROADMAP.md](docs/ROADMAP.md) for what's next.
 
 ---
 
-## 🤝 Contributing
-Contributions are welcome! Please see [TODOS.md](TODOS.md) for a list of known bugs and planned improvements.
+## License
 
----
-
-## 📄 License
-This project is private and for internal use unless otherwise specified.
-
----
-*Co-authored-by: Gemini <gemini-cli@google.com>*
+Private — for personal use.
