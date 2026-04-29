@@ -22,6 +22,13 @@ struct updocApp: App {
                 .task {
                     await AuthManager.shared.load()
                 }
+                .task {
+                    // Run once on first launch after upgrade
+                    let ctx = container.mainContext
+                    await MainActor.run {
+                        AppMigrationManager.runIfNeeded(context: ctx)
+                    }
+                }
                 .environment(themeManager)
         }
         .modelContainer(container)
