@@ -3,7 +3,28 @@ import { EditorState, Compartment } from "@codemirror/state"
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
 import { GFM } from "@lezer/markdown"
-import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language"
+import { syntaxHighlighting, HighlightStyle } from "@codemirror/language"
+import { tags } from "@lezer/highlight"
+
+function makeHighlightStyle(): HighlightStyle {
+  return HighlightStyle.define([
+    { tag: tags.heading1,    fontSize: "var(--updoc-heading-size, 2em)",   fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading2,    fontSize: "var(--updoc-heading-size, 1.6em)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading3,    fontSize: "var(--updoc-heading-size, 1.3em)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading4,    fontWeight: "bold", color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading5,    fontWeight: "bold", color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading6,    fontWeight: "bold", color: "var(--updoc-heading, inherit)" },
+    { tag: tags.strong,      fontWeight: "bold" },
+    { tag: tags.emphasis,    fontStyle: "italic" },
+    { tag: tags.strikethrough, textDecoration: "line-through" },
+    { tag: tags.link,        color: "var(--updoc-link, #0070f3)", textDecoration: "underline" },
+    { tag: tags.url,         color: "var(--updoc-link, #0070f3)" },
+    { tag: tags.monospace,   fontFamily: "var(--updoc-code-font, 'SF Mono', monospace)", fontSize: "var(--updoc-code-size, 0.9em)", color: "var(--updoc-code, inherit)", backgroundColor: "var(--updoc-code-bg, rgba(0,0,0,0.06))" },
+    { tag: tags.quote,       color: "var(--updoc-blockquote, #666)", borderLeft: "3px solid var(--updoc-blockquote, #ccc)", paddingLeft: "8px" },
+    { tag: tags.processingInstruction, color: "var(--updoc-text, inherit)", opacity: "0.4" },
+    { tag: tags.meta,        color: "var(--updoc-text, inherit)", opacity: "0.4" },
+  ])
+}
 
 // Compartment for toggling read-only state after editor creation
 const readOnlyCompartment = new Compartment()
@@ -49,7 +70,7 @@ function createEditor(): void {
         history(),
         keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
         markdown({ base: markdownLanguage, extensions: [GFM] }),
-        syntaxHighlighting(defaultHighlightStyle),
+        syntaxHighlighting(makeHighlightStyle()),
         EditorView.lineWrapping,
         readOnlyCompartment.of(EditorState.readOnly.of(false)),
         EditorView.updateListener.of((update) => {
