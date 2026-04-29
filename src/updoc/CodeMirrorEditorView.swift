@@ -76,6 +76,13 @@ struct CodeMirrorEditorView: NSViewRepresentable {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             isEditorReady = true
             applyTheme()
+            let autocorrect = parent.autocorrectEnabled
+            webView.evaluateJavaScript(
+                "document.querySelector('.cm-content')?.setAttribute('autocorrect', '\(autocorrect ? "on" : "off")')"
+            )
+            webView.evaluateJavaScript(
+                "document.querySelector('.cm-content')?.setAttribute('spellcheck', '\(parent.spellcheckEnabled ? "true" : "false")')"
+            )
             setReadOnly(parent.isReadOnly)
             if let pending = pendingContent {
                 loadContent(pending)
