@@ -15,6 +15,7 @@ struct NoteListView: View {
     @State private var updateTick = 0
     @State private var expandedMeetingGroups: Set<String> = []
     @State private var showingDeleteNotesConfirmation = false
+    @State private var meetingGroupsCache: [YearGroup] = []
     
     var body: some View {
         List(selection: $selectedNotes) {
@@ -24,7 +25,7 @@ struct NoteListView: View {
                 Text("GENERAL NOTES")
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             
             DisclosureGroup(isExpanded: $isMeetingsExpanded) {
@@ -33,7 +34,7 @@ struct NoteListView: View {
                 Text("MEETING NOTES")
                     .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("updoc")
@@ -75,9 +76,7 @@ struct NoteListView: View {
             Text("Are you sure you want to delete \(selectedNotes.count) selected notes?")
         }
         .onReceive(NotificationCenter.default.publisher(for: .treeNeedsRefresh)) { _ in
-            DispatchQueue.main.async {
-                updateTick += 1
-            }
+            updateTick += 1
         }
         .onReceive(NotificationCenter.default.publisher(for: .meetingNoteCreated)) { notification in
             if let userInfo = notification.userInfo,
@@ -90,20 +89,20 @@ struct NoteListView: View {
             }
         }
         .onAppear {
-            DispatchQueue.main.async {
-                if let data = expandedFoldersJSON.data(using: .utf8),
-                   let uuids = try? JSONDecoder().decode([UUID].self, from: data) {
-                    expandedFolders = Set(uuids)
-                }
+            if let data = expandedFoldersJSON.data(using: .utf8),
+               let uuids = try? JSONDecoder().decode([UUID].self, from: data) {
+                expandedFolders = Set(uuids)
             }
+            updateMeetingGroupsCache()
         }
         .onChange(of: expandedFolders) { oldVal, newVal in
-            DispatchQueue.main.async {
-                if let data = try? JSONEncoder().encode(Array(newVal)),
-                   let str = String(data: data, encoding: .utf8) {
-                    expandedFoldersJSON = str
-                }
+            if let data = try? JSONEncoder().encode(Array(newVal)),
+               let str = String(data: data, encoding: .utf8) {
+                expandedFoldersJSON = str
             }
+        }
+        .onChange(of: notes) { _, _ in
+            updateMeetingGroupsCache()
         }
     }
     
@@ -126,7 +125,7 @@ struct NoteListView: View {
     // MARK: - Meeting Notes Section
     @ViewBuilder
     private var meetingNotesSection: some View {
-        ForEach(meetingGroups) { yearGroup in
+        ForEach(meetingGroupsCache) { yearGroup in
             DisclosureGroup("\(String(yearGroup.year))", isExpanded: binding(for: yearGroup.id)) {
                 ForEach(yearGroup.months) { monthGroup in
                     DisclosureGroup("\(monthGroup.monthName)", isExpanded: binding(for: monthGroup.id)) {
@@ -189,7 +188,7 @@ struct NoteListView: View {
         let months: [MonthGroup]
     }
 
-    private var meetingGroups: [YearGroup] {
+    private func computeMeetingGroups() -> [YearGroup] {
         let calendar = Calendar.current
         let mNotes = notes.filter { !($0.meetingID ?? "").isEmpty }
         
@@ -205,12 +204,16 @@ struct NoteListView: View {
                     DayGroup(id: "\(year)-\(month)-\(day)", day: day, notes: dNotes.sorted { $0.createdAt > $1.createdAt })
                 }.sorted { $0.day > $1.day }
                 
-                let monthName = DateFormatter().shortMonthSymbols[month - 1]
+                let monthName = Calendar.current.shortMonthSymbols[month - 1]
                 return MonthGroup(id: "\(year)-\(month)", month: month, monthName: monthName, days: dSorted)
             }.sorted { $0.month > $1.month }
             
             return YearGroup(id: "\(year)", year: year, months: mSorted)
         }.sorted { $0.year > $1.year }
+    }
+    
+    private func updateMeetingGroupsCache() {
+        meetingGroupsCache = computeMeetingGroups()
     }
     
     private func binding(for id: String) -> Binding<Bool> {
@@ -272,7 +275,7 @@ struct FolderTreeItem: View {
     }
     
     private func importNote(from urlString: String, into folder: Folder) {
-        guard let docId = extractDocId(from: urlString) else {
+        guard let docId = urlString.extractDocId() else {
             print("Failed to extract Doc ID from URL: \(urlString)")
             return
         }
@@ -303,17 +306,7 @@ struct FolderTreeItem: View {
         }
     }
     
-    private func extractDocId(from urlString: String) -> String? {
-        let pattern = "document/d/([^/]+)"
-        let regex = try? NSRegularExpression(pattern: pattern, options: [])
-        let nsString = urlString as NSString
-        let results = regex?.matches(in: urlString, options: [], range: NSRange(location: 0, length: nsString.length))
-        
-        if let match = results?.first, match.numberOfRanges > 1 {
-            return nsString.substring(with: match.range(at: 1))
-        }
-        return nil
-    }
+
     
     var body: some View {
         DisclosureGroup(isExpanded: isExpanded) {
@@ -458,8 +451,8 @@ struct NoteRowView: View {
                             .padding(.horizontal, 4)
                             .padding(.vertical, 2)
                             .background(Color.orange.opacity(0.8))
-                            .foregroundColor(.white)
-                            .cornerRadius(4)
+                            .foregroundStyle(.white)
+                            .clipShape(.rect(cornerRadius: 4))
                     }
                 }
                 

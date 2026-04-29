@@ -198,7 +198,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Preview")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Heading 1")
@@ -212,20 +212,20 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "circle.fill")
                                 .font(.system(size: 6))
-                                .foregroundColor(bulletColor(for: selectedThemeName))
+                                .foregroundStyle(bulletColor(for: selectedThemeName))
                             Text("List item with **bold** and *italic* text")
                                 .font(Font(themeManager.font(for: selectedThemeName)))
                         }
                         
                         HStack {
                             Image(systemName: "checkmark.square.fill")
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(Color.accentColor)
                             Text("Completed task")
                                 .font(Font(themeManager.font(for: selectedThemeName)))
                         }
                         
                         (Text("Use `inline code` and ") + 
-                         Text("hyperlinks").foregroundColor(linkColor(for: selectedThemeName)) + 
+                         Text("hyperlinks").foregroundStyle(linkColor(for: selectedThemeName)) + 
                          Text(" for rich text."))
                             .font(Font(themeManager.font(for: selectedThemeName)))
                         
@@ -233,13 +233,13 @@ struct SettingsView: View {
                             .font(.system(.caption, design: .monospaced))
                             .padding(4)
                             .background(Color.secondary.opacity(0.1))
-                            .cornerRadius(4)
+                            .clipShape(.rect(cornerRadius: 4))
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(themeManager.backgroundColor(for: selectedThemeName)))
-                    .foregroundColor(Color(themeManager.textColor(for: selectedThemeName)))
-                    .cornerRadius(8)
+                    .foregroundStyle(Color(themeManager.textColor(for: selectedThemeName)))
+                    .clipShape(.rect(cornerRadius: 8))
                     .shadow(radius: 2)
                 }
                 
@@ -313,7 +313,7 @@ struct SettingsView: View {
             }
             
             Text("Manage your contacts here.")
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             
             List(contacts, selection: $selectedContactId) { contact in
                 HStack {
@@ -322,7 +322,7 @@ struct SettingsView: View {
                             .font(.headline)
                         Text(contact.email)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     Spacer()
                     Button(role: .destructive) {
@@ -355,10 +355,10 @@ struct SettingsView: View {
                     Text(title)
                         .font(.caption)
                 }
-                .foregroundColor(isSelected ? .accentColor : .primary)
+                .foregroundStyle(isSelected ? Color.accentColor : .primary)
                 .padding(8)
                 .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-                .cornerRadius(8)
+                .clipShape(.rect(cornerRadius: 8))
             }
             .buttonStyle(.plain)
         }

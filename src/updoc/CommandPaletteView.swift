@@ -23,7 +23,7 @@ public struct CommandPaletteView: View {
         VStack(spacing: 0) {
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                 TextField("Type a command or search notes...", text: $query)
                     .textFieldStyle(.plain)
                     .font(.title2)
@@ -43,7 +43,7 @@ public struct CommandPaletteView: View {
                 }
                 .keyboardShortcut(.escape, modifiers: [])
                 .buttonStyle(.plain)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             }
             .padding()
             
@@ -63,7 +63,7 @@ public struct CommandPaletteView: View {
                                     if let subtitle = command.subtitle {
                                         Text(subtitle)
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundStyle(.secondary)
                                     }
                                 }
                                 Spacer()
@@ -72,7 +72,7 @@ public struct CommandPaletteView: View {
                                         .font(.caption2)
                                         .padding(4)
                                         .background(Color.secondary.opacity(0.1))
-                                        .cornerRadius(4)
+                                        .clipShape(.rect(cornerRadius: 4))
                                 }
                             }
                         }
@@ -80,7 +80,7 @@ public struct CommandPaletteView: View {
                         .padding(.vertical, 4)
                         .padding(.horizontal, 8)
                         .background(selectedIndex == index ? Color.accentColor.opacity(0.1) : Color.clear)
-                        .cornerRadius(6)
+                        .clipShape(.rect(cornerRadius: 6))
                         .id(index)
                     }
                     .listStyle(.plain)
@@ -91,12 +91,12 @@ public struct CommandPaletteView: View {
                 }
             } else if !query.isEmpty {
                 Text("No results found.")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
                     .padding()
             }
         }
         .background(Color(NSColor.windowBackgroundColor))
-        .cornerRadius(12)
+        .clipShape(.rect(cornerRadius: 12))
         .shadow(radius: 20)
         .frame(width: 600)
         .padding()

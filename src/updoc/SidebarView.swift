@@ -126,11 +126,9 @@ struct SidebarView: View {
             Text(importErrorMessage)
         }
         .navigationTitle("updoc")
-        .onAppear {
-            DispatchQueue.main.async {
-                if AuthManager.shared.isAuthenticated() {
-                    refreshMeetings()
-                }
+        .task {
+            if AuthManager.shared.isAuthenticated() {
+                refreshMeetings()
             }
         }
         .onChange(of: AuthManager.shared.userEmail) {
@@ -164,7 +162,7 @@ struct SidebarView: View {
                 navigationMode = .allNotes
             } label: {
                 Label("All Notes", systemImage: "note.text")
-                    .foregroundColor(navigationMode == .allNotes ? .accentColor : .primary)
+                    .foregroundStyle(navigationMode == .allNotes ? Color.accentColor : .primary)
             }
             .buttonStyle(.plain)
             
@@ -172,7 +170,7 @@ struct SidebarView: View {
                 navigationMode = .weeklyLog
             } label: {
                 Label("Weekly Snippets", systemImage: "calendar.day.timeline.left")
-                    .foregroundColor(navigationMode == .weeklyLog ? .accentColor : .primary)
+                    .foregroundStyle(navigationMode == .weeklyLog ? Color.accentColor : .primary)
             }
             .buttonStyle(.plain)
             
@@ -183,7 +181,7 @@ struct SidebarView: View {
                         navigationMode = .category(category)
                     } label: {
                         Label(category, systemImage: "number")
-                            .foregroundColor(navigationMode == .category(category) ? .accentColor : .primary)
+                            .foregroundStyle(navigationMode == .category(category) ? Color.accentColor : .primary)
                     }
                     .buttonStyle(.plain)
                 }
@@ -217,7 +215,7 @@ struct SidebarView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Log in to see meetings")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     
                     Button(action: login) {
                         Text("Log in with Google")
@@ -246,7 +244,7 @@ struct SidebarView: View {
         HStack(spacing: 12) {
             Text("Notes")
                 .font(.headline)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
             
             Spacer()
             
@@ -404,7 +402,7 @@ struct SidebarView: View {
         )
         let resolved = templateEngine.resolveTemplate(for: input, rules: templateRules)
         
-        let docId = extractDocId(from: meeting.location)
+        let docId = meeting.location?.extractDocId()
         
         let newNote = Note(
             title: meeting.summary,
@@ -426,7 +424,7 @@ struct SidebarView: View {
     }
     
     private func importNote(from urlString: String, for meeting: CalendarEvent) {
-        guard let docId = extractDocId(from: urlString) else { return }
+        guard let docId = urlString.extractDocId() else { return }
         
         Task {
             do {
@@ -460,16 +458,7 @@ struct SidebarView: View {
         }
     }
     
-    private func extractDocId(from location: String?) -> String? {
-        guard let location = location else { return nil }
-        if location.contains("docs.google.com/document/d/"),
-           let range = location.range(of: "/d/") {
-            let start = range.upperBound
-            let end = location[start...].firstIndex(of: "/") ?? location.endIndex
-            return String(location[start..<end])
-        }
-        return nil
-    }
+
 }
 
 struct MeetingRow: View {
@@ -489,14 +478,14 @@ struct MeetingRow: View {
                 
                 Text(meeting.start.formatted(date: .omitted, time: .shortened))
                     .font(.caption2)
-                    .foregroundColor(isSelected ? .primary : .secondary)
+                    .foregroundStyle(isSelected ? .primary : .secondary)
             }
             Spacer()
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
         .background(isSelected ? Color.accentColor.opacity(0.15) : Color.clear)
-        .cornerRadius(6)
+        .clipShape(.rect(cornerRadius: 6))
         .contentShape(Rectangle())
         .onTapGesture(perform: onTap)
         .contextMenu {

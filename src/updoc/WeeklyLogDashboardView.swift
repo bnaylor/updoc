@@ -69,13 +69,15 @@ struct WeeklyLogDashboardView: View {
             Divider()
             
             if let note = currentNote {
-                EditorView(text: Binding(
-                    get: { note.content },
-                    set: { note.content = $0 }
-                ), assetIds: Binding(
-                    get: { note.assetIds },
-                    set: { note.assetIds = $0 }
-                ), selectionRange: $selectionRange, theme: themeManager.themeName(for: note), isReadOnly: note.isReadOnly, modelContainer: modelContext.container)
+                CodeMirrorEditorView(
+                    text: Binding(
+                        get: { note.content },
+                        set: { note.content = $0 }
+                    ),
+                    selectionRange: $selectionRange,
+                    theme: themeManager.themeName(for: note),
+                    isReadOnly: note.isReadOnly
+                )
                 .onAppear {
                     NotificationCenter.default.post(name: .focusEditor, object: nil)
                 }
@@ -87,7 +89,7 @@ struct WeeklyLogDashboardView: View {
                     Spacer()
                     Image(systemName: "text.badge.plus")
                         .font(.system(size: 40))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     Text("No snippet log found for this week.")
                         .font(.headline)
                     Button("Start Weekly Log") {

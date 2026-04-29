@@ -36,7 +36,7 @@ struct ContentView: View {
     @Query private var templateRules: [TemplateRule]
     private let templateEngine = SmartTemplateEngine()
     
-    private static let syncCoordinator = SyncCoordinator()
+    @State private var syncCoordinator = SyncCoordinator()
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
@@ -210,7 +210,7 @@ struct ContentView: View {
                                 // sync() is already @MainActor, so it will serialize on main 
                                 // thread but allow other tasks to interleave.
                                 let context = ModelContext(container)
-                                try await Self.syncCoordinator.sync(noteId: noteId, in: context)
+                                try await syncCoordinator.sync(noteId: noteId, in: context)
                             } catch {
                                 print("Failed to sync note: \(noteId)")
                             }
@@ -236,9 +236,10 @@ struct ContentView: View {
             syncError = nil
         }
         
+        let noteId = note.persistentModelID
         Task {
             do {
-                try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
+                try await syncCoordinator.sync(noteId: noteId, in: modelContext)
                 await MainActor.run {
                     isSyncing = false
                 }
@@ -284,22 +285,22 @@ struct ContentView: View {
         Task {
             do {
                 // 1. Get/Create Folder Structure
-                let rootFolder = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: "updoc")
+                let rootFolder = try await syncCoordinator.gDrive.getOrCreateFolder(named: "updoc")
                 let leafFolderId: String
                 
                 if note.meetingID != nil {
-                    let meetingsFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: "Meetings", parentId: rootFolder)
+                    let meetingsFolderId = try await syncCoordinator.gDrive.getOrCreateFolder(named: "Meetings", parentId: rootFolder)
                     
                     let calendar = Calendar.current
                     let year = calendar.component(.year, from: note.createdAt)
                     let month = calendar.component(.month, from: note.createdAt)
                     let day = calendar.component(.day, from: note.createdAt)
                     
-                    let yearFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: String(year), parentId: meetingsFolderId)
-                    let monthFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: String(format: "%02d", month), parentId: yearFolderId)
-                    leafFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: String(format: "%02d", day), parentId: monthFolderId)
+                    let yearFolderId = try await syncCoordinator.gDrive.getOrCreateFolder(named: String(year), parentId: meetingsFolderId)
+                    let monthFolderId = try await syncCoordinator.gDrive.getOrCreateFolder(named: String(format: "%02d", month), parentId: yearFolderId)
+                    leafFolderId = try await syncCoordinator.gDrive.getOrCreateFolder(named: String(format: "%02d", day), parentId: monthFolderId)
                 } else {
-                    let generalFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: "General", parentId: rootFolder)
+                    let generalFolderId = try await syncCoordinator.gDrive.getOrCreateFolder(named: "General", parentId: rootFolder)
                     
                     var currentFolderId = generalFolderId
                     var folderPath: [String] = []
@@ -310,13 +311,13 @@ struct ContentView: View {
                     }
                     
                     for folderName in folderPath {
-                        currentFolderId = try await Self.syncCoordinator.gDrive.getOrCreateFolder(named: folderName, parentId: currentFolderId)
+                        currentFolderId = try await syncCoordinator.gDrive.getOrCreateFolder(named: folderName, parentId: currentFolderId)
                     }
                     leafFolderId = currentFolderId
                 }
                 
                 // 2. Create Doc
-                let docId = try await Self.syncCoordinator.gDrive.createDoc(name: note.title, parentId: leafFolderId)
+                let docId = try await syncCoordinator.gDrive.createDoc(name: note.title, parentId: leafFolderId)
                 
                 // 3. Link and Initial Sync
                 await MainActor.run {
@@ -324,7 +325,7 @@ struct ContentView: View {
                     try? modelContext.save()
                 }
                 
-                try await Self.syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
+                try await syncCoordinator.sync(noteId: note.persistentModelID, in: modelContext)
                 
                 await MainActor.run {
                     isSyncing = false
@@ -345,7 +346,7 @@ struct ContentView: View {
             } else {
                 Text("Select a note to begin")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
         }
     }

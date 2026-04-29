@@ -25,13 +25,13 @@ struct ContactAutocompleteView: View {
                                 .font(.headline)
                             Text(person.email)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         case .date(let date):
                             Text(date.formatted(date: .abbreviated, time: .omitted))
                                 .font(.headline)
                             Text("Date")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     Spacer()
@@ -48,10 +48,10 @@ struct ContactAutocompleteView: View {
             
             HStack {
                 Image(systemName: "person.badge.plus")
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(Color.accentColor)
                 Text("Add New Contact...")
                     .font(.headline)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(Color.accentColor)
                 Spacer()
             }
             .padding(.vertical, 6)

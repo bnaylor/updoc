@@ -9,4 +9,4 @@ updoc.app/
 tests/ui/*.png
 *.swp
 tmp/
-
+editor/node_modules/
