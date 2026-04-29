@@ -68,7 +68,7 @@ struct GDocsConflictTests {
             title: "Test",
             body: GDocsBody(content: [
                 GDocsStructuralElement(startIndex: 1, endIndex: 13, paragraph: GDocsParagraph(elements: [
-                    GDocsParagraphElement(startIndex: 1, endIndex: 13, textRun: GDocsTextRun(content: "Remote Change\n", textStyle: nil), inlineObjectElement: nil)
+                    GDocsParagraphElement(startIndex: 1, endIndex: 13, textRun: GDocsTextRun(content: "Remote Change\n", textStyle: nil), inlineObjectElement: nil, person: nil, richLink: nil, dateElement: nil)
                 ]))
             ]),
             inlineObjects: nil,
