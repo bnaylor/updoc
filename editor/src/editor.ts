@@ -1,4 +1,8 @@
 import { EditorView, keymap } from "@codemirror/view"
+import {
+  syntaxHidingPlugin,
+  syntaxHidingTheme,
+} from "./updocDecorations"
 import { EditorState, Compartment } from "@codemirror/state"
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
@@ -72,6 +76,8 @@ function createEditor(): void {
         markdown({ base: markdownLanguage, extensions: [GFM] }),
         syntaxHighlighting(makeHighlightStyle()),
         EditorView.lineWrapping,
+        syntaxHidingPlugin,
+        syntaxHidingTheme,
         readOnlyCompartment.of(EditorState.readOnly.of(false)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) notifyContentChanged(update.view)
