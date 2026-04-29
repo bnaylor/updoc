@@ -10,7 +10,6 @@ struct SettingsView: View {
         case themes
         case meetingFilter
         case addressBook
-        case developer
     }
     
     @State private var selectedTab: Tab = .credentials
@@ -62,9 +61,6 @@ struct SettingsView: View {
                 ToolbarButton(title: "Address Book", icon: "person.text.rectangle", isSelected: selectedTab == .addressBook) {
                     selectedTab = .addressBook
                 }
-                ToolbarButton(title: "Developer", icon: "wrench.and.screwdriver", isSelected: selectedTab == .developer) {
-                    selectedTab = .developer
-                }
                 Spacer()
             }
             .padding()
@@ -89,8 +85,6 @@ struct SettingsView: View {
                         .environment(\.modelContext, modelContext)
                 case .addressBook:
                     addressBookPane
-                case .developer:
-                    DeveloperSettingsView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -427,22 +421,5 @@ struct SettingsView: View {
             return Color(nsColor)
         }
         return .primary
-    }
-}
-
-private struct DeveloperSettingsView: View {
-    @AppStorage("useCodeMirrorEditor") private var useCodeMirrorEditor: Bool = false
-
-    var body: some View {
-        Form {
-            Section("Editor") {
-                Toggle("Use CodeMirror 6 editor (experimental)", isOn: $useCodeMirrorEditor)
-                Text("Switches the note editor to CodeMirror 6 (WKWebView-based). Restart not required.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .formStyle(.grouped)
-        .padding()
     }
 }

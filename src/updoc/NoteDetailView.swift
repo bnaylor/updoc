@@ -17,7 +17,6 @@ struct NoteDetailView: View {
     
     @Environment(ThemeManager.self) private var themeManager
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("useCodeMirrorEditor") private var useCodeMirrorEditor: Bool = false
     private let templateEngine = SmartTemplateEngine()
     
     var triggerSync: (Note) -> Void
@@ -152,25 +151,12 @@ struct NoteDetailView: View {
             
             Divider()
             
-            Group {
-                if useCodeMirrorEditor {
-                    CodeMirrorEditorView(
-                        text: $note.content,
-                        selectionRange: $selectionRange,
-                        theme: themeManager.themeName(for: note),
-                        isReadOnly: note.isReadOnly
-                    )
-                } else {
-                    EditorView(
-                        text: $note.content,
-                        assetIds: $note.assetIds,
-                        selectionRange: $selectionRange,
-                        theme: themeManager.themeName(for: note),
-                        isReadOnly: note.isReadOnly,
-                        modelContainer: modelContext.container
-                    )
-                }
-            }
+            CodeMirrorEditorView(
+                text: $note.content,
+                selectionRange: $selectionRange,
+                theme: themeManager.themeName(for: note),
+                isReadOnly: note.isReadOnly
+            )
             .onAppear {
                 if note.title == "New Note" && note.content.isEmpty {
                     isTitleFocused.wrappedValue = true

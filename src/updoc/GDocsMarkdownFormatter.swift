@@ -9,11 +9,19 @@ public struct GDocsFormattedContent {
 public struct GDocsMarkdownFormatter {
     public typealias ImageSegment = (index: Int, uri: String, assetId: String)
     public init() {}
-    
+
+    private enum InlineStyle {
+        case bold
+        case italic
+        case underline
+        case code
+        case link(url: String?)
+    }
+
     private struct Match {
         let range: NSRange
         let content: String
-        let style: MarkdownStyle?
+        let style: InlineStyle?
         let isImage: Bool
         let assetId: String?
     }
