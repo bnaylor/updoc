@@ -631,6 +631,40 @@ public struct CustomTheme: Codable, Sendable, Identifiable {
     }
 }
 
+extension CustomTheme {
+    /// Returns a dictionary of CSS custom property names → values
+    /// suitable for pushing to the CM6 editor via window.updoc.setTheme().
+    public func cssVariables() -> [String: String] {
+        var vars: [String: String] = [
+            "--updoc-bg":          backgroundColor,
+            "--updoc-text":        textColor,
+            "--updoc-heading":     headingColor,
+            "--updoc-blockquote":  blockquoteColor,
+            "--updoc-highlight":   highlightColor,
+            "--updoc-link":        linkColor,
+            "--updoc-font-size":   "\(Int(fontSize))px",
+            "--updoc-font-family": Self.cssFontStack(fontFamily),
+        ]
+        if let v = codeColor           { vars["--updoc-code"]         = v }
+        if let v = codeBackgroundColor { vars["--updoc-code-bg"]      = v }
+        if let v = codeFontFamily      { vars["--updoc-code-font"]    = Self.cssFontStack(v) }
+        if let v = codeFontSize        { vars["--updoc-code-size"]    = "\(Int(v))px" }
+        if let v = bulletColor         { vars["--updoc-bullet"]       = v }
+        if let v = horizontalRuleColor { vars["--updoc-hr"]           = v }
+        if let v = headingFontFamily   { vars["--updoc-heading-font"] = Self.cssFontStack(v) }
+        if let v = headingFontSize     { vars["--updoc-heading-size"] = "\(Int(v))px" }
+        return vars
+    }
+
+    private static func cssFontStack(_ family: String) -> String {
+        switch family {
+        case "serif": return "'New York', 'Times New Roman', serif"
+        case "mono":  return "'SF Mono', 'Menlo', monospace"
+        default:      return "-apple-system, sans-serif"
+        }
+    }
+}
+
 extension NSColor {
     convenience init?(hex: String) {
         var cString: String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()

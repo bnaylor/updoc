@@ -7,11 +7,11 @@ struct ChecklistTests {
         let engine = MarkdownEngine()
         let text = "[ ] Task"
         let ranges = engine.parse(text)
-        let checklistRange = ranges.first { 
-            if case .checklist(let done) = $0.style { 
-                return !done 
-            } 
-            return false 
+        let checklistRange = ranges.first {
+            if case .checklist(let done, _) = $0.style {
+                return !done
+            }
+            return false
         }
         #expect(checklistRange != nil)
     }
@@ -20,11 +20,11 @@ struct ChecklistTests {
         let engine = MarkdownEngine()
         let text = "√ Completed Task"
         let ranges = engine.parse(text)
-        let checklistRange = ranges.first { 
-            if case .checklist(let done) = $0.style { 
-                return done 
-            } 
-            return false 
+        let checklistRange = ranges.first {
+            if case .checklist(let done, _) = $0.style {
+                return done
+            }
+            return false
         }
         #expect(checklistRange != nil)
     }

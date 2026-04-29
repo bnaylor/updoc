@@ -155,8 +155,3 @@ private extension WKWebView {
         return self
     }
 }
-
-// TODO: Remove when Task 5 adds cssVariables() to ThemeManager.swift
-private extension CustomTheme {
-    func cssVariables() -> [String: String] { [:] }
-}
