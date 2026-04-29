@@ -9,6 +9,7 @@ struct WeeklyLogDashboardView: View {
     @State private var currentWeekDate = Date()
     @State private var selectionRange: NSRange?
     @Environment(ThemeManager.self) private var themeManager
+    @AppStorage("useCodeMirrorEditor") private var useCodeMirrorEditor: Bool = false
     
     private var weekString: String {
         let formatter = DateFormatter()
@@ -69,13 +70,34 @@ struct WeeklyLogDashboardView: View {
             Divider()
             
             if let note = currentNote {
-                EditorView(text: Binding(
-                    get: { note.content },
-                    set: { note.content = $0 }
-                ), assetIds: Binding(
-                    get: { note.assetIds },
-                    set: { note.assetIds = $0 }
-                ), selectionRange: $selectionRange, theme: themeManager.themeName(for: note), isReadOnly: note.isReadOnly, modelContainer: modelContext.container)
+                Group {
+                    if useCodeMirrorEditor {
+                        CodeMirrorEditorView(
+                            text: Binding(
+                                get: { note.content },
+                                set: { note.content = $0 }
+                            ),
+                            selectionRange: $selectionRange,
+                            theme: themeManager.themeName(for: note),
+                            isReadOnly: note.isReadOnly
+                        )
+                    } else {
+                        EditorView(
+                            text: Binding(
+                                get: { note.content },
+                                set: { note.content = $0 }
+                            ),
+                            assetIds: Binding(
+                                get: { note.assetIds },
+                                set: { note.assetIds = $0 }
+                            ),
+                            selectionRange: $selectionRange,
+                            theme: themeManager.themeName(for: note),
+                            isReadOnly: note.isReadOnly,
+                            modelContainer: modelContext.container
+                        )
+                    }
+                }
                 .onAppear {
                     NotificationCenter.default.post(name: .focusEditor, object: nil)
                 }
