@@ -61,3 +61,67 @@ export const syntaxHidingPlugin = ViewPlugin.fromClass(
 export const syntaxHidingTheme = EditorView.baseTheme({
   ".cm-updoc-hidden": { display: "none" },
 })
+
+const underlineMark = Decoration.mark({ class: "cm-updoc-underline" })
+const highlightMark = Decoration.mark({ class: "cm-updoc-highlight" })
+
+// Matches ~text~ (single tilde, not double ~~)
+const UNDERLINE_RE = /(?<![~])~(?!~)(.+?)(?<![~])~(?!~)/g
+// Matches ==text==
+const HIGHLIGHT_RE = /==(.+?)==/g
+
+export const customMarkPlugin = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet
+
+    constructor(view: EditorView) {
+      this.decorations = this.build(view)
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = this.build(update.view)
+      }
+    }
+
+    build(view: EditorView): DecorationSet {
+      const builder = new RangeSetBuilder<Decoration>()
+      const activeLine = cursorLine(view)
+
+      for (const { from, to } of view.visibleRanges) {
+        const text = view.state.sliceDoc(from, to)
+
+        for (const re of [
+          { pattern: UNDERLINE_RE, deco: underlineMark },
+          { pattern: HIGHLIGHT_RE, deco: highlightMark },
+        ]) {
+          re.pattern.lastIndex = 0
+          let m: RegExpExecArray | null
+          while ((m = re.pattern.exec(text)) !== null) {
+            const start = from + m.index
+            const end = start + m[0].length
+            const line = view.state.doc.lineAt(start).number
+            if (line !== activeLine) {
+              // Hide the syntax markers (first/last 1-2 chars)
+              const markerLen = re.deco === underlineMark ? 1 : 2
+              builder.add(start,             start + markerLen, hiddenDeco)
+              builder.add(end - markerLen,   end,               hiddenDeco)
+              builder.add(start + markerLen, end - markerLen,   re.deco)
+            }
+          }
+        }
+      }
+
+      return builder.finish()
+    }
+  },
+  { decorations: (v) => v.decorations }
+)
+
+export const customMarkTheme = EditorView.baseTheme({
+  ".cm-updoc-underline": { textDecoration: "underline" },
+  ".cm-updoc-highlight": {
+    backgroundColor: "var(--updoc-highlight, rgba(255,255,0,0.4))",
+    borderRadius: "2px",
+  },
+})

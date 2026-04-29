@@ -2,6 +2,8 @@ import { EditorView, keymap } from "@codemirror/view"
 import {
   syntaxHidingPlugin,
   syntaxHidingTheme,
+  customMarkPlugin,
+  customMarkTheme,
 } from "./updocDecorations"
 import { EditorState, Compartment } from "@codemirror/state"
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
@@ -78,6 +80,8 @@ function createEditor(): void {
         EditorView.lineWrapping,
         syntaxHidingPlugin,
         syntaxHidingTheme,
+        customMarkPlugin,
+        customMarkTheme,
         readOnlyCompartment.of(EditorState.readOnly.of(false)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) notifyContentChanged(update.view)
