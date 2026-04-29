@@ -14,6 +14,6 @@ if ! command -v node &>/dev/null; then
   exit 0
 fi
 
-npm install --silent
+npm ci
 npm run build
 echo "editor.js built successfully → $OUTPUT_DIR/editor.js"
