@@ -4,6 +4,7 @@ import {
   syntaxHidingTheme,
   customMarkPlugin,
   customMarkTheme,
+  taskListPlugin,
 } from "./updocDecorations"
 import { EditorState, Compartment } from "@codemirror/state"
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands"
@@ -78,10 +79,47 @@ function createEditor(): void {
         markdown({ base: markdownLanguage, extensions: [GFM] }),
         syntaxHighlighting(makeHighlightStyle()),
         EditorView.lineWrapping,
+        EditorView.domEventHandlers({
+          mousedown(event, view) {
+            const target = event.target as HTMLElement
+            if (target.tagName !== "INPUT" || (target as HTMLInputElement).type !== "checkbox") {
+              return false
+            }
+            event.preventDefault()
+            const pos = view.posAtCoords({ x: event.clientX, y: event.clientY }, false)
+            if (pos == null) return false
+            const line = view.state.doc.lineAt(pos)
+            const m = line.text.match(/^(\s*-\s)(\[[ xX]\])/)
+            if (!m) return false
+            const from = line.from + m[1].length
+            const to   = from + m[2].length
+            const isChecked = m[2].toLowerCase() === "[x]"
+            view.dispatch({
+              changes: { from, to, insert: isChecked ? "[ ]" : "[x]" }
+            })
+            return true
+          }
+        }),
+        keymap.of([
+          {
+            key: "√",
+            run(view) {
+              const cursor = view.state.selection.main.head
+              const line = view.state.doc.lineAt(cursor)
+              const before = view.state.sliceDoc(line.from, cursor)
+              if (before.trim() === "") {
+                view.dispatch({ changes: { from: cursor, insert: "- [ ] " } })
+                return true
+              }
+              return false
+            }
+          }
+        ]),
         syntaxHidingPlugin,
         syntaxHidingTheme,
         customMarkPlugin,
         customMarkTheme,
+        taskListPlugin,
         readOnlyCompartment.of(EditorState.readOnly.of(false)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) notifyContentChanged(update.view)

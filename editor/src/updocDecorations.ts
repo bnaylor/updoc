@@ -125,3 +125,66 @@ export const customMarkTheme = EditorView.baseTheme({
     borderRadius: "2px",
   },
 })
+
+export class CheckboxWidget extends WidgetType {
+  constructor(readonly checked: boolean) { super() }
+
+  toDOM(): HTMLElement {
+    const wrap = document.createElement("span")
+    wrap.setAttribute("aria-hidden", "true")
+    const box = document.createElement("input")
+    box.type = "checkbox"
+    box.checked = this.checked
+    box.style.cursor = "pointer"
+    box.style.verticalAlign = "middle"
+    box.style.marginRight = "4px"
+    wrap.appendChild(box)
+    return wrap
+  }
+
+  ignoreEvent(event: Event): boolean {
+    return false // let click events through
+  }
+}
+
+export const taskListPlugin = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet
+
+    constructor(view: EditorView) {
+      this.decorations = this.build(view)
+    }
+
+    update(update: ViewUpdate) {
+      if (update.docChanged || update.viewportChanged) {
+        this.decorations = this.build(update.view)
+      }
+    }
+
+    build(view: EditorView): DecorationSet {
+      const builder = new RangeSetBuilder<Decoration>()
+
+      for (let i = 1; i <= view.state.doc.lines; i++) {
+        const line = view.state.doc.line(i)
+        const text = line.text
+
+        // Match "- [ ] " or "- [x] " at start of line (with optional leading whitespace)
+        const m = text.match(/^(\s*-\s)(\[[ xX]\])(\s)/)
+        if (!m) continue
+
+        const checkboxFrom = line.from + m[1].length
+        const checkboxTo   = checkboxFrom + m[2].length
+        const checked      = m[2].toLowerCase() === "[x]"
+
+        builder.add(
+          checkboxFrom,
+          checkboxTo,
+          Decoration.replace({ widget: new CheckboxWidget(checked) })
+        )
+      }
+
+      return builder.finish()
+    }
+  },
+  { decorations: (v) => v.decorations }
+)
