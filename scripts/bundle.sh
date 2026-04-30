@@ -13,7 +13,10 @@ mkdir -p "${APP_NAME}.app/Contents/MacOS"
 mkdir -p "${APP_NAME}.app/Contents/Resources"
 
 # Copy binary
-cp ".build/apple/Products/Release/${APP_NAME}" "${APP_NAME}.app/Contents/MacOS/"
+cp "${BUILD_DIR}/${APP_NAME}" "${APP_NAME}.app/Contents/MacOS/"
+
+# Copy all resource bundles
+cp -r ${BUILD_DIR}/*.bundle "${APP_NAME}.app/Contents/Resources/" 2>/dev/null || true
 
 # Copy Info.plist
 cp src/updoc/Info.plist "${APP_NAME}.app/Contents/Info.plist"

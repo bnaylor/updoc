@@ -24,6 +24,16 @@ struct CodeMirrorEditorView: NSViewRepresentable {
         controller.add(context.coordinator, name: "contentChanged")
         controller.add(context.coordinator, name: "checkboxToggled")
         controller.add(context.coordinator, name: "linkClicked")
+        controller.add(context.coordinator, name: "logging")
+
+        // Inject script to capture console.log
+        let script = WKUserScript(
+            source: "console.log = (msg) => window.webkit.messageHandlers.logging.postMessage(msg); " +
+                    "window.onerror = (msg, url, line, col, error) => window.webkit.messageHandlers.logging.postMessage('ERROR: ' + msg + ' at ' + url + ':' + line);",
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        controller.addUserScript(script)
 
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
@@ -52,6 +62,7 @@ struct CodeMirrorEditorView: NSViewRepresentable {
 
     // MARK: – Coordinator
 
+    @MainActor
     final class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
         var parent: CodeMirrorEditorView
         weak var webView: WKWebView?
@@ -92,6 +103,14 @@ struct CodeMirrorEditorView: NSViewRepresentable {
             }
         }
 
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            print("[WKWebView] didFailProvisionalNavigation: \(error.localizedDescription)")
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            print("[WKWebView] didFail: \(error.localizedDescription)")
+        }
+
         // MARK: WKScriptMessageHandler
 
         func userContentController(
@@ -102,6 +121,11 @@ struct CodeMirrorEditorView: NSViewRepresentable {
             switch message.name {
             case "contentChanged":
                 if let text = body["text"] as? String {
+                    // The editor sends an empty string on initialization.
+                    // If the note already has content, ignore this to avoid clearing it.
+                    if text.isEmpty && !parent.text.isEmpty {
+                        return
+                    }
                     lastKnownText = text
                     parent.text = text
                 }
@@ -113,6 +137,12 @@ struct CodeMirrorEditorView: NSViewRepresentable {
                 if let urlString = body["url"] as? String,
                    let url = URL(string: urlString) {
                     NSWorkspace.shared.open(url)
+                }
+            case "logging":
+                if let msg = message.body as? String {
+                    print("[JS] \(msg)")
+                } else {
+                    print("[JS] \(message.body)")
                 }
             default:
                 break

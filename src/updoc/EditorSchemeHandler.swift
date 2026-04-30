@@ -13,7 +13,7 @@ final class EditorSchemeHandler: NSObject, WKURLSchemeHandler {
         let nameWithoutExt = (fileName as NSString).deletingPathExtension
         let ext = (fileName as NSString).pathExtension
 
-        guard let resourceURL = Bundle.main.url(
+        guard let resourceURL = Bundle.module.url(
             forResource: nameWithoutExt,
             withExtension: ext,
             subdirectory: "editor"
