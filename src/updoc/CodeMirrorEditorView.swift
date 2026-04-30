@@ -52,6 +52,11 @@ struct CodeMirrorEditorView: NSViewRepresentable {
         if coordinator.lastKnownText != text {
             coordinator.loadContent(text)
         }
+        
+        // Push theme if it changed
+        if coordinator.lastThemeName != theme {
+            coordinator.applyTheme()
+        }
 
         // Handle search result navigation
         if let range = selectionRange {
@@ -70,6 +75,9 @@ struct CodeMirrorEditorView: NSViewRepresentable {
         /// The last text value we sent to the editor (or received from it).
         /// Used to suppress round-trip echoes in updateNSView.
         var lastKnownText: String = ""
+        
+        /// The last theme name applied to the editor.
+        var lastThemeName: String?
 
         private var isEditorReady = false
         private var pendingContent: String?
@@ -181,6 +189,7 @@ struct CodeMirrorEditorView: NSViewRepresentable {
             guard let data = try? JSONSerialization.data(withJSONObject: vars),
                   let json = String(data: data, encoding: .utf8) else { return }
             webView.evaluateJavaScript("window.updoc.setTheme(\(json))")
+            lastThemeName = parent.theme
         }
     }
 }

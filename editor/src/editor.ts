@@ -129,9 +129,14 @@ function createEditor(): void {
             height: "100%",
             fontSize: "var(--updoc-font-size, 16px)",
             fontFamily: "var(--updoc-font-family, -apple-system, sans-serif)",
+            color: "var(--updoc-text, currentColor)",
           },
           ".cm-scroller": { overflow: "auto" },
-          ".cm-content": { padding: "16px 20px", caretColor: "var(--updoc-text, currentColor)" },
+          ".cm-content": { 
+            padding: "16px 20px", 
+            caretColor: "var(--updoc-text, currentColor)",
+            color: "var(--updoc-text, currentColor)",
+          },
           ".cm-focused": { outline: "none" },
         }),
       ],
@@ -159,6 +164,7 @@ window.updoc = {
       root.style.setProperty(key, value)
     }
     if (vars["--updoc-bg"]) document.body.style.backgroundColor = vars["--updoc-bg"]
+    if (vars["--updoc-text"]) document.body.style.color = vars["--updoc-text"]
   },
 
   scrollToRange(from: number, to: number): void {
