@@ -15,18 +15,18 @@ import { tags } from "@lezer/highlight"
 
 function makeHighlightStyle(): HighlightStyle {
   return HighlightStyle.define([
-    { tag: tags.heading1,    fontSize: "var(--updoc-heading-size, 2em)",   fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
-    { tag: tags.heading2,    fontSize: "var(--updoc-heading-size, 1.6em)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
-    { tag: tags.heading3,    fontSize: "var(--updoc-heading-size, 1.3em)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
-    { tag: tags.heading4,    fontWeight: "bold", color: "var(--updoc-heading, inherit)" },
-    { tag: tags.heading5,    fontWeight: "bold", color: "var(--updoc-heading, inherit)" },
-    { tag: tags.heading6,    fontWeight: "bold", color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading1,    fontSize: "calc(var(--updoc-heading-size, 1em) * 1.8)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading2,    fontSize: "calc(var(--updoc-heading-size, 1em) * 1.6)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading3,    fontSize: "calc(var(--updoc-heading-size, 1em) * 1.3)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading4,    fontSize: "calc(var(--updoc-heading-size, 1em) * 1.1)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading5,    fontSize: "var(--updoc-heading-size, 1em)",            fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
+    { tag: tags.heading6,    fontSize: "calc(var(--updoc-heading-size, 1em) * 0.9)", fontWeight: "bold",   color: "var(--updoc-heading, inherit)" },
     { tag: tags.strong,      fontWeight: "bold" },
     { tag: tags.emphasis,    fontStyle: "italic" },
     { tag: tags.strikethrough, textDecoration: "line-through" },
     { tag: tags.link,        color: "var(--updoc-link, #0070f3)", textDecoration: "underline" },
     { tag: tags.url,         color: "var(--updoc-link, #0070f3)" },
-    { tag: tags.monospace,   fontFamily: "var(--updoc-code-font, 'SF Mono', monospace)", fontSize: "var(--updoc-code-size, 0.9em)", color: "var(--updoc-code, inherit)", backgroundColor: "var(--updoc-code-bg, rgba(0,0,0,0.06))" },
+    { tag: tags.monospace,   fontFamily: "var(--updoc-code-font, 'SF Mono', monospace)", fontSize: "var(--updoc-code-size, 0.9em)", color: "var(--updoc-code, inherit)", backgroundColor: "var(--updoc-code-bg, rgba(0,0,0,0.1))", padding: "2px 4px", borderRadius: "3px" },
     { tag: tags.quote,       color: "var(--updoc-blockquote, #666)", borderLeft: "3px solid var(--updoc-blockquote, #ccc)", paddingLeft: "8px" },
     { tag: tags.processingInstruction, color: "var(--updoc-text, inherit)", opacity: "0.4" },
     { tag: tags.meta,        color: "var(--updoc-text, inherit)", opacity: "0.4" },
@@ -47,6 +47,7 @@ declare global {
 
 interface UpdocAPI {
   loadContent(text: string): void
+  insertText(text: string, from?: number, to?: number): void
   setTheme(vars: Record<string, string>): void
   scrollToRange(from: number, to: number): void
   setReadOnly(readOnly: boolean): void
@@ -65,6 +66,49 @@ function notifyContentChanged(view: EditorView): void {
   }, 300)
 }
 
+let isAutocompleteVisible = false
+
+function checkTriggers(view: EditorView): void {
+  const cursor = view.state.selection.main.head
+  const line = view.state.doc.lineAt(cursor)
+  const before = line.text.slice(0, cursor - line.from)
+  
+  // Check for @mention trigger
+  const mentionMatch = before.match(/@(\w*)$/)
+  if (mentionMatch) {
+    isAutocompleteVisible = true
+    const coords = view.coordsAtPos(cursor)
+    const editorRect = view.dom.getBoundingClientRect()
+    postMessage("showAutocomplete", {
+      type: "mention",
+      query: mentionMatch[1],
+      x: (coords?.left ?? 0) - editorRect.left,
+      y: (coords?.top ?? 0) - editorRect.top,
+      bottom: (coords?.bottom ?? 0) - editorRect.top
+    })
+    return
+  }
+  
+  // Check for emoji trigger
+  const emojiMatch = before.match(/:(\w*)$/)
+  if (emojiMatch) {
+    isAutocompleteVisible = true
+    const coords = view.coordsAtPos(cursor)
+    const editorRect = view.dom.getBoundingClientRect()
+    postMessage("showAutocomplete", {
+      type: "emoji",
+      query: emojiMatch[1],
+      x: (coords?.left ?? 0) - editorRect.left,
+      y: (coords?.top ?? 0) - editorRect.top,
+      bottom: (coords?.bottom ?? 0) - editorRect.top
+    })
+    return
+  }
+
+  isAutocompleteVisible = false
+  postMessage("hideAutocomplete", {})
+}
+
 // ─── Editor instance ───────────────────────────────────────────────────────────
 
 let editor: EditorView | null = null
@@ -75,7 +119,41 @@ function createEditor(): void {
       doc: "",
       extensions: [
         history(),
-        keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+        keymap.of([
+          {
+            key: "ArrowDown",
+            run() {
+              if (isAutocompleteVisible) {
+                postMessage("autocompleteKeyEvent", { key: "ArrowDown" })
+                return true
+              }
+              return false
+            }
+          },
+          {
+            key: "ArrowUp",
+            run() {
+              if (isAutocompleteVisible) {
+                postMessage("autocompleteKeyEvent", { key: "ArrowUp" })
+                return true
+              }
+              return false
+            }
+          },
+          {
+            key: "Enter",
+            run() {
+              if (isAutocompleteVisible) {
+                postMessage("autocompleteKeyEvent", { key: "Enter" })
+                return true
+              }
+              return false
+            }
+          },
+          ...defaultKeymap, 
+          ...historyKeymap, 
+          indentWithTab
+        ]),
         markdown({ base: markdownLanguage, extensions: [GFM] }),
         syntaxHighlighting(makeHighlightStyle()),
         EditorView.lineWrapping,
@@ -123,6 +201,7 @@ function createEditor(): void {
         readOnlyCompartment.of(EditorState.readOnly.of(false)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) notifyContentChanged(update.view)
+          if (update.selectionSet || update.docChanged) checkTriggers(update.view)
         }),
         EditorView.theme({
           "&": {
@@ -156,6 +235,22 @@ window.updoc = {
     editor.dispatch({
       changes: { from: 0, to: editor.state.doc.length, insert: text },
     })
+  },
+
+  insertText(text: string, from?: number, to?: number): void {
+    if (!editor) return
+    const sel = editor.state.selection.main
+    const start = from ?? sel.from
+    const end = to ?? sel.to
+    editor.dispatch({
+      changes: { from: start, to: end, insert: text },
+      selection: { anchor: start + text.length }
+    })
+    editor.focus()
+  },
+
+  getEditorView(): EditorView | null {
+    return editor
   },
 
   setTheme(vars: Record<string, string>): void {

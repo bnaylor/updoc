@@ -230,9 +230,23 @@ public struct GDocsUpdateParagraphStyleRequest: Codable {
 
 public struct GDocsParagraphStyle: Codable {
     public let namedStyleType: String?
+    public let indentStart: GDocsDimension?
+    public let indentFirstLine: GDocsDimension?
     
-    public init(namedStyleType: String?) {
+    public init(namedStyleType: String? = nil, indentStart: GDocsDimension? = nil, indentFirstLine: GDocsDimension? = nil) {
         self.namedStyleType = namedStyleType
+        self.indentStart = indentStart
+        self.indentFirstLine = indentFirstLine
+    }
+}
+
+public struct GDocsDimension: Codable {
+    public let magnitude: Double?
+    public let unit: String? // "PT"
+    
+    public init(magnitude: Double?, unit: String? = "PT") {
+        self.magnitude = magnitude
+        self.unit = unit
     }
 }
 

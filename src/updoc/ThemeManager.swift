@@ -79,6 +79,16 @@ public class ThemeManager {
         case .solarized: headingColor = NSColor(calibratedRed: 0.79, green: 0.29, blue: 0.09, alpha: 1.0)
         }
         
+        // Resolve code background
+        let codeBg: NSColor
+        switch preset {
+        case .modern: codeBg = NSColor.quaternaryLabelColor
+        case .serif: codeBg = NSColor(calibratedRed: 0.0, green: 0.0, blue: 0.0, alpha: 0.05)
+        case .mono: codeBg = NSColor(calibratedRed: 1.0, green: 1.0, blue: 1.0, alpha: 0.1)
+        case .cyberpunk: codeBg = NSColor(calibratedRed: 0.0, green: 1.0, blue: 1.0, alpha: 0.1)
+        case .solarized: codeBg = NSColor(calibratedRed: 0.0, green: 0.0, blue: 0.0, alpha: 0.2)
+        }
+        
         return CustomTheme(
             name: preset.rawValue,
             backgroundColor: backgroundColor.hexString,
@@ -94,7 +104,7 @@ public class ThemeManager {
             blockquoteFontFamily: preset == .serif ? "serif" : (preset == .mono ? "mono" : "system"),
             blockquoteFontSize: baseSize,
             codeColor: textColor.hexString,
-            codeBackgroundColor: NSColor.quaternaryLabelColor.hexString,
+            codeBackgroundColor: codeBg.hexString,
             codeFontFamily: "mono",
             codeFontSize: baseSize - 1,
             bulletColor: NSColor.systemOrange.hexString,
@@ -397,28 +407,41 @@ extension NSColor {
             cString.remove(at: cString.startIndex)
         }
 
-        if cString.count != 6 {
-            return nil
+        if cString.count == 6 {
+            var rgbValue: UInt64 = 0
+            Scanner(string: cString).scanHexInt64(&rgbValue)
+            self.init(
+                calibratedRed: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+                green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+                blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+                alpha: 1.0
+            )
+            return
         }
 
-        var rgbValue: UInt64 = 0
-        Scanner(string: cString).scanHexInt64(&rgbValue)
+        if cString.count == 8 {
+            var rgbaValue: UInt64 = 0
+            Scanner(string: cString).scanHexInt64(&rgbaValue)
+            self.init(
+                calibratedRed: CGFloat((rgbaValue & 0xFF000000) >> 24) / 255.0,
+                green: CGFloat((rgbaValue & 0x00FF0000) >> 16) / 255.0,
+                blue: CGFloat((rgbaValue & 0x0000FF00) >> 8) / 255.0,
+                alpha: CGFloat(rgbaValue & 0x000000FF) / 255.0
+            )
+            return
+        }
 
-        self.init(
-            calibratedRed: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
-            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
-            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
-            alpha: 1.0
-        )
+        return nil
     }
     
     var hexString: String {
         guard let rgbColor = self.usingColorSpace(.deviceRGB) else {
-            return "#000000"
+            return "#000000FF"
         }
         let red = Int(rgbColor.redComponent * 255)
         let green = Int(rgbColor.greenComponent * 255)
         let blue = Int(rgbColor.blueComponent * 255)
-        return String(format: "#%02X%02X%02X", red, green, blue)
+        let alpha = Int(rgbColor.alphaComponent * 255)
+        return String(format: "#%02X%02X%02X%02X", red, green, blue, alpha)
     }
 }

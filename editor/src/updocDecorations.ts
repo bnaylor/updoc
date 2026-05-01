@@ -21,6 +21,8 @@ const HIDEABLE_NODES = new Set([
   "HeaderMark",         // # ## etc.
   "QuoteMark",          // >
   "LinkMark",           // [ ] ( )
+  "LinkResource",       // (url) in [text](url)
+  "URL",                // bare URL
   "HorizontalRule",     // ---
 ])
 
@@ -47,9 +49,17 @@ export const syntaxHidingPlugin = ViewPlugin.fromClass(
           if (!HIDEABLE_NODES.has(node.name)) return
           const line = view.state.doc.lineAt(node.from).number
           if (line !== activeLine) {
-            builder.add(node.from, node.to, hiddenDeco)
+            let to = node.to
+            // If it's a heading mark, also hide the trailing space
+            if (node.name === "HeaderMark") {
+              const nextChar = view.state.sliceDoc(node.to, node.to + 1)
+              if (nextChar === " ") {
+                to += 1
+              }
+            }
+            builder.add(node.from, to, hiddenDeco)
           }
-        },
+        }
       })
 
       return builder.finish()
@@ -64,11 +74,14 @@ export const syntaxHidingTheme = EditorView.baseTheme({
 
 const underlineMark = Decoration.mark({ class: "cm-updoc-underline" })
 const highlightMark = Decoration.mark({ class: "cm-updoc-highlight" })
+const pillMark = Decoration.mark({ class: "cm-updoc-pill" })
 
 // Matches ~text~ (single tilde, not double ~~)
 const UNDERLINE_RE = /(?<![~])~(?!~)(.+?)(?<![~])~(?!~)/g
 // Matches ==text==
 const HIGHLIGHT_RE = /==(.+?)==/g
+// Matches [@Name](mailto:email)
+const MENTION_RE = /\[(@.+?)\]\(mailto:.+?\)/g
 
 export const customMarkPlugin = ViewPlugin.fromClass(
   class {
@@ -79,7 +92,7 @@ export const customMarkPlugin = ViewPlugin.fromClass(
     }
 
     update(update: ViewUpdate) {
-      if (update.docChanged || update.viewportChanged) {
+      if (update.docChanged || update.viewportChanged || update.selectionSet) {
         this.decorations = this.build(update.view)
       }
     }
@@ -91,6 +104,7 @@ export const customMarkPlugin = ViewPlugin.fromClass(
       for (const { from, to } of view.visibleRanges) {
         const text = view.state.sliceDoc(from, to)
 
+        // Standard marks (~, ==)
         for (const re of [
           { pattern: UNDERLINE_RE, deco: underlineMark },
           { pattern: HIGHLIGHT_RE, deco: highlightMark },
@@ -102,12 +116,32 @@ export const customMarkPlugin = ViewPlugin.fromClass(
             const end = start + m[0].length
             const line = view.state.doc.lineAt(start).number
             if (line !== activeLine) {
-              // Hide the syntax markers (first/last 1-2 chars)
               const markerLen = re.deco === underlineMark ? 1 : 2
               builder.add(start,             start + markerLen, hiddenDeco)
               builder.add(end - markerLen,   end,               hiddenDeco)
               builder.add(start + markerLen, end - markerLen,   re.deco)
             }
+          }
+        }
+
+        // Mentions [@Name](mailto:email) -> Render as Pill
+        MENTION_RE.lastIndex = 0
+        let m: RegExpExecArray | null
+        while ((m = MENTION_RE.exec(text)) !== null) {
+          const start = from + m.index
+          const end = start + m[0].length
+          const line = view.state.doc.lineAt(start).number
+          
+          if (line !== activeLine) {
+            // Hide the [ and the ](mailto:email) part
+            const openBracketEnd = start + 1
+            const nameStart = start + 1
+            const nameEnd = start + 1 + m[1].length
+            const closeParenEnd = end
+            
+            builder.add(start, nameStart, hiddenDeco)
+            builder.add(nameStart, nameEnd, pillMark)
+            builder.add(nameEnd, end, hiddenDeco)
           }
         }
       }
@@ -123,6 +157,13 @@ export const customMarkTheme = EditorView.baseTheme({
   ".cm-updoc-highlight": {
     backgroundColor: "var(--updoc-highlight, rgba(255,255,0,0.4))",
     borderRadius: "2px",
+  },
+  ".cm-updoc-pill": {
+    backgroundColor: "var(--updoc-accent-bg, rgba(0,112,243,0.1))",
+    color: "var(--updoc-accent, #0070f3)",
+    padding: "0 4px",
+    borderRadius: "4px",
+    fontWeight: "500",
   },
 })
 

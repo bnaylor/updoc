@@ -1,6 +1,7 @@
 import SwiftUI
 import WebKit
 import AppKit
+import SwiftData
 
 struct CodeMirrorEditorView: NSViewRepresentable {
     @Binding var text: String
@@ -11,6 +12,7 @@ struct CodeMirrorEditorView: NSViewRepresentable {
     @AppStorage("spellcheckEnabled") private var spellcheckEnabled: Bool = true
     @AppStorage("autocorrectEnabled") private var autocorrectEnabled: Bool = true
     @Environment(ThemeManager.self) private var themeManager
+    @Environment(\.modelContext) private var modelContext
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -25,6 +27,9 @@ struct CodeMirrorEditorView: NSViewRepresentable {
         controller.add(context.coordinator, name: "checkboxToggled")
         controller.add(context.coordinator, name: "linkClicked")
         controller.add(context.coordinator, name: "logging")
+        controller.add(context.coordinator, name: "showAutocomplete")
+        controller.add(context.coordinator, name: "hideAutocomplete")
+        controller.add(context.coordinator, name: "autocompleteKeyEvent")
 
         // Inject script to capture console.log
         let script = WKUserScript(
@@ -81,13 +86,24 @@ struct CodeMirrorEditorView: NSViewRepresentable {
 
         private var isEditorReady = false
         private var pendingContent: String?
+        
+        // Autocomplete state
+        private var popover: NSPopover?
+        private var autocompleteType: String?
+        private var autocompleteQuery: String?
+        private var selectedIndex: Int = 0
+        private var currentMentionMatches: [AutocompleteItem] = []
+        private var currentEmojiMatches: [EmojiMatch] = []
 
         init(_ parent: CodeMirrorEditorView) {
             self.parent = parent
         }
 
         deinit {
-            webView?.configuration.userContentController.removeAllScriptMessageHandlers()
+            let controller = webView?.configuration.userContentController
+            DispatchQueue.main.async {
+                controller?.removeAllScriptMessageHandlers()
+            }
         }
 
         // MARK: WKNavigationDelegate
@@ -125,7 +141,17 @@ struct CodeMirrorEditorView: NSViewRepresentable {
             _ userContentController: WKUserContentController,
             didReceive message: WKScriptMessage
         ) {
+            if message.name == "logging" {
+                if let msg = message.body as? String {
+                    print("[JS] \(msg)")
+                } else {
+                    print("[JS] \(message.body)")
+                }
+                return
+            }
+
             guard let body = message.body as? [String: Any] else { return }
+            
             switch message.name {
             case "contentChanged":
                 if let text = body["text"] as? String {
@@ -146,15 +172,262 @@ struct CodeMirrorEditorView: NSViewRepresentable {
                    let url = URL(string: urlString) {
                     NSWorkspace.shared.open(url)
                 }
-            case "logging":
-                if let msg = message.body as? String {
-                    print("[JS] \(msg)")
-                } else {
-                    print("[JS] \(message.body)")
+            case "showAutocomplete":
+                if let type = body["type"] as? String,
+                   let query = body["query"] as? String,
+                   let x = body["x"] as? CGFloat,
+                   let y = body["y"] as? CGFloat,
+                   let bottom = body["bottom"] as? CGFloat {
+                    showAutocomplete(type: type, query: query, rect: NSRect(x: x, y: y, width: 1, height: bottom - y))
+                }
+            case "hideAutocomplete":
+                hideAutocomplete()
+            case "autocompleteKeyEvent":
+                if let key = body["key"] as? String {
+                    handleAutocompleteKey(key)
                 }
             default:
                 break
             }
+        }
+
+        // MARK: Autocomplete
+
+        private func handleAutocompleteKey(_ key: String) {
+            let maxCount: Int
+            if autocompleteType == "mention" {
+                maxCount = currentMentionMatches.count
+            } else {
+                maxCount = currentEmojiMatches.count
+            }
+            
+            guard maxCount > 0 else { return }
+            
+            switch key {
+            case "ArrowDown":
+                selectedIndex = min(selectedIndex + 1, maxCount - 1)
+                updatePopoverContent()
+            case "ArrowUp":
+                selectedIndex = max(selectedIndex - 1, 0)
+                updatePopoverContent()
+            case "Enter":
+                if autocompleteType == "mention" {
+                    let match = currentMentionMatches[selectedIndex].match
+                    hideAutocomplete()
+                    insertAutocomplete(match: match)
+                } else {
+                    let match = currentEmojiMatches[selectedIndex]
+                    hideAutocomplete()
+                    insertEmoji(match: match)
+                }
+            default:
+                break
+            }
+        }
+        
+        private func updatePopoverContent() {
+            let contentView: AnyView
+            if autocompleteType == "mention" {
+                contentView = AnyView(ContactAutocompleteView(
+                    items: currentMentionMatches,
+                    selectedIndex: selectedIndex,
+                    onSelect: { match in
+                        self.hideAutocomplete()
+                        self.insertAutocomplete(match: match)
+                    },
+                    onAddNewContact: {
+                        self.hideAutocomplete()
+                        NotificationCenter.default.post(name: .openAddContactDialog, object: nil)
+                    }
+                ))
+            } else {
+                contentView = AnyView(EmojiAutocompleteView(
+                    matches: currentEmojiMatches,
+                    selectedIndex: selectedIndex,
+                    onSelect: { match in
+                        self.hideAutocomplete()
+                        self.insertEmoji(match: match)
+                    }
+                ))
+            }
+            
+            if let controller = popover?.contentViewController as? NSHostingController<AnyView> {
+                controller.rootView = contentView
+            }
+        }
+
+        private func showAutocomplete(type: String, query: String, rect: NSRect) {
+            guard let webView = self.webView else { return }
+            
+            // If query changed, reset selection
+            if self.autocompleteQuery != query {
+                self.selectedIndex = 0
+            }
+            
+            self.autocompleteType = type
+            self.autocompleteQuery = query
+            
+            // Pre-calculate matches
+            if type == "mention" {
+                let descriptor = FetchDescriptor<Contact>(
+                    predicate: #Predicate { $0.name.contains(query) || $0.username.contains(query) || $0.email.contains(query) },
+                    sortBy: [SortDescriptor(\Contact.name)]
+                )
+                let contacts = (try? parent.modelContext.fetch(descriptor)) ?? []
+                var items = contacts.map { AutocompleteItem(match: .person(Person(id: $0.email, name: $0.name, email: $0.email))) }
+                if let date = DateService.parse(query) {
+                    items.insert(AutocompleteItem(match: .date(date)), at: 0)
+                }
+                self.currentMentionMatches = items
+            } else {
+                self.currentEmojiMatches = EmojiService.findMatches(for: query)
+            }
+            
+            let contentView: AnyView
+            if type == "mention" {
+                contentView = AnyView(ContactAutocompleteView(
+                    items: currentMentionMatches,
+                    selectedIndex: selectedIndex,
+                    onSelect: { match in
+                        self.hideAutocomplete()
+                        self.insertAutocomplete(match: match)
+                    },
+                    onAddNewContact: {
+                        self.hideAutocomplete()
+                        NotificationCenter.default.post(name: .openAddContactDialog, object: nil)
+                    }
+                ))
+            } else {
+                contentView = AnyView(EmojiAutocompleteView(
+                    matches: currentEmojiMatches,
+                    selectedIndex: selectedIndex,
+                    onSelect: { match in
+                        self.hideAutocomplete()
+                        self.insertEmoji(match: match)
+                    }
+                ))
+            }
+            
+            if popover == nil {
+                popover = NSPopover()
+                popover?.behavior = .transient
+                popover?.contentViewController = NSHostingController(rootView: contentView)
+            } else {
+                // Update existing popover's view to avoid jumps
+                if let controller = popover?.contentViewController as? NSHostingController<AnyView> {
+                    controller.rootView = contentView
+                }
+            }
+            
+            // WKWebView is a flipped view (0,0 at top-left), just like the JS viewport.
+            // So we can use the coordinates from JS directly.
+            // We anchor to the bottom edge of the cursor (maxY) to show the popover below.
+            let anchorRect = rect
+            
+            // Fixed preferred size to prevent jumps during typing
+            popover?.contentSize = NSSize(width: type == "mention" ? 250 : 200, height: 200)
+            
+            if !(popover?.isShown ?? false) {
+                popover?.show(relativeTo: anchorRect, of: webView, preferredEdge: .maxY)
+            } else {
+                // Reposition if the anchor changed
+                popover?.show(relativeTo: anchorRect, of: webView, preferredEdge: .maxY)
+            }
+            
+            // Re-focus the webView immediately but on the next run loop to ensure 
+            // the popover has finished its initial appearance logic.
+            DispatchQueue.main.async {
+                webView.window?.makeFirstResponder(webView)
+            }
+        }
+        
+        private func hideAutocomplete() {
+            popover?.performClose(nil)
+            popover = nil
+            currentMentionMatches = []
+            currentEmojiMatches = []
+            selectedIndex = 0
+        }
+        
+        private func mentionAutocompleteView(query: String) -> some View {
+            let descriptor = FetchDescriptor<Contact>(
+                predicate: #Predicate { $0.name.contains(query) || $0.username.contains(query) || $0.email.contains(query) },
+                sortBy: [SortDescriptor(\Contact.name)]
+            )
+            let contacts = (try? parent.modelContext.fetch(descriptor)) ?? []
+            let items = contacts.map { AutocompleteItem(match: .person(Person(id: $0.email, name: $0.name, email: $0.email))) }
+            
+            // Add date option if it matches
+            var finalItems = items
+            if let date = DateService.parse(query) {
+                finalItems.insert(AutocompleteItem(match: .date(date)), at: 0)
+            }
+            
+            return ContactAutocompleteView(
+                items: finalItems,
+                selectedIndex: 0,
+                onSelect: { match in
+                    self.hideAutocomplete()
+                    self.insertAutocomplete(match: match)
+                },
+                onAddNewContact: {
+                    self.hideAutocomplete()
+                    NotificationCenter.default.post(name: .openAddContactDialog, object: nil)
+                }
+            )
+        }
+        
+        private func emojiAutocompleteView(query: String) -> some View {
+            let matches = EmojiService.findMatches(for: query)
+            return EmojiAutocompleteView(
+                matches: matches,
+                selectedIndex: 0,
+                onSelect: { match in
+                    self.hideAutocomplete()
+                    self.insertEmoji(match: match)
+                }
+            )
+        }
+        
+        private func insertAutocomplete(match: AutocompleteMatch) {
+            let text: String
+            switch match {
+            case .person(let person):
+                text = "[@\(person.name)](mailto:\(person.email))"
+            case .date(let date):
+                text = "[@\(date.formatted(date: .abbreviated, time: .omitted))](updoc://date)"
+            }
+            
+            // We need to replace the trigger char (@query)
+            let queryLen = (autocompleteQuery?.count ?? 0) + 1 // +1 for @
+            
+            // MUST focus webview first because popover has focus
+            webView?.becomeFirstResponder()
+            self.replaceText(with: text, back: queryLen)
+        }
+        
+        private func insertEmoji(match: EmojiMatch) {
+            let text = match.emoji
+            let queryLen = (autocompleteQuery?.count ?? 0) + 1 // +1 for :
+            
+            // MUST focus webview first
+            webView?.becomeFirstResponder()
+            self.replaceText(with: text, back: queryLen)
+        }
+        
+        private func replaceText(with text: String, back: Int) {
+            guard let webView else { return }
+            
+            // Better: call insertText with the current position - back
+            webView.evaluateJavaScript("""
+                (function() {
+                    const view = window.updoc.getEditorView();
+                    if (!view) return;
+                    view.focus();
+                    const pos = view.state.selection.main.head;
+                    window.updoc.insertText(`\(text)`, pos - \(back), pos);
+                })()
+            """)
         }
 
         // MARK: Bridge helpers

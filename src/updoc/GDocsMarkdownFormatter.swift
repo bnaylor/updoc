@@ -37,31 +37,33 @@ public struct GDocsMarkdownFormatter {
         for (idx, line) in lines.enumerated() {
             let isLastLine = idx == lines.count - 1
             
-            // 1. List check
+            // 1. Indentation check
+            var indentLevel = 0
+            let leadingSpaces = line.prefix(while: { $0 == " " || $0 == "\t" })
+            // Assume 2 spaces or 1 tab = 1 level
+            let spaceCount = leadingSpaces.reduce(0) { $0 + ($1 == "\t" ? 2 : 1) }
+            indentLevel = spaceCount / 2
+
+            // 2. List check
             var bulletPreset: String? = nil
             var isStrikethrough = false
-            var lineContent = line
             
             let trimmed = line.trimmingCharacters(in: .whitespaces)
+            var lineContent = trimmed // Use trimmed content as the base to avoid auto-bulleting
+            
             if trimmed.hasPrefix("* ") || trimmed.hasPrefix("- ") || trimmed.hasPrefix("+ ") {
                 bulletPreset = "BULLET_DISC_CIRCLE_SQUARE"
-                if let range = line.range(of: trimmed.prefix(2)) {
-                    lineContent = String(line[range.upperBound...])
-                }
+                lineContent = String(trimmed.dropFirst(2))
             } else if trimmed.hasPrefix("[ ] ") {
                 bulletPreset = "BULLET_CHECKBOX"
-                if let range = line.range(of: "[ ] ") {
-                    lineContent = String(line[range.upperBound...])
-                }
+                lineContent = String(trimmed.dropFirst(4))
             } else if trimmed.hasPrefix("[x] ") {
                 bulletPreset = "BULLET_CHECKBOX"
                 isStrikethrough = true
-                if let range = line.range(of: "[x] ") {
-                    lineContent = String(line[range.upperBound...])
-                }
+                lineContent = String(trimmed.dropFirst(4))
             }
             
-            // 2. Heading check
+            // 3. Heading check
             var headingLevel: Int? = nil
             let headingRegex = try! NSRegularExpression(pattern: "^(#{1,6})\\s+(.*)$")
             if let match = headingRegex.firstMatch(in: lineContent, options: [], range: NSRange(lineContent.startIndex..., in: lineContent)) {
@@ -72,7 +74,7 @@ public struct GDocsMarkdownFormatter {
                 }
             }
             
-            // 3. Parse inline styles
+            // 4. Parse inline styles
             let (cleanedLine, lineRequests, lineImages) = parseInline(lineContent, baseOffset: currentOffset, assetMappings: assetMappings)
             
             let lineWithNewline = cleanedLine + (isLastLine ? "" : "\n")
@@ -86,15 +88,31 @@ public struct GDocsMarkdownFormatter {
             let lineRangeWithNewline = GDocsRange(startIndex: currentOffset, endIndex: currentOffset + rangeLength)
             let lineRangeTextOnly = GDocsRange(startIndex: currentOffset, endIndex: currentOffset + cleanedLine.utf16.count)
             
-            // 4. Apply list formatting
+            // 5. Apply list formatting and nesting
             if let preset = bulletPreset {
                 // Only apply if range is valid
                 if lineRangeWithNewline.startIndex < lineRangeWithNewline.endIndex {
                     requests.append(GDocsRequest(createParagraphBullets: GDocsCreateParagraphBulletsRequest(range: lineRangeWithNewline, bulletPreset: preset)))
+                    
+                    if indentLevel > 0 {
+                        // Apply indentation to set the nesting level
+                        // GDocs: 36pt per level is standard. 
+                        let start = Double((indentLevel + 1) * 36)
+                        let first = start - 18
+                        let style = GDocsParagraphStyle(
+                            indentStart: GDocsDimension(magnitude: start),
+                            indentFirstLine: GDocsDimension(magnitude: first)
+                        )
+                        requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(
+                            range: lineRangeWithNewline,
+                            paragraphStyle: style,
+                            fields: "indentStart,indentFirstLine"
+                        )))
+                    }
                 }
             }
             
-            // 5. Apply strikethrough for completed tasks (to the text only)
+            // 6. Apply strikethrough for completed tasks (to the text only)
             if isStrikethrough {
                 // CRITICAL: Google Docs API rejects ranges where startIndex == endIndex
                 if lineRangeTextOnly.startIndex < lineRangeTextOnly.endIndex {
@@ -102,10 +120,16 @@ public struct GDocsMarkdownFormatter {
                 }
             }
             
-            // 6. Apply heading style if needed
+            // 7. Apply heading style or reset to NORMAL_TEXT
             if let level = headingLevel {
                 if lineRangeWithNewline.startIndex < lineRangeWithNewline.endIndex {
                     let style = GDocsParagraphStyle(namedStyleType: "HEADING_\(level)")
+                    requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: lineRangeWithNewline, paragraphStyle: style, fields: "namedStyleType")))
+                }
+            } else if bulletPreset == nil {
+                // Explicitly set to NORMAL_TEXT to clear inherited bullets from previous lines or from the mandatory doc newline
+                if lineRangeWithNewline.startIndex < lineRangeWithNewline.endIndex {
+                    let style = GDocsParagraphStyle(namedStyleType: "NORMAL_TEXT")
                     requests.append(GDocsRequest(updateParagraphStyle: GDocsUpdateParagraphStyleRequest(range: lineRangeWithNewline, paragraphStyle: style, fields: "namedStyleType")))
                 }
             }
