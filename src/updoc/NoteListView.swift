@@ -14,6 +14,7 @@ struct NoteListView: View {
     @AppStorage("expandedFoldersJSON") private var expandedFoldersJSON = "[]"
     @State private var updateTick = 0
     @State private var expandedMeetingGroups: Set<String> = []
+    @AppStorage("expandedMeetingGroupsJSON") private var expandedMeetingGroupsJSON = "[]"
     @State private var showingDeleteNotesConfirmation = false
     @State private var meetingGroupsCache: [YearGroup] = []
     
@@ -93,12 +94,22 @@ struct NoteListView: View {
                let uuids = try? JSONDecoder().decode([UUID].self, from: data) {
                 expandedFolders = Set(uuids)
             }
+            if let data = expandedMeetingGroupsJSON.data(using: .utf8),
+               let groups = try? JSONDecoder().decode([String].self, from: data) {
+                expandedMeetingGroups = Set(groups)
+            }
             updateMeetingGroupsCache()
         }
         .onChange(of: expandedFolders) { oldVal, newVal in
             if let data = try? JSONEncoder().encode(Array(newVal)),
                let str = String(data: data, encoding: .utf8) {
                 expandedFoldersJSON = str
+            }
+        }
+        .onChange(of: expandedMeetingGroups) { oldVal, newVal in
+            if let data = try? JSONEncoder().encode(Array(newVal)),
+               let str = String(data: data, encoding: .utf8) {
+                expandedMeetingGroupsJSON = str
             }
         }
         .onChange(of: notes) { _, _ in
@@ -130,7 +141,7 @@ struct NoteListView: View {
                 ForEach(yearGroup.months) { monthGroup in
                     DisclosureGroup("\(monthGroup.monthName)", isExpanded: binding(for: monthGroup.id)) {
                         ForEach(monthGroup.days) { dayGroup in
-                            DisclosureGroup("Day \(dayGroup.day)", isExpanded: binding(for: dayGroup.id)) {
+                            DisclosureGroup("Day \(dayGroup.day) (\(dayGroup.dayName))", isExpanded: binding(for: dayGroup.id)) {
                                 ForEach(dayGroup.notes) { note in
                                     NoteRowView(note: note, selectedNotes: $selectedNotes)
                                         .tag(note)
@@ -174,6 +185,7 @@ struct NoteListView: View {
     struct DayGroup: Identifiable {
         let id: String
         let day: Int
+        let dayName: String
         let notes: [Note]
     }
     struct MonthGroup: Identifiable {
@@ -201,7 +213,10 @@ struct NoteListView: View {
                 let dGroup = Dictionary(grouping: mNotes) { calendar.component(.day, from: $0.createdAt) }
                 
                 let dSorted = dGroup.map { day, dNotes in
-                    DayGroup(id: "\(year)-\(month)-\(day)", day: day, notes: dNotes.sorted { $0.createdAt > $1.createdAt })
+                    // Grab the day name from the first note in the group
+                    let firstDate = dNotes.first?.createdAt ?? Date()
+                    let dayName = calendar.shortWeekdaySymbols[calendar.component(.weekday, from: firstDate) - 1]
+                    return DayGroup(id: "\(year)-\(month)-\(day)", day: day, dayName: dayName, notes: dNotes.sorted { $0.createdAt > $1.createdAt })
                 }.sorted { $0.day > $1.day }
                 
                 let monthName = Calendar.current.shortMonthSymbols[month - 1]
