@@ -51,6 +51,9 @@ struct updocApp: App {
                 Button("Import Notes from JSON...") {
                     NotificationCenter.default.post(name: .triggerImport, object: nil)
                 }
+                Button("Export Notes to Markdown...") {
+                    NotificationCenter.default.post(name: .triggerExport, object: nil)
+                }
             }
             
             CommandGroup(replacing: .pasteboard) {
@@ -160,6 +163,7 @@ extension Notification.Name {
     static let noRemoteEditDetected = Notification.Name("noRemoteEditDetected")
     static let clearMeetingSelection = Notification.Name("clearMeetingSelection")
     static let triggerImport = Notification.Name("triggerImport")
+    static let triggerExport = Notification.Name("triggerExport")
     static let treeNeedsRefresh = Notification.Name("treeNeedsRefresh")
     static let meetingNoteCreated = Notification.Name("meetingNoteCreated")
     static let openAddContactDialog = Notification.Name("openAddContactDialog")

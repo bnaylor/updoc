@@ -85,8 +85,8 @@ struct GDocsConflictTests {
                     let response = HTTPURLResponse(url: request.url!, statusCode: 400, httpVersion: nil, headerFields: nil)!
                     let errorJson = "{\"error\": {\"message\": \"revisionId mismatch\"}}".data(using: .utf8)!
                     return (response, errorJson)
-                } else if requestCount == 3 {
-                    // Third request: simulate successful update after re-fetch
+                } else {
+                    // Subsequent requests: simulate successful update
                     let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
                     let successResponse = GDocsBatchUpdateResponse(replies: [
                         GDocsReply(insertInlineImage: nil),
@@ -96,12 +96,10 @@ struct GDocsConflictTests {
                     return (response, data)
                 }
             } else if request.url?.absoluteString.contains("documents/\(docId)") == true && request.httpMethod == "GET" {
-                // Second request: re-fetch doc content
-                if requestCount == 2 || requestCount == 4 {
-                    let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
-                    let data = try! JSONEncoder().encode(updatedDoc)
-                    return (response, data)
-                }
+                // Re-fetch doc content
+                let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                let data = try! JSONEncoder().encode(updatedDoc)
+                return (response, data)
             }
             
             fatalError("Unexpected request #\(requestCount): \(request)")
@@ -111,10 +109,12 @@ struct GDocsConflictTests {
         try await service.updateDocContent(docId: docId, content: "Local Change", baseDocument: baseDoc)
         
         // Then
-        // 1. Initial update (fail)
+        // 1. Initial update Stage 1 (fail)
         // 2. Fetch doc (success)
-        // 3. Retry update (success)
-        // 4. Final fetch for revision (success)
-        #expect(requestCount == 4)
+        // 3. Retry update Stage 1 (success)
+        // 4. Fetch doc Stage 2 (success)
+        // 5. Update Stage 2 NORMAL_TEXT (success)
+        // 6. Final fetch for revision (success)
+        #expect(requestCount == 6)
     }
 }

@@ -56,6 +56,10 @@ struct SidebarView: View {
     @State private var showingFileImporter = false
     @State private var showingImportError = false
     @State private var importErrorMessage = ""
+    @State private var showingFileExporter = false
+    @State private var showingExportAlert = false
+    @State private var exportAlertTitle = ""
+    @State private var exportAlertMessage = ""
     private let templateEngine = SmartTemplateEngine()
     
     var body: some View {
@@ -120,10 +124,55 @@ struct SidebarView: View {
         .onReceive(NotificationCenter.default.publisher(for: .triggerImport)) { _ in
             showingFileImporter = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .triggerExport)) { _ in
+            showingFileExporter = true
+        }
+        .fileImporter(
+            isPresented: $showingFileExporter,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let url = urls.first else { return }
+                
+                let accessing = url.startAccessingSecurityScopedResource()
+                Task {
+                    defer {
+                        if accessing {
+                            url.stopAccessingSecurityScopedResource()
+                        }
+                    }
+                    
+                    do {
+                        let exporter = BulkExporter(modelContainer: modelContext.container)
+                        let count = try await exporter.exportNotes(to: url)
+                        await MainActor.run {
+                            exportAlertTitle = "Export Complete"
+                            exportAlertMessage = "Successfully exported \(count) notes to \(url.lastPathComponent)."
+                            showingExportAlert = true
+                        }
+                    } catch {
+                        await MainActor.run {
+                            exportAlertTitle = "Export Failed"
+                            exportAlertMessage = error.localizedDescription
+                            showingExportAlert = true
+                        }
+                    }
+                }
+            case .failure(let error):
+                print("Folder selection failed: \(error)")
+            }
+        }
         .alert("Import Failed", isPresented: $showingImportError) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(importErrorMessage)
+        }
+        .alert(exportAlertTitle, isPresented: $showingExportAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(exportAlertMessage)
         }
         .navigationTitle("updoc")
         .task {

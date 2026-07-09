@@ -25,7 +25,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Hello World")
-        #expect(result.requests.count == 1)
+        #expect(result.requests.count == 2)
         guard let req = result.requests.first?.updateTextStyle else {
             Issue.record("Expected updateTextStyle request")
             return
@@ -40,7 +40,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Hello World")
-        #expect(result.requests.count == 1)
+        #expect(result.requests.count == 2)
         guard let req = result.requests.first?.updateTextStyle else {
             Issue.record("Expected updateTextStyle request")
             return
@@ -55,7 +55,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Code block")
-        #expect(result.requests.count == 1)
+        #expect(result.requests.count == 2)
         guard let req = result.requests.first?.updateTextStyle else {
             Issue.record("Expected updateTextStyle request")
             return
@@ -70,7 +70,7 @@ struct GDocsMarkdownFormatterTests {
         let result = formatter.format(text)
         
         #expect(result.cleanText == "Check Google")
-        #expect(result.requests.count == 1)
+        #expect(result.requests.count == 2)
         guard let req = result.requests.first?.updateTextStyle else {
             Issue.record("Expected updateTextStyle request")
             return

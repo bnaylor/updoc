@@ -178,6 +178,9 @@ struct ContentView: View {
                 Task { @MainActor in
                     syncAllNotes()
                 }
+            },
+            Command(title: "Export Notes to Markdown...", subtitle: "App") {
+                NotificationCenter.default.post(name: .triggerExport, object: nil)
             }
         ]
         
