@@ -1,3 +1,7 @@
+# deprecated
+
+Replaced this with an Obsidian plugin.  [obsidian-updoc](https://github.com/bnaylor/obsidian-updoc/tree/main)
+
 # updoc
 
 `updoc` is a native macOS note-taking app for engineers and managers who live in the Google ecosystem. It gives you a fast, distraction-free local editing experience with deep Calendar, Docs, and Drive integration.
